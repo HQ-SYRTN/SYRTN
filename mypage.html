@@ -410,15 +410,6 @@
                 
                 alert("탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.");
                 location.replace('index.html');
-            } catch (error) {
-                // 민감한 작업(탈퇴, 비번변경 등)은 최근 로그인 기록이 없으면 에러 발생
-                if (error.code === 'auth/requires-recent-login') {
-                    alert("보안을 위해 다시 로그인한 직후에만 탈퇴가 가능합니다.\n로그아웃 후 다시 로그인하여 시도해 주세요.");
-                    await signOut(auth);
-                    location.replace('login.html');
-                } else {
-                    alert("탈퇴 처리 중 오류가 발생했습니다: " + error.message);
-                }
             }
         }
     };
