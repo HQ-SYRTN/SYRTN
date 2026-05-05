@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYRTN | My Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --accent: #00E5FF;
+            --error: #FF5252;
+            --text-main: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --nav-bg: rgba(0, 0, 0, 0.8);
+            --disabled-text: #666666;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        /* --- 상단 Bar (Auth Bar) --- */
+        .auth-bar {
+            position: fixed; top: 0; width: 100%; height: 60px;
+            background: var(--nav-bg); backdrop-filter: blur(10px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 40px; box-sizing: border-box; z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-link {
+            display: flex; align-items: center; gap: 12px;
+            text-decoration: none; color: white; font-weight: 700; letter-spacing: 2px;
+        }
+
+        .nav-logo {
+            height: 40px; width: 40px; border-radius: 50%;
+            background-color: white; object-fit: contain;
+        }
+
+        .auth-user-zone { display: flex; align-items: center; gap: 15px; }
+
+        .auth-btn {
+            background: transparent; border: 1px solid var(--text-main);
+            color: var(--text-main); padding: 6px 15px; cursor: pointer;
+            text-decoration: none; font-size: 0.85rem; transition: 0.3s; border-radius: 4px;
+        }
+
+        .auth-btn:hover { background: var(--text-main); color: black; }
+
+        /* --- Header (Hero Section) --- */
+        header.intro-hero {
+            height: 45vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.9)), 
+                        url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072') no-repeat center/cover;
+            text-align: center; padding-top: 60px;
+        }
+
+        .intro-hero h1 { font-size: 3.5rem; margin-bottom: 10px; color: var(--accent); }
+        .intro-hero p { font-size: 1.2rem; opacity: 0.8; font-weight: 300; }
+
+        /* --- 중간 Navigation Menu --- */
+        .sub-nav-container {
+            width: 100%; background: #111;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky; top: 60px; z-index: 900;
+        }
+
+        .nav-menu { display: flex; justify-content: center; gap: 40px; padding: 15px 0; }
+        .nav-menu a {
+            color: rgba(255, 255, 255, 0.7); text-decoration: none;
+            font-size: 1rem; font-weight: 400; letter-spacing: 1.5px;
+            transition: 0.3s; position: relative;
+        }
+
+        .nav-menu a:hover, .nav-menu a.active { color: var(--accent); }
+        .nav-menu a.active::after {
+            content: ''; position: absolute; width: 100%; height: 2px;
+            bottom: -5px; left: 0; background-color: var(--accent);
+        }
+
+        .nav-item {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding-bottom: 5px;
+            border-bottom: 2px solid transparent;
+            transition: 0.3s;
+        }
+
+        .nav-item:hover { border-bottom: 2px solid var(--accent); color: var(--accent); }
+
+        /* --- Main Content (Profile Section) --- */
+        .content-section {
+            max-width: 600px; /* 마이페이지는 좁은 폭이 더 깔끔함 */
+            margin: 60px auto 100px;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            font-size: 2rem; border-left: 4px solid var(--accent);
+            padding-left: 20px; margin-bottom: 40px; font-weight: 700;
+        }
+
+        .profile-card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .info-group { margin-bottom: 25px; }
+        .info-group label { display: block; font-size: 0.85rem; color: #888; margin-bottom: 8px; }
+        
+        .info-group input {
+            width: 100%; padding: 14px; border-radius: 8px;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: white; outline: none; box-sizing: border-box; font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        .info-group input:focus { border-color: var(--accent); background: rgba(255,255,255,0.15); }
+
+        .info-group input:disabled {
+            color: var(--disabled-text) !important;
+            border-color: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.02);
+            cursor: not-allowed;
+        }
+
+        /* --- Buttons --- */
+        .btn-zone { display: flex; flex-direction: column; gap: 12px; margin-top: 30px; }
+        
+        .btn { 
+            padding: 14px; border-radius: 8px; border: none; 
+            cursor: pointer; font-weight: 700; font-size: 1rem;
+            transition: 0.3s;
+        }
+        
+        .btn-save { background: var(--accent); color: #000; }
+        .btn-save:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 229, 255, 0.3); }
+        
+        .btn-logout { background: #333; color: white; }
+        .btn-logout:hover { background: #444; }
+        
+        .btn-delete { 
+            background: transparent; color: var(--error); 
+            font-size: 0.85rem; margin-top: 15px; opacity: 0.6; 
+            text-decoration: underline;
+        }
+        .btn-delete:hover { opacity: 1; }
+
+        /* --- Footer --- */
+        footer {
+            background: #000; padding: 60px 20px; text-align: center;
+            font-size: 0.9rem; color: #666; border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        @media (max-width: 600px) {
+            .logo-area span { font-size: 16px; }
+            nav a { padding: 10px 12px; font-size: 13px; }
+            header h1 { font-size: 22px; }
+            .header-logo { width: 100px; height: 100px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-bar">
+    <a href="index.html" class="logo-link">
+        <img src="SYRTN-logo-homepage.png" alt="SYRTN Logo" class="nav-logo">
+        <span>SYRTN</span>
+    </a>
+
+    <div class="auth-user-zone">
+        <span id="nav-user-name" class="user-greeting" style="font-size: 0.9rem; color: var(--accent); margin-right: 10px;"></span>
+        <button id="nav-logout-btn" class="auth-btn">LOGOUT</button>
+    </div>
+</div>
+
+<header class="intro-hero">
+    <h1>My Page</h1>
+    <p>회원 정보 관리 및 계정 설정</p>
+</header>
+
+<nav class="sub-nav-container">
+    <div class="nav-menu">
+        <a href="index.html" class="nav-item">HOME</a>
+        <a href="introduction.html" class="nav-item">INTRODUCTION</a>
+        <a href="talk.html" class="nav-item">TALK</a>
+        <a href="resource.html" class="nav-item">RESOURCE</a>
+        <a href="suggest.html" class="nav-item">SUGGESTION</a>
+        <a href="mypage.html" class="nav-item active">MY PAGE</a>
+        <a href="adjust.html" class="nav-item">REQUEST AUTHORITY</a>
+        <a href="admin.html" class="nav-item">ADMIN</a>
+    </div>
+</nav>
+
+<main class="content-section">
+    <div class="section-title">회원 정보 프로필</div>
+    
+    <div class="profile-card">
+        <div class="info-group">
+            <label>이메일 계정 (변경 불가)</label>
+            <input type="text" id="display-email" disabled>
+        </div>
+
+        <div class="info-group">
+            <label>소속 학교 (변경 불가)</label>
+            <input type="text" id="display-school" disabled>
+        </div>
+
+        <div class="info-group">
+            <label>이름 변경</label>
+            <input type="text" id="edit-name" placeholder="변경할 실명을 입력하세요">
+        </div>
+
+        <div class="btn-zone">
+            <button class="btn btn-save" id="update-profile-btn">수정사항 저장</button>
+            <button class="btn btn-logout" id="card-logout-btn">로그아웃</button>
+            <button class="btn btn-delete" id="delete-account-btn">회원 탈퇴</button>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <p>&copy; 2026 SYRTN Collaboration. All Rights Reserved.</p>
+    <p>영광해룡고등학교 | 순천고등학교 | 순천복성고등학교 물리·천문·지구과학 동아리 연합</p>
+    <p>designed by SYRTN Team | 문의 : 2jw5464@gmail.com</p>
+</footer>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    // [추가] App Check 라이브러리
+    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
+    import { 
+        getAuth, 
+        onAuthStateChanged, 
+        updateProfile, 
+        signOut, 
+        deleteUser
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    
+    import { 
+        getFirestore, 
+        doc, 
+        getDoc, 
+        updateDoc, 
+        deleteDoc 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU",
+        authDomain: "syrt-2026.firebaseapp.com",
+        projectId: "syrt-2026",
+        storageBucket: "syrt-2026.firebasestorage.app",
+        messagingSenderId: "848896876364",
+        appId: "1:848896876364:web:42edc690489962f76df9e9",
+        measurementId: "G-Q0BKR95VH2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+
+    // [추가] App Check 초기화
+    const appCheck = initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider('6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq'),
+        isTokenAutoRefreshEnabled: true
+    });
+
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // 인증 상태 감시
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            document.getElementById('display-email').value = user.email;
+            try {
+                const userDocRef = doc(db, "users", user.uid);
+                const userDoc = await getDoc(userDocRef);
+                
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    // UI에 데이터 반영
+                    const navName = document.getElementById('nav-user-name');
+                    if(navName) navName.innerText = `${userData.name}님`;
+                    
+                    document.getElementById('display-school').value = userData.school || "소속 정보 없음";
+                    document.getElementById('edit-name').value = userData.name || "";
+                } else {
+                    // Firestore에 정보가 없는 경우 (강제 로그아웃 또는 추가 정보 입력 유도)
+                    console.error("유저 문서가 존재하지 않습니다.");
+                }
+            } catch (error) {
+                console.error("데이터 로드 중 오류:", error);
+            }
+        } else {
+            // 로그인 상태가 아니면 로그인 페이지로 튕김
+            location.replace('login.html');
+        }
+    });
+
+    // 로그아웃 공통 함수
+    const handleLogout = async () => {
+        if (confirm("로그아웃 하시겠습니까?")) {
+            try {
+                await signOut(auth);
+                alert("성공적으로 로그아웃되었습니다.");
+                location.replace('index.html');
+            } catch (error) {
+                alert("로그아웃 실패: " + error.message);
+            }
+        }
+    };
+
+    document.getElementById('nav-logout-btn').onclick = handleLogout;
+    document.getElementById('card-logout-btn').onclick = handleLogout;
+
+    // 프로필(이름) 수정
+    document.getElementById('update-profile-btn').onclick = async () => {
+        const newName = document.getElementById('edit-name').value.trim();
+        const saveBtn = document.getElementById('update-profile-btn');
+
+        if (!newName) return alert("변경할 이름을 입력해 주세요.");
+        
+        saveBtn.disabled = true;
+        saveBtn.innerText = "저장 중...";
+
+        try {
+            const user = auth.currentUser;
+            // 1. Auth 프로필 업데이트
+            await updateProfile(user, { displayName: newName });
+            // 2. Firestore 문서 업데이트
+            const userDocRef = doc(db, "users", user.uid);
+            await updateDoc(userDocRef, { name: newName });
+            
+            alert("정보가 성공적으로 수정되었습니다.");
+            location.reload();
+        } catch (error) {
+            console.error("수정 오류:", error);
+            alert("정보 수정에 실패했습니다. 다시 시도해 주세요.");
+            saveBtn.disabled = false;
+            saveBtn.innerText = "수정사항 저장";
+        }
+    };
+
+    // 회원 탈퇴
+    document.getElementById('delete-account-btn').onclick = async () => {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const check = confirm("정말로 탈퇴하시겠습니까?\n탈퇴 시 작성한 게시글을 제외한 계정 정보가 삭제됩니다.");
+        
+        if (check) {
+            try {
+                const uid = user.uid;
+                // 1. Firestore 유저 정보 삭제
+                await deleteDoc(doc(db, "users", uid));
+                // 2. Auth 계정 삭제
+                await deleteUser(user);
+                
+                alert("탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.");
+                location.replace('index.html');
+            } catch (error) {
+                // 민감한 작업(탈퇴, 비번변경 등)은 최근 로그인 기록이 없으면 에러 발생
+                if (error.code === 'auth/requires-recent-login') {
+                    alert("보안을 위해 다시 로그인한 직후에만 탈퇴가 가능합니다.\n로그아웃 후 다시 로그인하여 시도해 주세요.");
+                    await signOut(auth);
+                    location.replace('login.html');
+                } else {
+                    alert("탈퇴 처리 중 오류가 발생했습니다: " + error.message);
+                }
+            }
+        }
+    };
+</script>
+</body>
+</html>

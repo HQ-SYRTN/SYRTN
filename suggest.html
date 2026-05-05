@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYRTN | Suggestion</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --accent: #00E5FF;
+            --text-main: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --nav-bg: rgba(0, 0, 0, 0.8);
+            --input-bg: rgba(255, 255, 255, 0.1);
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-dark); color: var(--text-main);
+            line-height: 1.6; scroll-behavior: smooth;
+        }
+
+        /* --- 상단 Bar (Logo & Login) --- */
+        .auth-bar {
+            position: fixed; top: 0; width: 100%; height: 60px;
+            background: var(--nav-bg); backdrop-filter: blur(10px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 40px; box-sizing: border-box;
+            z-index: 1000; border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-link { display: flex; align-items: center; gap: 12px; text-decoration: none; color: white; font-weight: 700; letter-spacing: 2px; }
+        .nav-logo { height: 40px; width: 40px; border-radius: 50%; background-color: white; object-fit: contain; }
+
+        .auth-user-zone { display: flex; align-items: center; gap: 15px; }
+        .auth-btn {
+            background: transparent; border: 1px solid var(--text-main); color: var(--text-main);
+            padding: 6px 15px; cursor: pointer; text-decoration: none; font-size: 0.85rem;
+            transition: 0.3s; border-radius: 4px;
+        }
+        .auth-btn:hover { background: var(--text-main); color: black; }
+
+        #user-name {
+    color: #ffffff !important; /* 강제로 흰색 적용 */
+}
+
+        /* --- Header (Hero Section) --- */
+        header.intro-hero {
+            height: 45vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), 
+                        url('https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=2072') no-repeat center/cover;
+            text-align: center; padding-top: 60px;
+        }
+        .intro-hero h1 { font-size: 3.5rem; margin-bottom: 10px; color: var(--accent); }
+        .intro-hero p { font-size: 1.2rem; opacity: 0.8; font-weight: 300; }
+
+        /* --- Navigation Menu --- */
+        .sub-nav-container {
+            width: 100%; background: #111; border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1); position: sticky; top: 60px; z-index: 900;
+        }
+        .nav-menu { display: flex; justify-content: center; gap: 40px; padding: 15px 0; }
+        .nav-menu a { color: rgba(255, 255, 255, 0.7); text-decoration: none; font-size: 1rem; letter-spacing: 1.5px; transition: 0.3s; position: relative; }
+        .nav-menu a:hover, .nav-menu a.active { color: var(--accent); }
+        .nav-menu a.active::after { content: ''; position: absolute; width: 100%; height: 2px; bottom: -5px; left: 0; background-color: var(--accent); }
+        .nav-item { color: var(--text-main); text-decoration: none; font-size: 1.1rem; padding-bottom: 5px; border-bottom: 2px solid transparent; transition: 0.3s; }
+
+        .nav-item:hover { border-bottom: 2px solid var(--accent); color: var(--accent); }
+
+        /* --- 건의함 폼 섹션 --- */
+        .content-section { max-width: 800px; margin: 60px auto 100px; padding: 0 20px; }
+        .section-title { font-size: 2rem; border-left: 4px solid var(--accent); padding-left: 20px; margin-bottom: 40px; font-weight: 700; }
+
+        .suggestion-form-card {
+            background: var(--card-bg); padding: 40px; border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .input-group { text-align: left; margin-bottom: 25px; }
+        .input-group label { display: block; font-size: 0.9rem; margin-bottom: 10px; color: #aaa; }
+        
+        input, select, textarea {
+            width: 100%; padding: 12px 15px; border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2); background: var(--input-bg);
+            color: #ffffff; box-sizing: border-box; outline: none; transition: 0.3s;
+            font-family: inherit; font-size: 1rem;
+        }
+
+        /* 분류(Select) 디자인 수정 - 배경/글자색 해결 */
+        select {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2300E5FF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 15px center; background-size: 18px;
+            -webkit-appearance: none; -moz-appearance: none; appearance: none;
+        }
+        select option { background-color: #1a1a1a; color: #ffffff; }
+
+        textarea { height: 200px; resize: none; }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent); background: rgba(255, 255, 255, 0.15); }
+
+        /* 익명 체크박스 */
+        .anon-container { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; cursor: pointer; color: #ccc; }
+        .anon-container input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+
+        .submit-btn {
+            width: 100%; padding: 16px; border-radius: 10px; border: none;
+            background: var(--accent); color: #000; font-weight: 700; font-size: 1.1rem;
+            cursor: pointer; transition: 0.3s;
+        }
+        .submit-btn:hover { background: #00b8cc; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0, 229, 255, 0.2); }
+
+        /* --- Footer --- */
+        footer { background: #000; padding: 60px 20px; text-align: center; font-size: 0.9rem; color: #666; border-top: 1px solid rgba(255,255,255,0.05); }
+    
+        @media (max-width: 600px) {
+            .logo-area span { font-size: 16px; }
+            nav a { padding: 10px 12px; font-size: 13px; }
+            header h1 { font-size: 22px; }
+            .header-logo { width: 100px; height: 100px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-bar">
+    <a href="index.html" class="logo-link">
+        <img src="SYRTN-logo-homepage.png" alt="SYRTN Logo" class="nav-logo">
+        <span>SYRTN</span>
+    </a>
+    <div class="auth-user-zone">
+        <a href="login.html" id="login-link" class="auth-btn">LOGIN</a>
+        <span id="user-name" style="display:none; font-size: 0.9rem; margin-right: 10px; color: var(--accent);"></span>
+        <button id="logout-btn" class="auth-btn" style="display:none;">LOGOUT</button>
+    </div>
+</div>
+
+<header class="intro-hero">
+    <h1>Suggestion</h1>
+    <p>SYRTN의 더 나은 미래를 위한 당신의 목소리</p>
+</header>
+
+<nav class="sub-nav-container">
+    <div class="nav-menu">
+        <a href="index.html" class="nav-item">HOME</a>
+        <a href="introduction.html" class="nav-item">INTRODUCTION</a>
+        <a href="talk.html" class="nav-item">TALK</a>
+        <a href="resource.html" class="nav-item">RESOURCE</a>
+        <a href="suggest.html" class="nav-item active">SUGGESTION</a>
+        <a href="mypage.html" class="nav-item">MY PAGE</a>
+        <a href="adjust.html" class="nav-item">REQUEST AUTHORITY</a>
+        <a href="admin.html" class="nav-item">ADMIN</a>
+    </div>
+</nav>
+
+<main class="content-section">
+    <div class="section-title">의견 보내기</div>
+    <div class="suggestion-form-card">
+        <form id="suggestion-form">
+            <div class="input-group" id="name-input-group">
+                <label>성함</label>
+                <input type="text" id="user-name-input" placeholder="성함을 입력하세요" required>
+            </div>
+
+            <label class="anon-container">
+                <input type="checkbox" id="anon-check">
+                <span>익명으로 제출하기</span>
+            </label>
+
+            <div class="input-group">
+                <label>분류</label>
+                <select id="category" required>
+                    <option value="" disabled selected>분류를 선택하세요</option>
+                    <option value="기능 제안">기능 제안</option>
+                    <option value="버그 제보">버그 제보</option>
+                    <option value="디자인 의견">디자인 의견</option>
+                    <option value="기타">기타</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>제목</label>
+                <input type="text" id="subject" placeholder="제목을 입력하세요" required>
+            </div>
+
+            <div class="input-group">
+                <label>내용</label>
+                <textarea id="content" placeholder="건의 내용을 상세히 작성해주세요." required></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">제출하기</button>
+        </form>
+    </div>
+</main>
+
+<footer>
+    <p>&copy; 2026 SYRTN Collaboration. All Rights Reserved.</p>
+    <p>영광해룡고등학교 | 순천고등학교 | 순천복성고등학교 물리·천문·지구과학 동아리 연합</p>
+    <p>designed by SYRTN Team | 문의 : 2jw5464@gmail.com</p>
+</footer>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    // [추가] App Check 라이브러리
+    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU",
+        authDomain: "syrt-2026.firebaseapp.com",
+        projectId: "syrt-2026",
+        storageBucket: "syrt-2026.firebasestorage.app",
+        messagingSenderId: "848896876364",
+        appId: "1:848896876364:web:42edc690489962f76df9e9",
+        measurementId: "G-Q0BKR95VH2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+
+    // [추가] App Check 초기화
+    const appCheck = initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider('6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq'),
+        isTokenAutoRefreshEnabled: true
+    });
+
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const loginLink = document.getElementById('login-link');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userNameDisplay = document.getElementById('user-name');
+    const nameInput = document.getElementById('user-name-input');
+    const anonCheck = document.getElementById('anon-check');
+    const submitBtn = document.querySelector('.submit-btn');
+
+    let currentUserData = null;
+
+    // --- 권한 체크 및 인증 상태 감시 ---
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            // 비로그인 시 경고 후 차단 페이지로
+            window.location.replace("block.html");
+            return;
+        }
+
+        try {
+            const userDocSnap = await getDoc(doc(db, "users", user.uid));
+            
+            if (userDocSnap.exists()) {
+                currentUserData = userDocSnap.data();
+                
+                // 일반 회원(member) 등급 차단 (연구원 등급 이상만 가능하도록 설정된 경우)
+                if (currentUserData.role === "member") {
+                    alert("건의함은 연구원 등급부터 이용 가능합니다.");
+                    window.location.replace("block.html");
+                    return;
+                }
+
+                // UI 처리
+                if(loginLink) loginLink.style.display = 'none';
+                if(userNameDisplay) {
+                    userNameDisplay.style.display = 'inline';
+                    userNameDisplay.innerText = `${currentUserData.name} 연구원님`;
+                }
+                if(logoutBtn) logoutBtn.style.display = 'inline';
+                
+                // 기본값으로 실명 입력
+                if(!anonCheck.checked) {
+                    nameInput.value = currentUserData.name || "";
+                }
+            } else {
+                window.location.replace("block.html");
+            }
+        } catch (error) {
+            console.error("Auth Check Error:", error);
+        }
+    });
+
+    // --- 익명 토글 로직 ---
+    anonCheck.addEventListener('change', () => {
+        if(anonCheck.checked) {
+            nameInput.value = "";
+            nameInput.disabled = true;
+            nameInput.placeholder = "익명으로 안전하게 제출됩니다.";
+            nameInput.required = false;
+        } else {
+            nameInput.disabled = false;
+            nameInput.placeholder = "성함을 입력하세요";
+            nameInput.required = true;
+            if(currentUserData) nameInput.value = currentUserData.name;
+        }
+    });
+
+    // --- 폼 제출 로직 ---
+    document.getElementById('suggestion-form').onsubmit = async (e) => {
+        e.preventDefault();
+
+        // 중복 클릭 방지
+        submitBtn.disabled = true;
+        submitBtn.innerText = "제출 중...";
+
+        const isAnon = anonCheck.checked;
+        const finalAuthor = isAnon ? "익명" : nameInput.value;
+
+        try {
+            await addDoc(collection(db, "suggestions"), {
+                authorName: finalAuthor,
+                isAnonymous: isAnon,
+                category: document.getElementById('category').value,
+                subject: document.getElementById('subject').value,
+                content: document.getElementById('content').value,
+                status: "대기 중", // 관리자가 확인할 상태값
+                createdAt: serverTimestamp(),
+                uid: auth.currentUser.uid,
+                userEmail: auth.currentUser.email
+            });
+
+            alert("소중한 의견이 제출되었습니다. 관리자가 검토 후 반영하겠습니다!");
+            location.reload();
+        } catch (err) {
+            console.error(err);
+            alert("제출 중 오류가 발생했습니다: " + err.message);
+            submitBtn.disabled = false;
+            submitBtn.innerText = "제출하기";
+        }
+    };
+
+    // 로그아웃
+    if(logoutBtn) {
+        logoutBtn.onclick = async () => {
+            if (confirm("로그아웃 하시겠습니까?")) {
+                await signOut(auth);
+                location.replace("index.html");
+            }
+        };
+    }
+</script>
+</body>
+</html>

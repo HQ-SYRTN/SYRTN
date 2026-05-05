@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="SYRTN-logo-homepage.png" type="image/png">
+    <link rel="apple-touch-icon" href="SYRTN-logo-homepage.png">
+    <title>SYRTN | Resource Board</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --accent: #00E5FF;
+            --text-main: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --nav-bg: rgba(0, 0, 0, 0.9);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-dark); color: var(--text-main);
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        /* --- 상단 Bar --- */
+        .auth-bar {
+            position: fixed; top: 0; width: 100%; height: 60px;
+            background: var(--nav-bg); backdrop-filter: blur(10px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 40px; box-sizing: border-box; z-index: 1000;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .logo-link { display: flex; align-items: center; gap: 12px; text-decoration: none; color: white; font-weight: 700; letter-spacing: 2px; }
+        .nav-logo { height: 40px; width: 40px; border-radius: 50%; background: white; object-fit: contain; }
+
+        .auth-user-zone { display: flex; align-items: center; gap: 15px; }
+        .auth-btn { 
+            background: transparent; border: 1px solid var(--text-main); color: var(--text-main); 
+            padding: 6px 15px; cursor: pointer; text-decoration: none; border-radius: 4px; font-size: 0.85rem; transition: 0.3s;
+        }
+        .auth-btn:hover { background: var(--text-main); color: black; }
+        
+        #user-name { color: var(--accent) !important; font-weight: bold; font-size: 0.9rem; margin-right: 10px; }
+
+        /* --- Hero --- */
+        header.board-hero {
+            height: 45vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.9)), 
+                        url('https://images.unsplash.com/photo-1462332420958-a05d1e002413?q=80&w=1920') no-repeat center/cover;
+            text-align: center; padding-top: 60px;
+        }
+        .board-hero h1 { font-size: 3.5rem; margin-bottom: 10px; color: var(--accent); }
+        .board-hero p { font-size: 1.2rem; opacity: 0.8; font-weight: 300; }
+
+        #user-name {
+            color: #ffffff !important; /* 강제로 흰색 적용 */
+        }
+
+        /* --- Sticky Nav --- */
+        .sub-nav-container {
+            width: 100%; background: #111;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky; top: 60px; z-index: 900;
+        }
+        .nav-menu { display: flex; justify-content: center; gap: 40px; padding: 15px 0; }
+        .nav-menu a {
+            color: rgba(255, 255, 255, 0.7); text-decoration: none;
+            font-size: 1rem; font-weight: 400; letter-spacing: 1.5px; transition: 0.3s; position: relative;
+        }
+        .nav-menu a:hover, .nav-menu a.active { color: var(--accent); }
+        .nav-menu a.active::after {
+            content: ''; position: absolute; width: 100%; height: 2px;
+            bottom: -5px; left: 0; background-color: var(--accent);
+        }
+        .nav-item {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding-bottom: 5px;
+            border-bottom: 2px solid transparent;
+            transition: 0.3s;
+        }
+
+        .nav-item:hover { border-bottom: 2px solid var(--accent); color: var(--accent); }
+
+        /* --- 필터 및 검색 바 --- */
+        .search-filter-section {
+            background: rgba(255,255,255,0.02);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            border: 1px solid var(--border-color);
+        }
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            padding: 10px 15px;
+            color: white;
+            border-radius: 6px;
+            outline: none;
+        }
+        .search-input:focus { border-color: var(--accent); }
+        
+        .filter-select {
+            background: #111;
+            color: white;
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 6px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* --- Content --- */
+        .content-section { max-width: 1000px; margin: 60px auto 100px; padding: 0 20px; }
+        .board-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-write { 
+            background: transparent; border: 1px solid var(--accent); color: var(--accent); 
+            padding: 8px 20px; border-radius: 4px; text-decoration: none; 
+            font-weight: 500; font-size: 0.85rem; transition: 0.3s;
+        }
+        .btn-write:hover { background: var(--accent); color: black; box-shadow: 0 0 15px rgba(0, 229, 255, 0.3); }
+
+        .resource-container { display: flex; flex-direction: column; gap: 12px; }
+        .resource-item { 
+            display: flex; align-items: center; background: var(--card-bg); 
+            padding: 25px; border-radius: 12px; border: 1px solid var(--border-color);
+            transition: 0.3s; position: relative; cursor: pointer;
+        }
+        .resource-item:hover { background: rgba(255, 255, 255, 0.06); border-color: var(--accent); transform: translateY(-3px); }
+
+        .item-content { flex-grow: 1; pointer-events: none; }
+        .item-title { font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: 8px; display: block; }
+        .item-meta { font-size: 0.85rem; color: #777; display: flex; align-items: center; gap: 10px; }
+
+        .btn-delete-left {
+            margin-right: 20px; z-index: 10;
+            background: rgba(255, 77, 77, 0.1); color: #ff4d4d;
+            border: 1px solid #ff4d4d; padding: 6px 12px;
+            border-radius: 4px; cursor: pointer; font-size: 0.75rem; transition: 0.2s;
+        }
+        .btn-delete-left:hover { background: #ff4d4d; color: white; }
+
+        .tag { font-size: 0.7rem; padding: 3px 10px; border-radius: 4px; background: rgba(0, 229, 255, 0.1); color: var(--accent); border: 1px solid var(--accent); }
+
+        footer { text-align: center; padding: 60px; color: #444; font-size: 0.8rem; border-top: 1px solid var(--border-color); }
+    
+        @media (max-width: 600px) {
+            .logo-area span { font-size: 16px; }
+            nav a { padding: 10px 12px; font-size: 13px; }
+            header h1 { font-size: 22px; }
+            .header-logo { width: 100px; height: 100px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-bar">
+    <a href="index.html" class="logo-link">
+        <img src="SYRTN-logo-homepage.png" alt="Logo" class="nav-logo">
+        <span>SYRTN</span>
+    </a>
+    <div class="auth-user-zone">
+        <a href="login.html" id="login-link" class="auth-btn">LOGIN</a>
+        <span id="user-name" style="display:none;"></span>
+        <button id="logout-btn" class="auth-btn" style="display:none;">LOGOUT</button>
+    </div>
+</div>
+
+<header class="board-hero">
+    <h1>Resources</h1>
+    <p>Archive of research materials and observation data</p>
+</header>
+
+<nav class="sub-nav-container">
+    <div class="nav-menu">
+        <a href="index.html" class="nav-item">HOME</a>
+        <a href="introduction.html" class="nav-item">INTRODUCTION</a>
+        <a href="talk.html" class="nav-item">TALK</a>
+        <a href="resource.html" class="nav-item active">RESOURCE</a>
+        <a href="suggest.html" class="nav-item">SUGGESTION</a>
+        <a href="mypage.html" class="nav-item">MY PAGE</a>
+        <a href="adjust.html" class="nav-item">REQUEST AUTHORITY</a>
+        <a href="admin.html" class="nav-item">ADMIN</a>
+    </div>
+</nav>
+
+<main class="content-section">
+    <div class="board-header">
+        <h2 style="margin:0; font-size: 1.5rem; border-left: 4px solid var(--accent); padding-left: 15px;">Archive List</h2>
+        <a href="write.html" class="btn-write">ADD RESOURCE</a>
+    </div>
+
+    <div class="search-filter-section">
+        <select id="filter-category" class="filter-select">
+            <option value="all">전체 카테고리</option>
+            <option value="천체 관측 데이터">천체 관측 데이터</option>
+            <option value="기술 문서 / 매뉴얼">기술 문서 / 매뉴얼</option>
+            <option value="발표 및 세미나">발표 및 세미나</option>
+            <option value="소프트웨어 및 코드">소프트웨어 및 코드</option>
+        </select>
+        <input type="text" id="search-keyword" class="search-input" placeholder="제목 또는 작성자 검색...">
+    </div>
+
+    <div id="resource-list" class="resource-container">
+        <div style="padding: 100px; text-align: center; color: #555;">데이터를 불러오는 중...</div>
+    </div>
+</main>
+
+<footer>
+    <p>&copy; 2026 SYRTN Collaboration. All Rights Reserved.</p>
+    <p>영광해룡고등학교 | 순천고등학교 | 순천복성고등학교 물리·천문·지구과학 동아리 연합</p>
+    <p>designed by SYRTN Team | 문의 : 2jw5464@gmail.com</p>
+</footer>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    // [추가] App Check 라이브러리 임포트
+    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, query, orderBy, onSnapshot, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU",
+        authDomain: "syrt-2026.firebaseapp.com",
+        projectId: "syrt-2026",
+        storageBucket: "syrt-2026.firebasestorage.app",
+        messagingSenderId: "848896876364",
+        appId: "1:848896876364:web:42edc690489962f76df9e9"
+    };
+
+    const app = initializeApp(firebaseConfig);
+
+    // --- [App Check 초기화] ---
+    const appCheck = initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider('6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq'),
+        isTokenAutoRefreshEnabled: true 
+    });
+
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const ADMIN_EMAIL = "2jw5464@gmail.com";
+
+    let currentUserData = null; 
+
+    // 전역 로그아웃
+    window.handleLogout = async () => {
+        if(confirm("로그아웃 하시겠습니까?")) {
+            try {
+                await signOut(auth);
+                alert("로그아웃 되었습니다.");
+                window.location.replace("index.html");
+            } catch (error) { console.error(error); }
+        }
+    };
+
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) logoutBtn.addEventListener('click', window.handleLogout);
+
+    // 게시글 삭제 (보안 강화)
+    window.deletePost = async (e, postId) => {
+        e.stopPropagation();
+        if (confirm("정말로 삭제하시겠습니까?")) {
+            try {
+                await deleteDoc(doc(db, "resources", postId));
+                alert("삭제되었습니다.");
+            } catch (err) { 
+                console.error(err);
+                alert("삭제 권한이 없거나 보안 검증에 실패했습니다."); 
+            }
+        }
+    };
+
+    // 인증 상태 감시 및 역할(Role) 확인
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            // 비로그인 유저는 차단 (기존 로직 유지)
+            location.href = "block.html";
+            return;
+        }
+
+        try {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+                currentUserData = userDoc.data();
+                
+                const userNameSpan = document.getElementById('user-name');
+                const loginLink = document.getElementById('login-link');
+                const logoutBtn = document.getElementById('logout-btn');
+                
+                if(userNameSpan) {
+                    userNameSpan.innerText = `${currentUserData.name || '유저'}님`;
+                    userNameSpan.style.display = 'inline';
+                    if(loginLink) loginLink.style.display = 'none';
+                    if(logoutBtn) logoutBtn.style.display = 'inline';
+                }
+            }
+            loadList(); 
+        } catch (error) {
+            console.error("사용자 정보 로드 중 오류:", error);
+            loadList();
+        }
+    });
+
+    // 글쓰기 버튼 클릭 제어 (member 등급 차단)
+    const writeBtn = document.querySelector('.btn-write');
+    if (writeBtn) {
+        writeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentUserData && currentUserData.role === 'member') {
+                alert("일반 회원은 글쓰기 권한이 없습니다.");
+            } else {
+                location.href = "write.html";
+            }
+        });
+    }
+
+    // 리스트 로드 함수
+    function loadList() {
+        const q = query(collection(db, "resources"), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const allDocs = snapshot.docs;
+            const listDiv = document.getElementById('resource-list');
+            const searchInput = document.getElementById('search-keyword');
+            const filterSelect = document.getElementById('filter-category');
+
+            const render = () => {
+                const keyword = searchInput.value.toLowerCase();
+                const categoryFilter = filterSelect.value;
+                listDiv.innerHTML = "";
+
+                const filtered = allDocs.filter(postDoc => {
+                    const data = postDoc.data();
+                    const title = (data.title || "").toLowerCase();
+                    const author = (data.author || "").toLowerCase();
+                    const category = data.category || "기타";
+                    return (title.includes(keyword) || author.includes(keyword)) && 
+                           (categoryFilter === "all" || category === categoryFilter);
+                });
+
+                if (filtered.length === 0) {
+                    listDiv.innerHTML = '<div style="padding:100px; text-align:center; color: #555;">검색 결과가 없습니다.</div>';
+                    return;
+                }
+
+                filtered.forEach((postDoc) => {
+                    const data = postDoc.data();
+                    const date = data.createdAt ? data.createdAt.toDate().toLocaleDateString() : "-";
+                    // 삭제 권한 체크: 본인 글이거나 관리자 이메일일 경우
+                    const hasPermission = auth.currentUser && (auth.currentUser.uid === data.uid || auth.currentUser.email === ADMIN_EMAIL);
+
+                    listDiv.innerHTML += `
+                        <div class="resource-item" onclick="location.href='view.html?id=${postDoc.id}'">
+                            ${hasPermission ? `<button class="btn-delete-left" onclick="deletePost(event, '${postDoc.id}')">삭제</button>` : ""}
+                            <div class="item-content">
+                                <span class="tag" style="margin-bottom:8px; display:inline-block;">${data.category || '기타'}</span>
+                                <span class="item-title">${data.title}</span>
+                                <div class="item-meta">
+                                    <span>${data.author || '익명'}</span>
+                                    <span style="opacity: 0.4;">|</span>
+                                    <span>${date}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            };
+            searchInput.oninput = render;
+            filterSelect.onchange = render;
+            render();
+        });
+    }
+</script>
+</body>
+</html>

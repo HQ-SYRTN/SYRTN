@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="SYRTN-logo-homepage.png" type="image/png">
+    <link rel="apple-touch-icon" href="SYRTN-logo-homepage.png">
+    <title>SYRTN | SCH</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --accent: #00E5FF;
+            --text-main: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --nav-bg: rgba(0, 0, 0, 0.9);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-dark); color: var(--text-main);
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        /* --- 상단 Bar --- */
+        .auth-bar {
+            position: fixed; top: 0; width: 100%; height: 60px;
+            background: var(--nav-bg); backdrop-filter: blur(10px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 40px; box-sizing: border-box; z-index: 1000;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .logo-link { display: flex; align-items: center; gap: 12px; text-decoration: none; color: white; font-weight: 700; letter-spacing: 2px; }
+        .nav-logo { height: 40px; width: 40px; border-radius: 50%; background: white; object-fit: contain; }
+
+        .auth-user-zone { display: flex; align-items: center; gap: 15px; }
+        .auth-btn { 
+            background: transparent; border: 1px solid var(--text-main); color: var(--text-main); 
+            padding: 6px 15px; cursor: pointer; text-decoration: none; border-radius: 4px; font-size: 0.85rem; transition: 0.3s;
+        }
+        .auth-btn:hover { background: var(--text-main); color: black; }
+        
+        #user-name { color: var(--accent) !important; font-weight: bold; font-size: 0.9rem; margin-right: 10px; }
+
+        /* --- Hero --- */
+        header.board-hero {
+            height: 40vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), 
+                        url('https://images.unsplash.com/photo-1614732414444-096e5f1122d5?q=80&w=2074') no-repeat center/cover;
+            text-align: center; padding-top: 60px;
+        }
+        .board-hero h1 { font-size: 3rem; margin-bottom: 10px; color: var(--accent); }
+        .board-hero p { font-size: 1.1rem; opacity: 0.8; font-weight: 300; }
+
+        /* --- Sticky Nav --- */
+        .sub-nav-container {
+            width: 100%;
+            background: #111;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 60px; /* auth-bar 바로 아래 붙음 */
+            z-index: 900;
+        }
+
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding: 15px 0;
+        }
+
+        .nav-menu a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 400;
+            letter-spacing: 1.5px;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .nav-menu a:hover, .nav-menu a.active {
+            color: var(--accent);
+        }
+
+        .nav-menu a.active::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--accent);
+        }
+
+        .nav-item {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding-bottom: 5px;
+            border-bottom: 2px solid transparent;
+            transition: 0.3s;
+        }
+
+        .nav-item:hover { border-bottom: 2px solid var(--accent); color: var(--accent); }
+
+        /* --- 필터 및 검색 바 --- */
+        .search-filter-section {
+            background: rgba(255,255,255,0.02);
+            padding: 20px; border-radius: 12px; margin-bottom: 30px;
+            display: flex; flex-wrap: wrap; gap: 15px; align-items: center;
+            border: 1px solid var(--border-color);
+        }
+        .search-input {
+            flex: 1; min-width: 250px; background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color); padding: 10px 15px;
+            color: white; border-radius: 6px; outline: none;
+        }
+        .filter-select {
+            background: #111; color: white; border: 1px solid var(--border-color);
+            padding: 10px; border-radius: 6px; outline: none; cursor: pointer;
+        }
+
+        /* --- Content --- */
+        .content-section { max-width: 1000px; margin: 40px auto 100px; padding: 0 20px; }
+        .board-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-write { 
+            background: transparent; border: 1px solid var(--accent); color: var(--accent); 
+            padding: 8px 20px; border-radius: 4px; text-decoration: none; 
+            font-weight: 500; font-size: 0.85rem; transition: 0.3s;
+        }
+        .btn-write:hover { background: var(--accent); color: black; }
+
+        .resource-container { display: flex; flex-direction: column; gap: 12px; }
+        .resource-item { 
+            display: flex; align-items: center; background: var(--card-bg); 
+            padding: 20px; border-radius: 12px; border: 1px solid var(--border-color);
+            transition: 0.3s; cursor: pointer;
+        }
+        .resource-item:hover { background: rgba(255, 255, 255, 0.06); border-color: var(--accent); transform: translateY(-2px); }
+
+        .item-content { flex-grow: 1; }
+        .item-title { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 5px; display: block; }
+        .item-meta { font-size: 0.8rem; color: #777; display: flex; align-items: center; gap: 10px; }
+
+        .btn-delete-left {
+            margin-right: 15px; background: rgba(255, 77, 77, 0.1); color: #ff4d4d;
+            border: 1px solid #ff4d4d; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.7rem;
+        }
+
+        .tag { font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; background: rgba(0, 229, 255, 0.1); color: var(--accent); border: 1px solid var(--accent); }
+
+        .empty-msg { padding: 100px; text-align: center; color: #666; font-size: 1.1rem; }
+
+        footer { text-align: center; padding: 60px; color: #444; font-size: 0.8rem; border-top: 1px solid var(--border-color); }
+    
+        @media (max-width: 600px) {
+            .logo-area span { font-size: 16px; }
+            nav a { padding: 10px 12px; font-size: 13px; }
+            header h1 { font-size: 22px; }
+            .header-logo { width: 100px; height: 100px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-bar">
+    <a href="index.html" class="logo-link">
+        <img src="SYRTN-logo-homepage.png" alt="Logo" class="nav-logo">
+        <span>SYRTN</span>
+    </a>
+    <div class="auth-user-zone">
+        <a href="login.html" id="login-link" class="auth-btn">LOGIN</a>
+        <span id="user-name" style="display:none; color: white !important;"></span>
+        <button id="logout-btn" class="auth-btn" style="display:none;">LOGOUT</button>
+    </div>
+</div>
+
+<header class="board-hero">
+    <h1>순천고 전용 자료실</h1>
+    <p>순천고 전용 연구 데이터 및 결과물 아카이브(타 학교 열람 불가)</p>
+</header>
+
+<nav class="sub-nav-container">
+    <div class="nav-menu">
+        <a href="index.html" class="nav-item">HOME</a>
+        <a href="introduction.html" class="nav-item">INTRODUCTION</a>
+        <a href="talk.html" class="nav-item">TALK</a>
+        <a href="resource.html" class="nav-item">RESOURCE</a>
+        <a href="mypage.html" class="nav-item">MY PAGE</a>
+        <a href="adjust.html" class="nav-item">REQUEST AUTHORITY</a>
+        <a href="admin.html" class="nav-item">ADMIN</a>
+    </div>
+</nav>
+
+<main class="content-section">
+    <div class="board-header">
+        <h2 style="margin:0; font-size: 1.3rem; border-left: 4px solid var(--accent); padding-left: 15px;">순천고 아카이브</h2>
+        <a href="s-write.html" class="btn-write">자료 등록</a>
+    </div>
+
+    <div class="search-filter-section">
+        <select id="filter-category" class="filter-select">
+            <option value="all">전체 카테고리</option>
+            <option value="천체 관측 데이터">천체 관측 데이터</option>
+            <option value="실험 보고서">실험 보고서</option>
+            <option value="세미나 자료">세미나 자료</option>
+            <option value="소스 코드">소스 코드</option>
+        </select>
+        <input type="text" id="search-keyword" class="search-input" placeholder="제목 또는 작성자 검색...">
+    </div>
+
+    <div id="resource-list" class="resource-container">
+        <div class="empty-msg">데이터를 불러오는 중...</div>
+    </div>
+</main>
+
+<footer>
+    <p>&copy; 2026 SYRTN Collaboration. All Rights Reserved.</p>
+    <p>영광해룡고등학교 | 순천고등학교 | 순천복성고등학교 물리·천문·지구과학 동아리 연합</p>
+    <p>designed by SYRTN Team | 문의 : 2jw5464@gmail.com</p>
+</footer>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    // [추가] App Check 라이브러리 임포트
+    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, query, orderBy, onSnapshot, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // Firebase 설정
+    const firebaseConfig = {
+        apiKey: "AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU",
+        authDomain: "syrt-2026.firebaseapp.com",
+        projectId: "syrt-2026",
+        storageBucket: "syrt-2026.firebasestorage.app",
+        messagingSenderId: "848896876364",
+        appId: "1:848896876364:web:42edc690489962f76df9e9"
+    };
+
+    const app = initializeApp(firebaseConfig);
+
+    // --- [App Check 초기화] ---
+    const appCheck = initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider('6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq'), 
+        isTokenAutoRefreshEnabled: true 
+    });
+
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const ADMIN_EMAIL = "2jw5464@gmail.com";
+
+    let currentUserData = null; 
+
+    // 로그아웃 함수
+    window.handleLogout = async () => {
+        if(confirm("로그아웃 하시겠습니까?")) {
+            await signOut(auth);
+            window.location.replace("index.html");
+        }
+    };
+    document.getElementById('logout-btn').addEventListener('click', window.handleLogout);
+
+    // 게시글 삭제 함수 (App Check 토큰이 자동으로 포함되어 전송됨)
+    window.deletePost = async (e, postId) => {
+        e.stopPropagation(); 
+        if (confirm("이 자료를 삭제하시겠습니까?")) {
+            try {
+                await deleteDoc(doc(db, "s-resources", postId));
+                alert("삭제되었습니다.");
+            } catch (err) { 
+                alert("삭제 실패: " + err.message); 
+            }
+        }
+    };
+
+    // 인증 상태 감시 및 권한 체크
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            location.href = "block.html";
+            return;
+        }
+
+        try {
+            // App Check가 활성화되면 getDoc 요청 시 보안 토큰이 함께 전송됩니다.
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                const role = userData.role;
+                const allowedRoles = ['s-student', 's-leader', 'teacher', 'admin'];
+
+                if (user.email === ADMIN_EMAIL || allowedRoles.includes(role)) {
+                    currentUserData = userData;
+                    
+                    // UI 업데이트 (상단 바 이름 표시)
+                    const userNameSpan = document.getElementById('user-name');
+                    const logoutBtn = document.getElementById('logout-btn');
+                    const loginLink = document.getElementById('login-link');
+                    
+                    if(userNameSpan) {
+                        userNameSpan.style.display = 'inline';
+                        userNameSpan.innerText = `${userData.name || '회원'}님`;
+                    }
+                    if(logoutBtn) logoutBtn.style.display = 'inline';
+                    if(loginLink) loginLink.style.display = 'none';
+
+                    // 게시글 로드 함수 호출
+                    loadList(); 
+                } else {
+                    location.href = "block.html";
+                }
+            } else {
+                location.href = "block.html";
+            }
+        } catch (error) {
+            console.error("권한 확인 중 오류 발생:", error);
+            location.href = "block.html";
+        }
+    });
+
+    // 리스트 로드 및 렌더링
+    function loadList() {
+        const q = query(collection(db, "s-resources"), orderBy("createdAt", "desc"));
+        
+        onSnapshot(q, (snapshot) => {
+            const listDiv = document.getElementById('resource-list');
+            const searchInput = document.getElementById('search-keyword');
+            const filterSelect = document.getElementById('filter-category');
+
+            const render = () => {
+                const keyword = searchInput.value.toLowerCase();
+                const categoryFilter = filterSelect.value;
+                const user = auth.currentUser;
+                
+                listDiv.innerHTML = "";
+
+                const filtered = snapshot.docs.filter(postDoc => {
+                    const data = postDoc.data();
+                    const title = (data.title || "").toLowerCase();
+                    const author = (data.author || "").toLowerCase();
+                    const category = data.category || "기타";
+                    
+                    return (title.includes(keyword) || author.includes(keyword)) && 
+                           (categoryFilter === "all" || category === categoryFilter);
+                });
+
+                if (filtered.length === 0) {
+                    listDiv.innerHTML = '<div class="empty-msg">등록된 자료가 없습니다.</div>';
+                    return;
+                }
+
+                filtered.forEach((postDoc) => {
+                    const data = postDoc.data();
+                    const date = data.createdAt ? data.createdAt.toDate().toLocaleDateString() : "-";
+                    
+                    // 삭제 권한 체크
+                    const isManager = (currentUserData.role === 'admin' || currentUserData.role === 'teacher' || currentUserData.role === 's-leader');
+                    const isOwner = (user && user.uid === data.uid);
+                    const isAdminEmail = (user && user.email === ADMIN_EMAIL);
+                    const hasPermission = isManager || isOwner || isAdminEmail;
+
+                    listDiv.innerHTML += `
+                        <div class="resource-item" onclick="location.href='s-view.html?id=${postDoc.id}'">
+                            ${hasPermission ? `<button class="btn-delete-left" onclick="deletePost(event, '${postDoc.id}')">삭제</button>` : ""}
+                            <div class="item-content">
+                                <span class="item-title">${data.title}</span>
+                                <div class="item-meta">
+                                    <span class="tag">${data.category || '기타'}</span>
+                                    <span>${data.author || '익명'}</span>
+                                    <span>|</span>
+                                    <span>${date}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            };
+
+            searchInput.oninput = render;
+            filterSelect.onchange = render;
+            render();
+        });
+    }
+</script>
+</body>
+</html>

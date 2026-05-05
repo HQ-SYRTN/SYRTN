@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYRTN | View</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-dark: #050505; --accent: #00E5FF; --card-bg: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.1); }
+        body { margin: 0; font-family: 'Noto Sans KR', sans-serif; background: var(--bg-dark); color: white; line-height: 1.6; }
+        .container { max-width: 850px; margin: 60px auto; padding: 0 20px; }
+        .view-card { background: var(--card-bg); border-radius: 20px; border: 1px solid var(--border); padding: 45px; position: relative; }
+        .post-header { border-bottom: 1px solid var(--border); margin-bottom: 35px; padding-bottom: 25px; }
+        .post-category { color: var(--accent); font-size: 0.9rem; font-weight: 700; margin-bottom: 12px; }
+        .post-title { font-size: 2.2rem; margin: 0 0 15px 0; }
+        .post-info { font-size: 14px; color: #777; display: flex; justify-content: space-between; }
+        .post-content { font-size: 1.1rem; color: #ccc; white-space: pre-wrap; min-height: 200px; margin-bottom: 50px; }
+        
+        /* 다중 링크 스타일 */
+        .links-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 40px; }
+        .link-item { background: rgba(0, 229, 255, 0.1); border: 1px solid var(--accent); padding: 12px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: white; transition: 0.3s; }
+        .link-item:hover { background: var(--accent); color: black; }
+        .link-name { font-weight: bold; }
+
+        /* 관리 버튼 */
+        .admin-zone { position: absolute; top: 45px; right: 45px; display: flex; gap: 10px; }
+        .btn-small { padding: 5px 12px; font-size: 12px; border-radius: 4px; cursor: pointer; border: 1px solid #555; background: transparent; color: #ccc; }
+        .btn-small:hover { background: white; color: black; }
+
+        /* 댓글 스타일 */
+        .comment-section { margin-top: 50px; border-top: 1px solid var(--border); padding-top: 40px; }
+        .comment-title { font-size: 1.3rem; color: var(--accent); margin-bottom: 25px; }
+        .comment-item { background: rgba(255, 255, 255, 0.02); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--border); }
+        .comment-meta { display: flex; justify-content: space-between; font-size: 13px; color: #666; margin-bottom: 8px; }
+        .comment-author { color: var(--accent); font-weight: bold; }
+        .comment-actions { display: flex; gap: 8px; }
+        .comment-form { display: flex; gap: 12px; margin-top: 30px; }
+        .comment-input { flex: 1; background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border); border-radius: 10px; color: white; padding: 15px; outline: none; }
+        .btn-comment { background: var(--accent); border: none; padding: 0 25px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        
+        .hidden { display: none; }
+        footer { text-align: center; padding: 60px; color: #444; font-size: 0.8rem; border-top: 1px solid var(--border); }
+    
+        @media (max-width: 600px) {
+            .view-card { padding: 30px 20px; }
+            .post-title { font-size: 1.6rem; }
+            .post-info { flex-direction: column; gap: 8px; }
+            .admin-zone { top: 30px; right: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="view-card">
+        <div class="admin-zone" id="postAdminZone">
+            <button class="btn-small hidden" id="btnEditPost">수정</button>
+            <button class="btn-small hidden" id="btnDeletePost">삭제</button>
+        </div>
+
+        <div class="post-header">
+            <div id="viewCategory" class="post-category">-</div>
+            <h1 id="viewTitle" class="post-title">LOADING...</h1>
+            <div class="post-info">
+                <span id="viewAuthor">-</span>
+                <span id="viewDate">-</span>
+            </div>
+        </div>
+        
+        <div id="viewContent" class="post-content"></div>
+
+        <div class="links-container" id="linksContainer">
+            </div>
+
+        <div class="comment-section">
+            <div class="comment-title">COMMENTS</div>
+            <div id="commentList"></div>
+            
+            <div id="commentFormArea" class="hidden">
+                <div class="comment-form">
+                    <input type="text" id="commentInput" class="comment-input" placeholder="의견을 남겨주세요.">
+                    <button class="btn-comment" id="btnPostComment">POST</button>
+                </div>
+            </div>
+            <div id="loginNotice" class="login-notice hidden" style="text-align: center; color: #888;">
+                댓글 작성을 위해 <a href="login.html" style="color:var(--accent)">로그인</a>이 필요합니다.
+            </div>
+        </div>
+        <a href="hearyong.html" style="display:block; margin-top:40px; color:#555; text-decoration:none;">← BACK TO LIST</a>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2026 SYRTN Collaboration. All Rights Reserved.</p>
+    <p>영광해룡고등학교 | 순천고등학교 | 순천복성고등학교 물리·천문·지구과학 동아리 연합</p>
+    <p>designed by SYRTN Team | 문의 : 2jw5464@gmail.com</p>
+</footer>
+
+<script type="module">
+    // Firebase SDK 모듈 임포트
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    // [추가] App Check 라이브러리 임포트
+    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { 
+        getFirestore, doc, getDoc, updateDoc, deleteDoc, 
+        collection, addDoc, query, orderBy, onSnapshot, serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // 1. Firebase 설정
+    const firebaseConfig = {
+        apiKey: "AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU",
+        authDomain: "syrt-2026.firebaseapp.com",
+        projectId: "syrt-2026",
+        storageBucket: "syrt-2026.firebasestorage.app",
+        messagingSenderId: "848896876364",
+        appId: "1:848896876364:web:42edc690489962f76df9e9"
+    };
+
+    const app = initializeApp(firebaseConfig);
+
+    // --- [App Check 초기화] ---
+    const appCheck = initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider('6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq'), // 실제 reCAPTCHA v3 사이트 키로 교체하세요
+        isTokenAutoRefreshEnabled: true 
+    });
+
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxwDx5UzcTNUg-Er_AkUN2oA8-5s0zxyLYGz4MOsJUKoVzRThoEhAsO0zNDalZ5nkxi/exec"; 
+    const ADMIN_EMAIL = "2jw5464@gmail.com";
+
+    const postId = new URLSearchParams(window.location.search).get("id");
+    let currentUser = null;
+    let postData = null;
+
+    // 2. 인증 상태 감시 및 초기화
+    onAuthStateChanged(auth, async (user) => {
+        currentUser = user;
+        const form = document.getElementById("commentFormArea");
+        const notice = document.getElementById("loginNotice");
+        
+        if (user) {
+            form.classList.remove("hidden");
+            notice.classList.add("hidden");
+        } else {
+            form.classList.add("hidden");
+            notice.classList.remove("hidden");
+        }
+        
+        if (postId) {
+            loadPost();
+            loadComments();
+        } else {
+            alert("잘못된 접근입니다.");
+            location.href = "hearyong.html";
+        }
+    });
+
+    // 3. 게시글 본문 로드
+    async function loadPost() {
+        const docRef = doc(db, "h-resources", postId);
+        onSnapshot(docRef, (snap) => {
+            if (!snap.exists()) {
+                alert("삭제된 게시글입니다.");
+                location.href = "hearyong.html";
+                return;
+            }
+            postData = snap.data();
+            
+            document.getElementById("viewTitle").innerText = postData.title;
+            document.getElementById("viewAuthor").innerText = `BY. ${postData.author}`;
+            document.getElementById("viewCategory").innerText = postData.category;
+            document.getElementById("viewDate").innerText = postData.createdAt?.toDate().toLocaleString() || "-";
+            document.getElementById("viewContent").innerText = postData.description;
+
+            const linksDiv = document.getElementById("linksContainer");
+            linksDiv.innerHTML = "";
+            if (postData.links && postData.links.length > 0) {
+                postData.links.forEach(link => {
+                    linksDiv.innerHTML += `
+                        <a href="${link.url}" target="_blank" class="link-item">
+                            <span class="link-name">${link.name}</span>
+                            <span style="font-size:12px; opacity:0.6;">새창에서 열기 ↗</span>
+                        </a>`;
+                });
+            }
+
+            if (currentUser) {
+                const isOwner = currentUser.uid === postData.uid;
+                const isAdmin = currentUser.email === ADMIN_EMAIL;
+                if (isOwner) document.getElementById("btnEditPost").classList.remove("hidden");
+                if (isOwner || isAdmin) document.getElementById("btnDeletePost").classList.remove("hidden");
+            }
+        });
+    }
+
+    // 4. 댓글 목록 로드
+    function loadComments() {
+        const q = query(collection(db, "h-resources", postId, "comments"), orderBy("createdAt", "asc"));
+        onSnapshot(q, (snap) => {
+            const list = document.getElementById("commentList");
+            list.innerHTML = "";
+            
+            if (snap.empty) {
+                list.innerHTML = `<div style="text-align:center; color:#555; padding:20px;">등록된 의견이 없습니다.</div>`;
+                return;
+            }
+
+            snap.forEach(commentDoc => {
+                const c = commentDoc.data();
+                const cid = commentDoc.id;
+                const isCommentOwner = currentUser && currentUser.uid === c.uid;
+                const isPostOwner = currentUser && currentUser.uid === postData?.uid;
+                const isAdmin = currentUser && currentUser.email === ADMIN_EMAIL;
+                const myHighlight = isCommentOwner ? "border: 1px solid var(--accent);" : "";
+
+                list.innerHTML += `
+                    <div class="comment-item" style="${myHighlight}">
+                        <div class="comment-meta">
+                            <span class="comment-author">
+                                ${c.author} ${isCommentOwner ? '<small style="color:var(--accent)">(나)</small>' : ''}
+                            </span>
+                            <div class="comment-actions">
+                                <span>${c.createdAt?.toDate().toLocaleString() || "작성 중..."}</span>
+                                ${c.isEdited ? '<small style="opacity:0.5">(수정됨)</small>' : ''}
+                            </div>
+                        </div>
+                        <div class="comment-text">${c.content}</div>
+                        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;">
+                            ${isCommentOwner ? `<button class="btn-small" onclick="editComment('${cid}', \`${c.content.replace(/`/g, '\\`')}\`)">수정</button>` : ""}
+                            ${(isCommentOwner || isPostOwner || isAdmin) ? `<button class="btn-small" style="color:#ff4d4d; border-color:#ff4d4d;" onclick="deleteComment('${cid}')">삭제</button>` : ""}
+                        </div>
+                    </div>`;
+            });
+        });
+    }
+
+    // 5. 댓글 작성 (App Check 토큰 자동 전송)
+    document.getElementById("btnPostComment").onclick = async () => {
+        const input = document.getElementById("commentInput");
+        const btn = document.getElementById("btnPostComment");
+        const content = input.value.trim();
+
+        if (!content) return alert("내용을 입력해주세요.");
+        
+        btn.disabled = true;
+        btn.innerText = "UPDATING...";
+
+        try {
+            const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+            const authorName = userDoc.exists() ? userDoc.data().name : "익명 연구원";
+
+            await addDoc(collection(db, "h-resources", postId, "comments"), {
+                author: authorName,
+                content: content,
+                uid: currentUser.uid,
+                createdAt: serverTimestamp(),
+                isEdited: false
+            });
+
+            if (GAS_URL) {
+                fetch(GAS_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        postTitle: postData.title,
+                        commentAuthor: authorName,
+                        commentContent: content,
+                        postAuthorEmail: postData.authorEmail || ADMIN_EMAIL
+                    })
+                }).catch(e => console.log("Notification skipped"));
+            }
+
+            input.value = "";
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        } catch (err) {
+            alert("저장 실패: " + err.message + "\n(보안 검증 오류가 발생했을 수 있습니다.)");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "POST";
+        }
+    };
+
+    // 6. 전역 함수 (수정/삭제)
+    window.deleteComment = async (cid) => {
+        if (confirm("댓글을 삭제하시겠습니까?")) {
+            try {
+                await deleteDoc(doc(db, "h-resources", postId, "comments", cid));
+            } catch (err) {
+                alert("삭제 권한이 없거나 오류가 발생했습니다.");
+            }
+        }
+    };
+
+    window.editComment = async (cid, oldContent) => {
+        const newContent = prompt("댓글 수정:", oldContent);
+        if (newContent && newContent !== oldContent) {
+            try {
+                await updateDoc(doc(db, "h-resources", postId, "comments", cid), {
+                    content: newContent,
+                    isEdited: true,
+                    updatedAt: serverTimestamp()
+                });
+            } catch (err) {
+                alert("수정 권한이 없거나 오류가 발생했습니다.");
+            }
+        }
+    };
+
+    document.getElementById("btnDeletePost").onclick = async () => {
+        if (confirm("게시글을 영구 삭제하시겠습니까?")) {
+            try {
+                await deleteDoc(doc(db, "h-resources", postId));
+                location.href = "hearyong.html";
+            } catch (err) {
+                alert("게시글 삭제 중 오류가 발생했습니다.");
+            }
+        }
+    };
+
+    document.getElementById("btnEditPost").onclick = () => {
+        location.href = `h-write.html?id=${postId}`;
+    };
+
+</script>
+</body>
+</html>
