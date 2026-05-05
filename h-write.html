@@ -214,8 +214,7 @@
     // --- [2. 권한 확인 및 수정 데이터 로드] ---
     onAuthStateChanged(auth, async (user) => {
         if (!user) {
-            alert("로그인이 필요합니다.");
-            window.location.replace("login.html");
+            window.location.replace("block.html");
             return;
         }
 
@@ -230,7 +229,6 @@
                 const isAuthorized = allowedRoles.includes(role) || user.email === ADMIN_EMAIL;
                 
                 if (!isAuthorized) {
-                    alert("순천고 전용 작성 권한이 없습니다.");
                     window.location.replace("hearyong.html");
                     return;
                 }
@@ -244,7 +242,6 @@
                     loadEditData(user);
                 }
             } else {
-                alert("사용자 정보를 찾을 수 없습니다.");
                 window.location.replace("block.html");
             }
         } catch (error) {
@@ -265,7 +262,7 @@
                 return;
             }
 
-            document.getElementById("formTitle").innerText = "순천고 자료 수정";
+            document.getElementById("formTitle").innerText = "해룡고 자료 수정";
             document.getElementById("submitBtn").innerText = "수정 완료";
             document.getElementById("postTitle").value = data.title;
             document.getElementById("postContent").value = data.description;
@@ -329,7 +326,7 @@
                 await addDoc(collection(db, "s-resources"), postData);
                 alert("등록되었습니다.");
             }
-            window.location.replace("suncheon.html");
+            window.location.replace("hearyong.html");
         } catch (err) {
             console.error("제출 에러:", err);
             alert("저장 실패: " + err.message);
