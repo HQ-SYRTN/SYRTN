@@ -319,11 +319,11 @@
             };
 
             if (editPostId) {
-                await updateDoc(doc(db, "s-resources", editPostId), postData);
+                await updateDoc(doc(db, "h-resources", editPostId), postData);
                 alert("수정되었습니다.");
             } else {
                 postData.createdAt = serverTimestamp();
-                await addDoc(collection(db, "s-resources"), postData);
+                await addDoc(collection(db, "h-resources"), postData);
                 alert("등록되었습니다.");
             }
             window.location.replace("hearyong.html");
