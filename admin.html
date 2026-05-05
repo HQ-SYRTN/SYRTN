@@ -302,38 +302,64 @@
             return;
         }
 
-        // [핵심] 슈퍼 관리자 이메일 하이패스 (DB 조회 전 통과)
-        if (user.email === '2jw5464@gmail.com') {
-            console.log("슈퍼 관리자(이메일) 인증 성공");
-            initAdminPage(user, { name: "최고 관리자", role: "admin" });
-            return;
-        }
-
         try {
-            const userDocSnap = await getDoc(doc(db, "users", user.uid));
+            // 우선 Firestore에서 현재 로그인한 유저의 정보를 가져옵니다.
+            const userDocRef = doc(db, "users", user.uid);
+            const userDocSnap = await getDoc(userDocRef);
             
+            // 1. 슈퍼 관리자 이메일('2jw5464@gmail.com')인 경우
+            if (user.email === '2jw5464@gmail.com') {
+                console.log("관리자 인증 성공");
+                
+                let userData;
+                if (userDocSnap.exists()) {
+                    // DB에 정보가 있으면 DB에 저장된 이름 사용
+                    userData = userDocSnap.data();
+                } else {
+                    // DB에 아직 문서가 없다면 이메일 정보 등을 기반으로 임시 데이터 생성
+                    userData = { name: "관리자", role: "admin" };
+                }
+                
+                initAdminPage(user, userData);
+                return;
+            }
+
+            // 2. 일반 관리자/부장 권한 체크
             if (userDocSnap.exists()) {
                 const userData = userDocSnap.data();
-                console.log("현재 유저 권한:", userData.role);
+                console.log("현재 유저 데이터:", userData);
 
                 const allowedRoles = ['admin', 's-leader', 'h-leader', 'b-leader'];
                 
                 if (allowedRoles.includes(userData.role)) {
                     initAdminPage(user, userData);
                 } else {
-                    console.error("접근 권한이 없는 역할입니다.");
+                    console.error("접근 권한이 없는 역할입니다:", userData.role);
                     window.location.replace("block.html");
                 }
             } else {
-                console.error("Firestore에 해당 유저의 문서가 없습니다.");
+                // 슈퍼 관리자 이메일도 아니고, DB에 문서도 없는 경우
+                console.error("Firestore에 사용자 정보가 없습니다.");
                 window.location.replace("block.html");
             }
         } catch (error) {
             console.error("권한 확인 중 오류 발생:", error);
-            // 에러 확인을 위해 잠시 지연 후 이동
             setTimeout(() => window.location.replace("block.html"), 2000);
         }
     });
+
+    // 관리자 페이지 데이터 로드 시작 함수 (이름 표시 부분 수정)
+    function initAdminPage(user, userData) {
+        if (userNameDisplay) {
+            userNameDisplay.style.display = 'inline';
+            // userData.name이 있으면 사용, 없으면 '관리자'로 표시
+            userNameDisplay.innerText = `${userData.name || '관리자'}님`;
+        }
+        if (logoutBtn) logoutBtn.style.display = 'inline';
+        
+        loadUsers();
+        loadSuggestions();
+    }
 
     // 관리자 페이지 데이터 로드 시작 함수
     function initAdminPage(user, userData) {
