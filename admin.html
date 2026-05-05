@@ -240,6 +240,20 @@
             </tbody>
         </table>
     </div>
+
+    <div class="section-title">접수된 등급 조정 신청</div>
+    <div class="admin-card">
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>신청일</th><th>이름</th><th>학교</th><th>요청 등급</th><th>사유</th><th>관리</th>
+                </tr>
+            </thead>
+            <tbody id="request-list">
+                <tr><td colspan='6' style="text-align:center; padding: 50px;">데이터를 불러오는 중...</td></tr>
+            </tbody>
+        </table>
+    </div>
 </main>
 
 <footer>
@@ -437,6 +451,71 @@
             suggestionList.innerHTML = "<tr><td colspan='5' style='text-align:center;'>데이터를 불러올 수 없습니다.</td></tr>";
         }
     }
+
+    // 9. 등급 조정 신청 목록 불러오기
+    async function loadRequests() {
+        const requestList = document.getElementById('request-list');
+        try {
+            const querySnapshot = await getDocs(query(collection(db, "pending_requests"), orderBy("timestamp", "desc")));
+            requestList.innerHTML = "";
+
+            if (querySnapshot.empty) {
+                requestList.innerHTML = "<tr><td colspan='6' style='text-align:center; padding:30px;'>접수된 신청이 없습니다.</td></tr>";
+                return;
+            }
+
+            querySnapshot.forEach((docSnap) => {
+                const r = docSnap.data();
+                const rid = docSnap.id; // 신청자의 UID
+                const date = r.timestamp ? new Date(r.timestamp).toLocaleDateString() : "-";
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${date}</td>
+                    <td>${r.name}</td>
+                    <td>${r.school}</td>
+                    <td><span style="color:var(--accent)">${roleMap[r.requestedRole] || r.requestedRole}</span></td>
+                    <td><small style="color:#ccc">${r.reason}</small></td>
+                    <td>
+                        <button class="btn-update" onclick="handleRequest('${rid}', '${r.requestedRole}', 'approve')">승인</button>
+                        <button class="btn-update" style="background:#ff4444; color:white;" onclick="handleRequest('${rid}', null, 'reject')">거절</button>
+                    </td>
+                `;
+                requestList.appendChild(tr);
+            });
+        } catch (err) {
+            console.error("요청 로드 실패:", err);
+            requestList.innerHTML = "<tr><td colspan='6' style='text-align:center;'>데이터를 불러올 수 없습니다.</td></tr>";
+        }
+    }
+
+    // 10. 신청 승인/거절 처리 함수
+    window.handleRequest = async (uid, requestedRole, action) => {
+        const actionText = action === 'approve' ? "승인" : "거절";
+        if (!confirm(`이 신청을 ${actionText}하시겠습니까?`)) return;
+
+        try {
+            if (action === 'approve') {
+                // 1. users 컬렉션의 등급 업데이트
+                await updateDoc(doc(db, "users", uid), { 
+                    role: requestedRole 
+                });
+                alert("등급이 승인되어 업데이트되었습니다.");
+            } else {
+                alert("신청이 거절되었습니다.");
+            }
+
+            // 2. 처리가 완료된 신청 문서는 pending_requests에서 삭제
+            await deleteDoc(doc(db, "pending_requests", uid));
+            
+            // 3. 목록 새로고침
+            loadRequests();
+            loadUsers();
+        } catch (err) {
+            console.error(err);
+            alert("처리 중 오류가 발생했습니다.");
+        }
+    };
 
     // 6. 유저 등급 업데이트
     window.updateUserRole = async (uid) => {
