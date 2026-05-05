@@ -258,14 +258,15 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    // [추가] App Check 라이브러리
     import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
     import { 
         getAuth, 
         onAuthStateChanged, 
         updateProfile, 
         signOut, 
-        deleteUser
+        deleteUser,
+        EmailAuthProvider,
+        reauthenticateWithCredential 
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     
     import { 
@@ -276,6 +277,7 @@
         deleteDoc 
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+    // Firebase 설정
     const firebaseConfig = {
         apiKey: "AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU",
         authDomain: "syrt-2026.firebaseapp.com",
@@ -288,7 +290,7 @@
 
     const app = initializeApp(firebaseConfig);
 
-    // [추가] App Check 초기화
+    // App Check 초기화
     const appCheck = initializeAppCheck(app, {
         provider: new ReCaptchaV3Provider('6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq'),
         isTokenAutoRefreshEnabled: true
@@ -297,119 +299,107 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // 인증 상태 감시
+    // --- [1. 인증 상태 감시 및 UI 데이터 로드] ---
     onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        document.getElementById('display-email').value = user.email;
-        try {
-            const userDocRef = doc(db, "users", user.uid);
-            const userDoc = await getDoc(userDocRef);
-            
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                const role = userData.role || 'member'; // 기본값 member
-
-                // 1. 기존 UI 업데이트
-                const navName = document.getElementById('nav-user-name');
-                if(navName) navName.innerText = `${userData.name}님`;
-                document.getElementById('display-school').value = userData.school || "소속 정보 없음";
-                document.getElementById('edit-name').value = userData.name || "";
-
-                // 2.  등급 및 권한 매핑 로직
-                const roleMap = {
-                    'admin': { name: '관리자', desc: ['모든 게시판 관리', '사용자 권한 승인/삭제', '자료실 수정 및 삭제'] },
-                    'teacher': { name: '지도 교사', desc: ['자료실 게시글 삭제 권한', '모든 학교 자료실 열람', '댓글 관리'] },
-                    's-leader': { name: '순천고 부장', desc: ['순천고 자료실 작성/수정', '공용 자료실 작성', '건의사항 작성'] },
-                    'h-leader': { name: '해룡고 부장', desc: ['해룡고 자료실 작성/수정', '공용 자료실 작성', '건의사항 작성'] },
-                    'b-leader': { name: '복성고 부장', desc: ['복성고 자료실 작성/수정', '공용 자료실 작성', '건의사항 작성'] },
-                    's-student': { name: '순천고 부원', desc: ['순천고/공용 자료실 열람 및 작성', '댓글 작성'] },
-                    'h-student': { name: '해룡고 부원', desc: ['해룡고/공용 자료실 열람 및 작성', '댓글 작성'] },
-                    'b-student': { name: '복성고 부원', desc: ['복성고/공용 자료실 열람 및 작성', '댓글 작성'] },
-                    'member': { name: '일반 회원', desc: ['공용 자료실 열람 전용'] }
-                };
-
-                const currentRole = roleMap[role] || roleMap['member'];
+        if (user) {
+            document.getElementById('display-email').value = user.email;
+            try {
+                const userDocRef = doc(db, "users", user.uid);
+                const userDoc = await getDoc(userDocRef);
                 
-                // 뱃지 업데이트
-                const badge = document.getElementById('display-role-badge');
-                badge.innerText = currentRole.name;
-                
-                // 권한 리스트 업데이트
-                const listContainer = document.getElementById('permission-list');
-                listContainer.innerHTML = currentRole.desc.map(item => `<li>${item}</li>`).join('');
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    const role = userData.role || 'member';
 
-            } else {
-                console.error("유저 문서가 존재하지 않습니다.");
-            }
-        } catch (error) {
-            console.error("데이터 로드 중 오류:", error);
+                    const navName = document.getElementById('nav-user-name');
+                    if(navName) navName.innerText = `${userData.name}님`;
+                    document.getElementById('display-school').value = userData.school || "소속 정보 없음";
+                    document.getElementById('edit-name').value = userData.name || "";
+
+                    // 등급 및 권한 매핑
+                    const roleMap = {
+                        'admin': { name: '관리자', desc: ['모든 게시판 관리', '사용자 권한 승인/삭제', '자료실 관리'] },
+                        'teacher': { name: '지도 교사', desc: ['자료실 삭제 권한', '전체 열람', '댓글 관리'] },
+                        's-leader': { name: '순천고 부장', desc: ['순천고 자료실 작성/수정', '공용 자료실 작성'] },
+                        'h-leader': { name: '해룡고 부장', desc: ['해룡고 자료실 작성/수정', '공용 자료실 작성'] },
+                        'b-leader': { name: '복성고 부장', desc: ['복성고 자료실 작성/수정', '공용 자료실 작성'] },
+                        's-student': { name: '순천고 부원', desc: ['순천고/공용 자료실 열람 및 작성'] },
+                        'h-student': { name: '해룡고 부원', desc: ['해룡고/공용 자료실 열람 및 작성'] },
+                        'b-student': { name: '복성고 부원', desc: ['복성고/공용 자료실 열람 및 작성'] },
+                        'member': { name: '일반 회원', desc: ['공용 자료실 열람 전용'] }
+                    };
+
+                    const currentRole = roleMap[role] || roleMap['member'];
+                    document.getElementById('display-role-badge').innerText = currentRole.name;
+                    document.getElementById('permission-list').innerHTML = currentRole.desc.map(item => `<li>${item}</li>`).join('');
+
+                }
+            } catch (error) {
+                console.error("데이터 로드 오류:", error);
             }
         } else {
             location.replace('login.html');
         }
     });
 
-    // 로그아웃 공통 함수
+    // --- [2. 로그아웃 함수] ---
     const handleLogout = async () => {
         if (confirm("로그아웃 하시겠습니까?")) {
-            try {
-                await signOut(auth);
-                alert("성공적으로 로그아웃되었습니다.");
-                location.replace('index.html');
-            } catch (error) {
-                alert("로그아웃 실패: " + error.message);
-            }
+            await signOut(auth);
+            location.replace('index.html');
         }
     };
-
     document.getElementById('nav-logout-btn').onclick = handleLogout;
     document.getElementById('card-logout-btn').onclick = handleLogout;
 
-    // 프로필(이름) 수정
+    // --- [3. 프로필 수정] ---
     document.getElementById('update-profile-btn').onclick = async () => {
         const newName = document.getElementById('edit-name').value.trim();
-        const saveBtn = document.getElementById('update-profile-btn');
-
-        if (!newName) return alert("변경할 이름을 입력해 주세요.");
+        if (!newName) return alert("이름을 입력해 주세요.");
         
-        saveBtn.disabled = true;
-        saveBtn.innerText = "저장 중...";
-
         try {
             const user = auth.currentUser;
-            // 1. Auth 프로필 업데이트
             await updateProfile(user, { displayName: newName });
-            // 2. Firestore 문서 업데이트
-            const userDocRef = doc(db, "users", user.uid);
-            await updateDoc(userDocRef, { name: newName });
-            
-            alert("정보가 성공적으로 수정되었습니다.");
+            await updateDoc(doc(db, "users", user.uid), { name: newName });
+            alert("정보가 수정되었습니다.");
             location.reload();
         } catch (error) {
-            console.error("수정 오류:", error);
-            alert("정보 수정에 실패했습니다. 다시 시도해 주세요.");
-            saveBtn.disabled = false;
-            saveBtn.innerText = "수정사항 저장";
+            alert("수정 실패: " + error.message);
         }
     };
 
-    // 회원 탈퇴
+    // --- [4. 회원 탈퇴 (재인증 기능 포함)] ---
     document.getElementById('delete-account-btn').onclick = async () => {
         const user = auth.currentUser;
         if (!user) return;
 
-        const check = confirm("정말로 탈퇴하시겠습니까?\n탈퇴 시 작성한 게시글을 제외한 계정 정보가 삭제됩니다.");
-        
-        if (check) {
-            try {
-                const uid = user.uid;
-                // 1. Firestore 유저 정보 삭제
-                await deleteDoc(doc(db, "users", uid));
-                // 2. Auth 계정 삭제
-                await deleteUser(user);
-                
-                alert("탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.");
-                location.replace('index.html');
+        // 1차 확인
+        const check = confirm("정말로 탈퇴하시겠습니까?\n탈퇴 시 모든 개인 데이터가 삭제됩니다.");
+        if (!check) return;
+
+        // 재인증을 위한 비밀번호 입력 (팝업)
+        const password = prompt("보안을 위해 현재 계정의 비밀번호를 입력해 주세요.");
+        if (!password) return alert("비밀번호를 입력해야 탈퇴 처리가 가능합니다.");
+
+        try {
+            // 재인증 시도
+            const credential = EmailAuthProvider.credential(user.email, password);
+            await reauthenticateWithCredential(user, credential);
+            
+            // 재인증 성공 후 삭제 진행
+            const uid = user.uid;
+            await deleteDoc(doc(db, "users", uid)); // Firestore 삭제
+            await deleteUser(user);                // Auth 삭제
+            
+            alert("탈퇴가 완료되었습니다.");
+            location.replace('index.html');
+
+        } catch (error) {
+            console.error("탈퇴 오류:", error);
+            if (error.code === 'auth/wrong-password') {
+                alert("비밀번호가 틀렸습니다.");
+            } else {
+                alert("탈퇴 처리 중 오류가 발생했습니다: " + error.message);
             }
         }
     };
