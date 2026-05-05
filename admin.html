@@ -350,28 +350,23 @@
 
     // 관리자 페이지 데이터 로드 시작 함수 (이름 표시 부분 수정)
     function initAdminPage(user, userData) {
-        if (userNameDisplay) {
-            userNameDisplay.style.display = 'inline';
-            // userData.name이 있으면 사용, 없으면 '관리자'로 표시
-            userNameDisplay.innerText = `${userData.name || '관리자'}님`;
-        }
-        if (logoutBtn) logoutBtn.style.display = 'inline';
-        
-        loadUsers();
-        loadSuggestions();
+    console.log("페이지 초기화 시작:", userData.name); // 디버깅용 로그
+    
+    if (userNameDisplay) {
+        userNameDisplay.style.display = 'inline';
+        // Firestore에 name이 있으면 그 이름을, 없으면 '관리자'라고 표시
+        const finalName = userData.name || '관리자';
+        userNameDisplay.innerText = `${finalName}님`;
     }
-
-    // 관리자 페이지 데이터 로드 시작 함수
-    function initAdminPage(user, userData) {
-        if (userNameDisplay) {
-            userNameDisplay.style.display = 'inline';
-            userNameDisplay.innerText = `${userData.name || '관리자'}님 (관리자)`;
-        }
-        if (logoutBtn) logoutBtn.style.display = 'inline';
-        
-        loadUsers();
-        loadSuggestions();
+    
+    if (logoutBtn) {
+        logoutBtn.style.display = 'inline';
     }
+    
+    // 데이터 로드 실행
+    loadUsers();
+    loadSuggestions();
+}
 
     // 4. 부원 목록 불러오기
     async function loadUsers() {
