@@ -250,7 +250,6 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    // [추가] App Check 라이브러리 임포트
     import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { 
@@ -258,6 +257,7 @@
         query, orderBy, onSnapshot 
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+    // 1. Firebase 설정
     const firebaseConfig = {
         apiKey: "AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU",
         authDomain: "syrt-2026.firebaseapp.com",
@@ -268,10 +268,9 @@
         measurementId: "G-Q0BKR95VH2"
     };
 
-    // Firebase 앱 초기화
     const app = initializeApp(firebaseConfig);
 
-    // --- [추가] App Check 초기화 ---
+    // 2. App Check 초기화 (reCAPTCHA v3)
     const appCheck = initializeAppCheck(app, {
         provider: new ReCaptchaV3Provider('6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq'),
         isTokenAutoRefreshEnabled: true
@@ -295,10 +294,18 @@
     const userNameDisplay = document.getElementById('user-name');
     const logoutBtn = document.getElementById('logout-btn');
 
-    // 1. 권한 체크 및 초기화 로직
+    // 3. 권한 체크 및 페이지 초기화
     onAuthStateChanged(auth, async (user) => {
         if (!user) {
+            console.warn("로그인 정보가 없습니다. block.html로 이동합니다.");
             window.location.replace("block.html");
+            return;
+        }
+
+        // [핵심] 슈퍼 관리자 이메일 하이패스 (DB 조회 전 통과)
+        if (user.email === '2jw5464@gmail.com') {
+            console.log("슈퍼 관리자(이메일) 인증 성공");
+            initAdminPage(user, { name: "최고 관리자", role: "admin" });
             return;
         }
 
@@ -307,33 +314,110 @@
             
             if (userDocSnap.exists()) {
                 const userData = userDocSnap.data();
+                console.log("현재 유저 권한:", userData.role);
+
                 const allowedRoles = ['admin', 's-leader', 'h-leader', 'b-leader'];
                 
-                if (!allowedRoles.includes(userData.role)) {
+                if (allowedRoles.includes(userData.role)) {
+                    initAdminPage(user, userData);
+                } else {
+                    console.error("접근 권한이 없는 역할입니다.");
                     window.location.replace("block.html");
-                    return;
                 }
-
-                if (userNameDisplay) {
-                    userNameDisplay.style.display = 'inline';
-                    userNameDisplay.innerText = `${userData.name}님 (관리자)`;
-                }
-                if (logoutBtn) logoutBtn.style.display = 'inline';
-                
-                loadUsers();
-                loadSuggestions();
             } else {
+                console.error("Firestore에 해당 유저의 문서가 없습니다.");
                 window.location.replace("block.html");
             }
         } catch (error) {
-            console.error("Admin Auth Check Error:", error);
-            window.location.replace("block.html");
+            console.error("권한 확인 중 오류 발생:", error);
+            // 에러 확인을 위해 잠시 지연 후 이동
+            setTimeout(() => window.location.replace("block.html"), 2000);
         }
     });
 
-    // ... (loadUsers, loadSuggestions 함수는 동일) ...
+    // 관리자 페이지 데이터 로드 시작 함수
+    function initAdminPage(user, userData) {
+        if (userNameDisplay) {
+            userNameDisplay.style.display = 'inline';
+            userNameDisplay.innerText = `${userData.name || '관리자'}님 (관리자)`;
+        }
+        if (logoutBtn) logoutBtn.style.display = 'inline';
+        
+        loadUsers();
+        loadSuggestions();
+    }
 
-    // 4. 유저 등급 업데이트 (App Check 토큰이 자동으로 포함되어 전송됨)
+    // 4. 부원 목록 불러오기
+    async function loadUsers() {
+        const userList = document.getElementById('user-list');
+        try {
+            const querySnapshot = await getDocs(query(collection(db, "users"), orderBy("name", "asc")));
+            userList.innerHTML = "";
+
+            querySnapshot.forEach((docSnap) => {
+                const u = docSnap.data();
+                const uid = docSnap.id;
+                const tr = document.createElement('tr');
+                
+                // 등급 선택 셀렉트 박스 생성
+                let options = "";
+                for (const [val, label] of Object.entries(roleMap)) {
+                    options += `<option value="${val}" ${u.role === val ? 'selected' : ''}>${label}</option>`;
+                }
+
+                tr.innerHTML = `
+                    <td>${u.name || '이름없음'}</td>
+                    <td>${u.school || '-'}</td>
+                    <td>${u.email || '-'}</td>
+                    <td><span style="color:var(--accent)">${roleMap[u.role] || u.role}</span></td>
+                    <td>
+                        <select id="role-${uid}" class="role-select">${options}</select>
+                        <button class="btn-update" onclick="updateUserRole('${uid}')">변경</button>
+                    </td>
+                `;
+                userList.appendChild(tr);
+            });
+        } catch (err) {
+            console.error("유저 로드 실패:", err);
+            userList.innerHTML = "<tr><td colspan='5' style='text-align:center;'>데이터를 읽어올 권한이 없습니다.</td></tr>";
+        }
+    }
+
+    // 5. 건의 사항 불러오기
+    async function loadSuggestions() {
+        const suggestionList = document.getElementById('suggestion-list');
+        try {
+            const q = query(collection(db, "suggestions"), orderBy("timestamp", "desc"));
+            const querySnapshot = await getDocs(q);
+            suggestionList.innerHTML = "";
+
+            if (querySnapshot.empty) {
+                suggestionList.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:30px;'>접수된 건의 사항이 없습니다.</td></tr>";
+                return;
+            }
+
+            querySnapshot.forEach((docSnap) => {
+                const s = docSnap.data();
+                const sid = docSnap.id;
+                const date = s.timestamp ? new Date(s.timestamp.seconds * 1000).toLocaleDateString() : "-";
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${date}</td>
+                    <td><span style="color:#00E5FF">[${s.category}]</span></td>
+                    <td><strong>${s.subject}</strong><br><small style="color:#ccc">${s.content}</small></td>
+                    <td>${s.authorName || '익명'}</td>
+                    <td><button class="btn-update" style="background:#ff4444; color:white;" onclick="deleteSuggestion('${sid}')">해결완료</button></td>
+                `;
+                suggestionList.appendChild(tr);
+            });
+        } catch (err) {
+            console.error("건의사항 로드 실패:", err);
+            suggestionList.innerHTML = "<tr><td colspan='5' style='text-align:center;'>데이터를 불러올 수 없습니다.</td></tr>";
+        }
+    }
+
+    // 6. 유저 등급 업데이트
     window.updateUserRole = async (uid) => {
         const roleSelect = document.getElementById(`role-${uid}`);
         const newRole = roleSelect.value;
@@ -341,28 +425,26 @@
 
         if (confirm(`해당 유저의 등급을 ${roleName}(으)로 변경하시겠습니까?`)) {
             try {
-                // App Check가 활성화된 상태에서 정상적인 브라우저 접근이 아니면 거부됨
                 await updateDoc(doc(db, "users", uid), { role: newRole });
                 alert("등급이 성공적으로 변경되었습니다.");
                 loadUsers();
             } catch (err) {
                 console.error(err);
-                alert("변경 권한이 없거나 유효하지 않은 요청입니다.");
+                alert("권한이 없거나 요청이 거부되었습니다.");
             }
         }
     };
 
-    // 5. 건의 사항 삭제 (App Check 토큰 필수)
+    // 7. 건의 사항 삭제 및 메일 발송
     window.deleteSuggestion = async (sid) => {
-        if (confirm("이 건의 사항을 해결 완료 처리하고 삭제하시겠습니까?\n작성자에게 알림 메일이 발송됩니다.")) {
+        if (confirm("이 건의 사항을 해결 완료 처리하고 삭제하시겠습니까?")) {
             try {
                 const docRef = doc(db, "suggestions", sid);
                 const docSnap = await getDoc(docRef);
                 
                 if (docSnap.exists()) {
                     const sData = docSnap.data();
-
-                    // GAS 연동 메일 발송
+                    // GAS 메일 발송 로직 (옵션)
                     if (sData.userEmail && sData.userEmail !== "비회원") {
                         fetch("https://script.google.com/macros/s/AKfycbx33DYyGQW6a5TmP7DWuBG_WuoK-43Asu3GjZtfYtUnAaIFB9X8l8y2dlzdXMva2IoA/exec", {
                             method: "POST",
@@ -370,25 +452,22 @@
                             body: JSON.stringify({
                                 userEmail: sData.userEmail,
                                 authorName: sData.authorName,
-                                category: sData.category,
-                                subject: sData.subject,
-                                content: sData.content
+                                subject: sData.subject
                             })
-                        }).catch(e => console.log("메일 발송 요청 실패"));
+                        }).catch(e => console.log("메일 알림 실패"));
                     }
 
-                    // Firestore 삭제 수행
                     await deleteDoc(docRef);
-                    alert("해결 알림 발송 및 데이터 삭제가 완료되었습니다.");
+                    alert("삭제되었습니다.");
+                    loadSuggestions();
                 }
             } catch (err) {
-                console.error("처리 중 오류:", err);
-                alert("삭제 처리 중 오류가 발생했습니다.");
+                alert("처리 중 오류가 발생했습니다.");
             }
         }
     };
 
-    // 6. 로그아웃 처리
+    // 8. 로그아웃
     logoutBtn.onclick = async () => {
         if (confirm("로그아웃 하시겠습니까?")) {
             await signOut(auth);
