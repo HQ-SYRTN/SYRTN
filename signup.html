@@ -166,7 +166,6 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    // [추가] App Check 라이브러리 임포트
     import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
     import { 
         getAuth, 
@@ -196,7 +195,7 @@
     // 초기화
     const app = initializeApp(firebaseConfig);
 
-    // --- [App Check 초기화] ---
+    // App Check 초기화
     const appCheck = initializeAppCheck(app, {
         provider: new ReCaptchaV3Provider('6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq'),
         isTokenAutoRefreshEnabled: true 
@@ -205,18 +204,16 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // URL 파라미터 가져오기
+    // DOM 요소 및 URL 파라미터
     const urlParams = new URLSearchParams(window.location.search);
     const method = urlParams.get('method');
     const submitBtn = document.getElementById('submit-btn');
-
-    // DOM 요소
     const emailInput = document.getElementById('email');
     const nameInput = document.getElementById('user-name');
     const schoolInput = document.getElementById('user-school');
     const passwordInput = document.getElementById('password');
 
-    // --- [1] Google 로그인 연동 처리 ---
+    // [1] Google 로그인 연동 처리
     if (method === 'google') {
         submitBtn.disabled = true;
         submitBtn.innerText = "계정 확인 중...";
@@ -227,18 +224,17 @@
                 submitBtn.innerText = "가입 완료하기";
                 emailInput.value = user.email || "";
                 nameInput.value = user.displayName || "";
+                emailInput.readOnly = true;
+                document.getElementById('pw-group').style.display = 'none';
+                passwordInput.required = false;
             } else {
                 alert("로그인 정보가 없습니다. 다시 로그인해 주세요.");
                 location.href = 'login.html';
             }
         });
-
-        emailInput.readOnly = true;
-        document.getElementById('pw-group').style.display = 'none';
-        passwordInput.required = false;
     }
 
-    // --- [2] 회원가입 폼 제출 핸들러 ---
+    // [2] 회원가입 폼 제출 핸들러
     document.getElementById('signup-form').onsubmit = async (e) => {
         e.preventDefault();
         
@@ -253,31 +249,39 @@
             let user;
 
             if (method === 'google') {
+                // 구글 가입 시 이미 로그인된 상태의 currentUser 사용
                 user = auth.currentUser;
                 if (!user) throw new Error("유저 세션을 찾을 수 없습니다.");
             } else {
+                // 이메일/비밀번호 가입
                 const password = passwordInput.value;
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 user = userCredential.user;
                 
+                // 닉네임 업데이트
                 await updateProfile(user, { displayName: name });
-                await sendEmailVerification(user);
+                
+                // 인증 메일 발송 (이 부분이 누락되거나 에러나면 가입 중단 방지를 위해 await 처리)
+                try {
+                    await sendEmailVerification(user);
+                    console.log("인증 메일 발송 완료");
+                } catch (emailErr) {
+                    console.error("인증 메일 발송 중 오류:", emailErr);
+                    // 메일 발송 실패해도 DB 저장까지 진행하려면 throw 하지 않음
+                }
             }
 
-            // --- [3] Firestore에 유저 상세 정보 저장 ---
-            // App Check가 활성화되면 이 setDoc 요청 시 자동으로 토큰이 검증됩니다.
+            // [3] Firestore에 유저 상세 정보 저장 (role: member 설정)
             const userDocRef = doc(db, "users", user.uid);
             await setDoc(userDocRef, {
                 uid: user.uid,
                 email: email,
                 name: name,
                 school: school,
-                role: 'student',
+                role: 'member', // 요청하신 member 등급 적용
                 method: method || 'email',
                 createdAt: serverTimestamp()
             });
-
-            console.log("Firestore 데이터 저장 성공");
 
             if (method === 'google') {
                 alert("정보 등록이 완료되었습니다! 환영합니다.");
@@ -292,10 +296,13 @@
             submitBtn.disabled = false;
             submitBtn.innerText = "가입하기";
 
+            // 사용자 친화적 에러 메시지
             if (error.code === 'auth/email-already-in-use') {
                 alert("이미 사용 중인 이메일 주소입니다.");
+            } else if (error.code === 'auth/weak-password') {
+                alert("비밀번호가 너무 취약합니다. 6자 이상 입력해주세요.");
             } else if (error.code === 'appCheck/re-captcha-error') {
-                alert("봇 감지 시스템 오류가 발생했습니다. 다시 시도해 주세요.");
+                alert("봇 감지 시스템 오류가 발생했습니다. 새로고침 후 다시 시도해 주세요.");
             } else {
                 alert("오류가 발생했습니다: " + error.message);
             }
