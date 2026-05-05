@@ -253,7 +253,6 @@
                 
                 // 일반 회원(member) 등급 차단 (연구원 등급 이상만 가능하도록 설정된 경우)
                 if (currentUserData.role === "member") {
-                    alert("건의함은 연구원 등급부터 이용 가능합니다.");
                     window.location.replace("block.html");
                     return;
                 }
