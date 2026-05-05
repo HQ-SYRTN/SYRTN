@@ -316,17 +316,17 @@
                 document.getElementById('display-school').value = userData.school || "소속 정보 없음";
                 document.getElementById('edit-name').value = userData.name || "";
 
-                // 2. [추가] 등급 및 권한 매핑 로직
+                // 2.  등급 및 권한 매핑 로직
                 const roleMap = {
-                    'admin': { name: '전체 관리자', desc: ['모든 게시판 관리', '사용자 권한 승인/삭제', '자료실 수정 및 삭제'] },
+                    'admin': { name: '관리자', desc: ['모든 게시판 관리', '사용자 권한 승인/삭제', '자료실 수정 및 삭제'] },
                     'teacher': { name: '지도 교사', desc: ['자료실 게시글 삭제 권한', '모든 학교 자료실 열람', '댓글 관리'] },
-                    's-leader': { name: '순천고 기장', desc: ['순천고 자료실 작성/수정', '공용 자료실 작성', '건의사항 작성'] },
-                    'h-leader': { name: '해룡고 기장', desc: ['해룡고 자료실 작성/수정', '공용 자료실 작성', '건의사항 작성'] },
-                    'b-leader': { name: '복성고 기장', desc: ['복성고 자료실 작성/수정', '공용 자료실 작성', '건의사항 작성'] },
-                    's-student': { name: '순천고 정회원', desc: ['순천고/공용 자료실 열람 및 작성', '댓글 작성'] },
-                    'h-student': { name: '해룡고 정회원', desc: ['해룡고/공용 자료실 열람 및 작성', '댓글 작성'] },
-                    'b-student': { name: '복성고 정회원', desc: ['복성고/공용 자료실 열람 및 작성', '댓글 작성'] },
-                    'member': { name: '준회원', desc: ['공용 자료실 열람 전용', '권한 요청 필요'] }
+                    's-leader': { name: '순천고 부장', desc: ['순천고 자료실 작성/수정', '공용 자료실 작성', '건의사항 작성'] },
+                    'h-leader': { name: '해룡고 부장', desc: ['해룡고 자료실 작성/수정', '공용 자료실 작성', '건의사항 작성'] },
+                    'b-leader': { name: '복성고 부장', desc: ['복성고 자료실 작성/수정', '공용 자료실 작성', '건의사항 작성'] },
+                    's-student': { name: '순천고 부원', desc: ['순천고/공용 자료실 열람 및 작성', '댓글 작성'] },
+                    'h-student': { name: '해룡고 부원', desc: ['해룡고/공용 자료실 열람 및 작성', '댓글 작성'] },
+                    'b-student': { name: '복성고 부원', desc: ['복성고/공용 자료실 열람 및 작성', '댓글 작성'] },
+                    'member': { name: '일반 회원', desc: ['공용 자료실 열람 전용'] }
                 };
 
                 const currentRole = roleMap[role] || roleMap['member'];
