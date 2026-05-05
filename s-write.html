@@ -152,7 +152,6 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    // [추가] App Check 라이브러리 임포트
     import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, doc, getDoc, addDoc, updateDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -168,7 +167,6 @@
 
     const app = initializeApp(firebaseConfig);
 
-    // --- [App Check 초기화] ---
     const appCheck = initializeAppCheck(app, {
         provider: new ReCaptchaV3Provider('6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq'), 
         isTokenAutoRefreshEnabled: true 
@@ -180,7 +178,6 @@
     const urlParams = new URLSearchParams(window.location.search);
     const editPostId = urlParams.get('id');
     let currentUserName = "익명";
-    let currentUserRole = "member";
     const ADMIN_EMAIL = "2jw5464@gmail.com";
 
     // --- 링크 필드 동적 추가 함수 ---
@@ -214,7 +211,7 @@
     };
     document.getElementById('logout-btn').addEventListener('click', window.handleLogout);
 
-    // 인증 및 권한 감시
+    // --- [권한 감시 로직 수정] ---
     onAuthStateChanged(auth, async (user) => {
         if (!user) {
             alert("로그인이 필요합니다.");
@@ -223,21 +220,23 @@
         }
 
         try {
-            // App Check 토큰이 자동으로 포함되어 getDoc 호출
             const userDocSnap = await getDoc(doc(db, "users", user.uid));
             if (userDocSnap.exists()) {
                 const userData = userDocSnap.data();
-                currentUserRole = userData.role || 'member';
+                const role = userData.role || 'member';
                 currentUserName = userData.name || "사용자";
 
-                const isAuthorized = (currentUserRole === 'admin' || currentUserRole === 'teacher' || currentUserRole === 's-leader' || user.email === ADMIN_EMAIL);
+                // 허용 등급 정의: s-student, s-leader, teacher, admin
+                const allowedRoles = ['s-student', 's-leader', 'teacher', 'admin'];
+                const isAuthorized = allowedRoles.includes(role) || user.email === ADMIN_EMAIL;
                 
-                if (!isAuthorized && !editPostId) {
-                    alert("순천고 자료 등록 권한이 없습니다.");
+                if (!isAuthorized) {
+                    alert("순천고 전용 작성 권한이 없습니다. (순천고 연구원 이상 등급 필요)");
                     window.location.replace("suncheon.html");
                     return;
                 }
 
+                // UI 업데이트
                 document.getElementById('user-name').style.display = 'inline';
                 document.getElementById('logout-btn').style.display = 'inline';
                 document.getElementById('user-name').innerText = `${currentUserName}님`;
@@ -246,31 +245,43 @@
                     loadEditData(user);
                 }
             } else {
+                alert("사용자 정보를 찾을 수 없습니다.");
                 window.location.replace("block.html");
             }
         } catch (error) {
-            console.error("데이터 로드 오류:", error);
-            // App Check 실패 시에도 이쪽으로 올 수 있습니다.
+            console.error("권한 확인 오류:", error);
+            window.location.replace("suncheon.html");
         }
     });
 
     // 수정 데이터 로드
     async function loadEditData(user) {
-        document.getElementById("formTitle").innerText = "자료 수정하기";
-        document.getElementById("submitBtn").innerText = "수정 완료";
+        try {
+            const docSnap = await getDoc(doc(db, "s-resources", editPostId));
+            if (!docSnap.exists()) return;
 
-        const docSnap = await getDoc(doc(db, "s-resources", editPostId));
-        if (!docSnap.exists()) return;
+            const data = docSnap.data();
 
-        const data = docSnap.data();
-        document.getElementById("postTitle").value = data.title;
-        document.getElementById("postContent").value = data.description;
-        document.getElementById("category").value = data.category;
+            // 작성자 본인이거나 관리자가 아니면 수정 금지
+            if (data.uid !== user.uid && user.email !== ADMIN_EMAIL) {
+                alert("본인의 게시물만 수정할 수 있습니다.");
+                window.location.replace("suncheon.html");
+                return;
+            }
 
-        if (data.links && data.links.length > 0) {
-            const container = document.getElementById("linkContainer");
-            container.innerHTML = ""; 
-            data.links.forEach(link => addLinkField(link.url, link.name));
+            document.getElementById("formTitle").innerText = "자료 수정하기";
+            document.getElementById("submitBtn").innerText = "수정 완료";
+            document.getElementById("postTitle").value = data.title;
+            document.getElementById("postContent").value = data.description;
+            document.getElementById("category").value = data.category;
+
+            if (data.links && data.links.length > 0) {
+                const container = document.getElementById("linkContainer");
+                container.innerHTML = ""; 
+                data.links.forEach(link => addLinkField(link.url, link.name));
+            }
+        } catch (err) {
+            console.error("수정 데이터 로드 중 오류:", err);
         }
     }
 
@@ -314,7 +325,6 @@
                 updatedAt: serverTimestamp()
             };
 
-            // Firestore 저장 시 App Check 토큰이 자동으로 헤더에 포함됩니다.
             if (editPostId) {
                 await updateDoc(doc(db, "s-resources", editPostId), postData);
                 alert("수정되었습니다.");
@@ -328,9 +338,9 @@
             console.error("제출 에러:", err);
             alert("저장 실패: " + err.message);
             submitBtn.disabled = false;
-            submitBtn.innerText = "자료 등록하기";
+            submitBtn.innerText = editPostId ? "수정 완료" : "자료 등록하기";
         }
     }
-</script>>
+</script>
 </body>
 </html>
