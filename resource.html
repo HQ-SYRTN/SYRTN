@@ -256,66 +256,65 @@
 
     let currentUserData = null; 
 
+    // --- 권한 그룹 정의 ---
+    const WRITABLE_ROLES = ['teacher', 's-leader', 'b-leader', 'h-leader', 'admin'];
+
     // 3. 인증 상태 감시 및 UI 업데이트
     onAuthStateChanged(auth, async (user) => {
         const userNameSpan = document.getElementById('user-name');
         const loginLink = document.getElementById('login-link');
         const logoutBtn = document.getElementById('logout-btn');
 
-        if (user) {
-            // 로그인 된 경우
-            try {
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                if (userDoc.exists()) {
-                    currentUserData = userDoc.data();
-                    if(userNameSpan) {
-                        userNameSpan.innerText = `${currentUserData.name || '유저'}님`;
-                        userNameSpan.style.display = 'inline';
-                        if(loginLink) loginLink.style.display = 'none';
-                        if(logoutBtn) logoutBtn.style.display = 'inline';
-                    }
+        if (!user) {
+            // [권한체크] 비로그인 유저는 block.html로 이동
+            alert("로그인이 필요한 페이지입니다.");
+            location.replace("block.html");
+            return;
+        }
+
+        // 로그인 된 경우 정보 가져오기
+        try {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+                currentUserData = userDoc.data();
+                if(userNameSpan) {
+                    userNameSpan.innerText = `${currentUserData.name || '유저'}님 (${currentUserData.role})`;
+                    userNameSpan.style.display = 'inline';
+                    if(loginLink) loginLink.style.display = 'none';
+                    if(logoutBtn) logoutBtn.style.display = 'inline';
                 }
-            } catch (error) {
-                console.error("사용자 정보 로딩 실패:", error);
+            } else {
+                // 계정 정보가 Firestore에 없는 특수 상황
+                alert("등록된 회원 정보가 없습니다.");
+                location.replace("block.html");
+                return;
             }
-        } else {
-            // 로그아웃 된 경우
-            currentUserData = null;
-            if(userNameSpan) userNameSpan.style.display = 'none';
-            if(loginLink) loginLink.style.display = 'inline';
-            if(logoutBtn) logoutBtn.style.display = 'none';
+        } catch (error) {
+            console.error("사용자 정보 로딩 실패:", error);
         }
         
-        // 리스트 로드는 로그인 여부와 관계없이 항상 실행
+        // 리스트 로드
         loadList(); 
     });
 
-    // 4. 글쓰기 버튼 권한 제어 (중요 수정 부분)
+    // 4. 글쓰기 버튼 권한 제어
     const writeBtn = document.querySelector('.btn-write');
     if (writeBtn) {
         writeBtn.addEventListener('click', (e) => {
-            e.preventDefault(); // 기본 이동 방지
+            e.preventDefault(); 
 
-            // [조건 1] 로그인 여부 확인
-            if (!auth.currentUser) {
-                alert("로그인이 필요한 서비스입니다.");
-                location.href = "login.html";
-                return;
+            if (!currentUserData) return;
+
+            // [권한체크] WRITABLE_ROLES에 포함된 사람만 글쓰기 가능
+            if (WRITABLE_ROLES.includes(currentUserData.role)) {
+                location.href = "write.html";
+            } else {
+                alert("글쓰기 권한이 없습니다. (관리자/지도교사/각 학교 기장 전용)");
             }
-
-            // [조건 2] 등급(role) 확인
-            // 'member' 등급은 글쓰기를 차단하고 알림창을 띄움
-            if (currentUserData && currentUserData.role === 'member') {
-                alert("부원 전용 기능입니다. 'REQUEST AUTHORITY' 메뉴에서 등급 승인을 먼저 받아주세요.");
-                return;
-            }
-
-            // 모든 조건 통과 시 이동
-            location.href = "write.html";
         });
     }
 
-    // 5. 게시글 리스트 실시간 로드 및 필터링
+    // 5. 게시글 리스트 실시간 로드
     function loadList() {
         const q = query(collection(db, "resources"), orderBy("createdAt", "desc"));
         
@@ -349,8 +348,12 @@
                     const data = postDoc.data();
                     const date = data.createdAt ? data.createdAt.toDate().toLocaleDateString() : "-";
                     
-                    // 삭제 권한: 작성자 본인이거나 시스템 관리자 이메일일 경우
-                    const hasPermission = auth.currentUser && (auth.currentUser.uid === data.uid || auth.currentUser.email === ADMIN_EMAIL);
+                    // 삭제 권한: 작성자 본인, 시스템 관리자(이메일), 또는 role이 admin인 경우
+                    const hasPermission = auth.currentUser && (
+                        auth.currentUser.uid === data.uid || 
+                        auth.currentUser.email === ADMIN_EMAIL || 
+                        (currentUserData && currentUserData.role === 'admin')
+                    );
 
                     listDiv.innerHTML += `
                         <div class="resource-item" onclick="location.href='view.html?id=${postDoc.id}'">
@@ -369,20 +372,19 @@
                 });
             };
 
-            // 검색/필터 이벤트 연결
             searchInput.oninput = render;
             filterSelect.onchange = render;
             render();
         }, (error) => {
             console.error("데이터 로드 오류:", error);
             document.getElementById('resource-list').innerHTML = 
-                '<div style="padding:100px; text-align:center; color: #ff4d4d;">자료를 불러올 권한이 없습니다. 관리자에게 문의하세요.</div>';
+                '<div style="padding:100px; text-align:center; color: #ff4d4d;">자료를 불러올 권한이 없거나 로그인이 만료되었습니다.</div>';
         });
     }
 
     // 6. 게시글 삭제 함수
     window.deletePost = async (e, postId) => {
-        e.stopPropagation(); // 클릭 이벤트 전파 방지 (view.html 이동 막기)
+        e.stopPropagation(); 
         if (confirm("이 자료를 삭제하시겠습니까?")) {
             try {
                 await deleteDoc(doc(db, "resources", postId));
@@ -400,7 +402,7 @@
             try {
                 await signOut(auth);
                 alert("로그아웃 되었습니다.");
-                window.location.replace("index.html");
+                location.replace("index.html");
             } catch (error) { 
                 console.error("로그아웃 오류:", error); 
             }
