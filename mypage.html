@@ -226,26 +226,25 @@
             <input type="text" id="edit-name" placeholder="변경할 실명을 입력하세요">
         </div>
 
+        <div align = "center", class="info-group">
+            <label>현재 회원 등급</label>
+            <div id="display-role-badge" style="display: inline-block; padding: 4px 12px; border-radius: 20px; background: var(--accent); color: #000; font-weight: bold; font-size: 0.85rem; margin-bottom: 10px;">
+                불러오는 중...
+            </div>
+        </div>
+
+
+        <div align = "center", class="info-group">
+            <label>등급별 이용 권한</label>
+            <div id="role-permissions" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; font-size: 0.9rem;">
+                <ul id="permission-list" style="margin: 0; padding-left: 20px; color: #bbb; line-height: 1.8;"></ul>
+        </div>
+    </div>
+
         <div class="btn-zone">
             <button class="btn btn-save" id="update-profile-btn">수정사항 저장</button>
             <button class="btn btn-logout" id="card-logout-btn">로그아웃</button>
             <button class="btn btn-delete" id="delete-account-btn">회원 탈퇴</button>
-        </div>
-    </div>
-
-    <div align = "center", class="info-group">
-        <label>현재 회원 등급</label>
-        <div id="display-role-badge" style="display: inline-block; padding: 4px 12px; border-radius: 20px; background: var(--accent); color: #000; font-weight: bold; font-size: 0.85rem; margin-bottom: 10px;">
-            불러오는 중...
-        </div>
-    </div>
-
-
-    <div align = "center", class="info-group">
-        <label>등급별 이용 권한</label>
-        <div id="role-permissions" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; font-size: 0.9rem;">
-            <ul id="permission-list" style="margin: 0; padding-left: 20px; color: #bbb; line-height: 1.8;">
-                </ul>
         </div>
     </div>
 </main>
@@ -319,14 +318,14 @@
                     document.getElementById('edit-name').value = userData.name || "";
 
                     const roleMap = {
-                        'admin': { name: '관리자', desc: ['모든 게시판 관리', '사용자 권한 승인/삭제', '자료실 관리'] },
-                        'teacher': { name: '지도 교사', desc: ['자료실 삭제 권한', '전체 열람', '댓글 관리'] },
-                        's-leader': { name: '순천고 부장', desc: ['순천고 자료실 작성/수정', '공용 자료실 작성'] },
-                        'h-leader': { name: '해룡고 부장', desc: ['해룡고 자료실 작성/수정', '공용 자료실 작성'] },
-                        'b-leader': { name: '복성고 부장', desc: ['복성고 자료실 작성/수정', '공용 자료실 작성'] },
-                        's-student': { name: '순천고 부원', desc: ['순천고/공용 자료실 열람 및 작성'] },
-                        'h-student': { name: '해룡고 부원', desc: ['해룡고/공용 자료실 열람 및 작성'] },
-                        'b-student': { name: '복성고 부원', desc: ['복성고/공용 자료실 열람 및 작성'] },
+                        'admin': { name: '관리자', desc: ['모든 게시판 관리', '사용자 권한 승인/삭제', '공용 자료실 관리', '건의 사항 관리', '학교 전용 자료실 관리'] },
+                        'teacher': { name: '지도 교사', desc: ['공용 자료실 관리', '학교 전용 자료실 관리'] },
+                        's-leader': { name: '순천고 부장', desc: ['순천고 자료실 관리', '공용 자료실 작성/수정', '사용자 권한 수정'] },
+                        'h-leader': { name: '해룡고 부장', desc: ['해룡고 자료실 관리', '공용 자료실 작성/수정', '사용자 권한 수정'] },
+                        'b-leader': { name: '복성고 부장', desc: ['복성고 자료실 관리', '공용 자료실 작성/수정', '사용자 권한 수정'] },
+                        's-student': { name: '순천고 부원', desc: ['순천고 자료실 작성', '공용 자료실 열람'] },
+                        'h-student': { name: '해룡고 부원', desc: ['해룡고 자료실 작성', '공용 자료실 열람'] },
+                        'b-student': { name: '복성고 부원', desc: ['복성고 자료실 작성', '공용 자료실 열람'] },
                         'member': { name: '일반 회원', desc: ['공용 자료실 열람 전용'] }
                     };
 
@@ -338,7 +337,7 @@
                 console.error("데이터 로드 오류:", error);
             }
         } else {
-            location.replace('login.html');
+            location.replace('block.html');
         }
     });
 
