@@ -129,12 +129,12 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const GAS_URL = "YOUR_GAS_DEPLOY_URL_HERE"; // 실제 Google Apps Script 배포 URL을 입력하세요.
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbz3k8f-VpEPgpHbt7ZAntmLp-ruYMoMz8shUd91mjU0xSvQNByk_AN9kVXh7Yi6oR5c/exec";
     const ADMIN_EMAIL = "2jw5464@gmail.com";
 
     const postId = new URLSearchParams(window.location.search).get("id");
     let currentUser = null;
-    let currentUserData = null; // Firestore에서 가져온 유저 상세 정보 (role 등)
+    let currentUserData = null;
     let postData = null;
 
     // 3. 인증 상태 감시 및 초기 UI 제어
