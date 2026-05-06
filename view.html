@@ -101,7 +101,6 @@
 <script type="module">
     // Firebase SDK 모듈 임포트
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    // [추가] App Check 라이브러리
     import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { 
@@ -121,7 +120,7 @@
 
     const app = initializeApp(firebaseConfig);
 
-    // [추가] App Check 초기화
+    // 2. App Check 초기화 (보안 강화)
     const appCheck = initializeAppCheck(app, {
         provider: new ReCaptchaV3Provider('6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq'),
         isTokenAutoRefreshEnabled: true
@@ -130,20 +129,27 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const GAS_URL = "YOUR_GAS_DEPLOY_URL_HERE"; 
+    const GAS_URL = "YOUR_GAS_DEPLOY_URL_HERE"; // 실제 Google Apps Script 배포 URL을 입력하세요.
     const ADMIN_EMAIL = "2jw5464@gmail.com";
 
     const postId = new URLSearchParams(window.location.search).get("id");
     let currentUser = null;
+    let currentUserData = null; // Firestore에서 가져온 유저 상세 정보 (role 등)
     let postData = null;
 
-    // 2. 인증 상태 감시 및 초기화
+    // 3. 인증 상태 감시 및 초기 UI 제어
     onAuthStateChanged(auth, async (user) => {
         currentUser = user;
         const form = document.getElementById("commentFormArea");
         const notice = document.getElementById("loginNotice");
         
         if (user) {
+            // 로그인 시 유저 컬렉션에서 상세 정보(실명, 역할) 로드
+            try {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) currentUserData = userDoc.data();
+            } catch (e) { console.error("사용자 정보 로딩 실패:", e); }
+
             if (form) form.classList.remove("hidden");
             if (notice) notice.classList.add("hidden");
         } else {
@@ -160,7 +166,7 @@
         }
     });
 
-    // 3. 게시글 본문 로드
+    // 4. 게시글 본문 로드
     async function loadPost() {
         const docRef = doc(db, "resources", postId);
         onSnapshot(docRef, (snap) => {
@@ -194,17 +200,18 @@
                 });
             }
 
-            // 게시글 관리 권한 (작성자/관리자)
+            // 게시글 관리 권한 (작성자 본인 또는 관리자)
             if (currentUser) {
                 const isOwner = currentUser.uid === postData.uid;
-                const isAdmin = currentUser.email === ADMIN_EMAIL;
+                const isAdmin = currentUser.email === ADMIN_EMAIL || (currentUserData && currentUserData.role === 'admin');
+                
                 if (isOwner) document.getElementById("btnEditPost").classList.remove("hidden");
                 if (isOwner || isAdmin) document.getElementById("btnDeletePost").classList.remove("hidden");
             }
         });
     }
 
-    // 4. 댓글 목록 로드
+    // 5. 댓글 목록 실시간 로드
     function loadComments() {
         const q = query(collection(db, "resources", postId, "comments"), orderBy("createdAt", "asc"));
         onSnapshot(q, (snap) => {
@@ -219,14 +226,17 @@
             snap.forEach(commentDoc => {
                 const c = commentDoc.data();
                 const cid = commentDoc.id;
+                
+                // 댓글 권한 체크
                 const isCommentOwner = currentUser && currentUser.uid === c.uid;
-                const isPostOwner = currentUser && currentUser.uid === postData?.uid;
-                const isAdmin = currentUser && currentUser.email === ADMIN_EMAIL;
-                const myHighlight = isCommentOwner ? "border: 1px solid var(--accent);" : "";
+                const isAdmin = currentUser && (currentUser.email === ADMIN_EMAIL || (currentUserData && currentUserData.role === 'admin'));
+                const isStaff = currentUserData && (currentUserData.role === 'teacher' || currentUserData.role === 'admin');
+                const isPostOwner = currentUser && postData && (currentUser.uid === postData.uid);
 
                 const item = document.createElement('div');
                 item.className = "comment-item";
-                item.style = myHighlight;
+                if(isCommentOwner) item.style.border = "1px solid var(--accent)";
+                
                 item.innerHTML = `
                     <div class="comment-meta">
                         <span class="comment-author">
@@ -240,7 +250,8 @@
                     <div class="comment-text">${c.content}</div>
                     <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;">
                         ${isCommentOwner ? `<button class="btn-small edit-comment-btn">수정</button>` : ""}
-                        ${(isCommentOwner || isPostOwner || isAdmin) ? `<button class="btn-small delete-comment-btn" style="color:#ff4d4d; border-color:#ff4d4d;">삭제</button>` : ""}
+                        ${(isCommentOwner || isPostOwner || isAdmin || isStaff) ? 
+                            `<button class="btn-small delete-comment-btn" style="color:#ff4d4d; border-color:#ff4d4d;">삭제</button>` : ""}
                     </div>
                 `;
                 
@@ -248,7 +259,7 @@
                 if(isCommentOwner) {
                     item.querySelector('.edit-comment-btn').onclick = () => window.editComment(cid, c.content);
                 }
-                if(isCommentOwner || isPostOwner || isAdmin) {
+                if(isCommentOwner || isPostOwner || isAdmin || isStaff) {
                     item.querySelector('.delete-comment-btn').onclick = () => window.deleteComment(cid);
                 }
 
@@ -257,7 +268,7 @@
         });
     }
 
-    // 5. 댓글 작성
+    // 6. 댓글 작성 및 알림 발송
     document.getElementById("btnPostComment").onclick = async () => {
         const input = document.getElementById("commentInput");
         const btn = document.getElementById("btnPostComment");
@@ -270,10 +281,10 @@
         btn.innerText = "UPDATING...";
 
         try {
-            // 유저 컬렉션에서 실제 성함 가져오기
-            const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-            const authorName = userDoc.exists() ? userDoc.data().name : (currentUser.displayName || "익명 연구원");
+            // Firestore 'users' 컬렉션에서 실제 성함 확인
+            const authorName = currentUserData ? currentUserData.name : (currentUser.displayName || "익명 연구원");
 
+            // 1. Firestore에 댓글 저장
             await addDoc(collection(db, "resources", postId, "comments"), {
                 author: authorName,
                 content: content,
@@ -282,23 +293,25 @@
                 isEdited: false
             });
 
-            // 알림 시스템 (GAS)
+            // 2. GAS 알림 시스템 발송 (비동기 처리)
             if (GAS_URL && GAS_URL.startsWith("http")) {
                 fetch(GAS_URL, {
                     method: "POST",
                     mode: "no-cors",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
+                        type: "NEW_COMMENT",
                         postTitle: postData.title,
                         commentAuthor: authorName,
                         commentContent: content,
-                        postAuthorEmail: postData.authorEmail || ADMIN_EMAIL
+                        postAuthorEmail: postData.authorEmail || ADMIN_EMAIL // 게시글 작성자에게 알림
                     })
-                }).catch(e => console.log("Notification skipped"));
+                }).catch(e => console.log("알림 발송 생략됨"));
             }
 
             input.value = "";
         } catch (err) {
+            console.error(err);
             alert("오류 발생: " + err.message);
         } finally {
             btn.disabled = false;
@@ -306,7 +319,7 @@
         }
     };
 
-    // 6. 전역 함수 (수정/삭제)
+    // 7. 댓글 수정 및 삭제 전역 함수
     window.deleteComment = async (cid) => {
         if (confirm("댓글을 삭제하시겠습니까?")) {
             try {
@@ -328,8 +341,9 @@
         }
     };
 
+    // 8. 게시글 관리 함수
     document.getElementById("btnDeletePost").onclick = async () => {
-        if (confirm("게시글을 영구 삭제하시겠습니까?")) {
+        if (confirm("게시글을 영구 삭제하시겠습니까? 관련 댓글도 모두 삭제됩니다.")) {
             try {
                 await deleteDoc(doc(db, "resources", postId));
                 location.href = "resource.html";
