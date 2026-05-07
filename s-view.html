@@ -36,7 +36,15 @@
             font-weight: 700;
             letter-spacing: 2px;
         }
-
+        .nav-logo { width: 38px; height: 38px; border-radius: 50%; background: white; padding: 2px; }
+        .auth-user-zone { display: flex; align-items: center; gap: 15px; }
+        .user-name-tag { font-size: 0.9rem; color: #ccc; }
+        .auth-btn { 
+            text-decoration: none; color: white; border: 1px solid var(--border); 
+            padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 700;
+            transition: 0.3s; cursor: pointer; background: transparent;
+        }
+        .auth-btn:hover { background: var(--accent); color: black; border-color: var(--accent); }
         .container { max-width: 850px; margin: 60px auto; padding: 0 20px; }
         .view-card { background: var(--card-bg); border-radius: 20px; border: 1px solid var(--border); padding: 45px; position: relative; }
         .post-header { border-bottom: 1px solid var(--border); margin-bottom: 35px; padding-bottom: 25px; }
