@@ -169,7 +169,6 @@
 <script type="module">
     // Firebase SDK 모듈 임포트
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    // [추가] App Check 라이브러리 임포트
     import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { 
@@ -189,15 +188,17 @@
 
     const app = initializeApp(firebaseConfig);
 
-    // --- [App Check 초기화] ---
+    // 2. App Check 초기화
+    // ※ 만약 로컬 테스트 중 데이터가 안 나온다면 이 영역을 잠시 주석 처리해보세요.
     const appCheck = initializeAppCheck(app, {
-        provider: new ReCaptchaV3Provider('6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq'), // 실제 reCAPTCHA v3 사이트 키로 교체하세요
+        provider: new ReCaptchaV3Provider('6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq'),
         isTokenAutoRefreshEnabled: true 
     });
 
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // GAS URL 및 관리자 이메일 설정
     const GAS_URL = "https://script.google.com/macros/s/AKfycbxwDx5UzcTNUg-Er_AkUN2oA8-5s0zxyLYGz4MOsJUKoVzRThoEhAsO0zNDalZ5nkxi/exec"; 
     const ADMIN_EMAIL = "2jw5464@gmail.com";
 
@@ -205,11 +206,10 @@
     let currentUser = null;
     let postData = null;
 
-    // 2. 인증 상태 감시 및 초기화
+    // 3. 인증 상태 감시 및 UI 업데이트
     onAuthStateChanged(auth, async (user) => {
         currentUser = user;
         
-        // DOM 요소 참조
         const loginLink = document.getElementById('login-link');
         const logoutBtn = document.getElementById('logout-btn');
         const userNameArea = document.getElementById('user-name');
@@ -217,34 +217,29 @@
         const notice = document.getElementById("loginNotice");
 
         if (user) {
-            // [상단바] 로그인 상태 UI
+            // 로그인 상태
             if (loginLink) loginLink.style.display = 'none';
             if (logoutBtn) logoutBtn.style.display = 'inline-block';
             if (userNameArea) {
                 userNameArea.style.display = 'inline';
-                // Firestore에서 유저 실명 가져오기 시도
                 try {
                     const userDoc = await getDoc(doc(db, "users", user.uid));
-                    userNameArea.innerText = `${userDoc.exists() ? userDoc.data().name : (user.displayName)}님`;
+                    userNameArea.innerText = `${userDoc.exists() ? userDoc.data().name : (user.displayName || "연구원")}님`;
                 } catch (e) {
-                    userNameArea.innerText = `${user.displayName}님`;
+                    userNameArea.innerText = `${user.displayName || "연구원"}님`;
                 }
             }
-            // [댓글창] 활성화
-            form.classList.remove("hidden");
-            notice.classList.add("hidden");
+            if (form) form.classList.remove("hidden");
+            if (notice) notice.classList.add("hidden");
         } else {
-            // [상단바] 로그아웃 상태 UI
+            // 로그아웃 상태
             if (loginLink) loginLink.style.display = 'inline-block';
             if (logoutBtn) logoutBtn.style.display = 'none';
             if (userNameArea) userNameArea.style.display = 'none';
-            
-            // [댓글창] 비활성화
-            form.classList.add("hidden");
-            notice.classList.remove("hidden");
+            if (form) form.classList.add("hidden");
+            if (notice) notice.classList.remove("hidden");
         }
         
-        // 게시글 로드 로직
         if (postId) {
             loadPost();
             loadComments();
@@ -254,7 +249,7 @@
         }
     });
 
-    // 3. 게시글 본문 로드
+    // 4. 게시글 본문 로드
     async function loadPost() {
         const docRef = doc(db, "h-resources", postId);
         onSnapshot(docRef, (snap) => {
@@ -275,11 +270,15 @@
             linksDiv.innerHTML = "";
             if (postData.links && postData.links.length > 0) {
                 postData.links.forEach(link => {
-                    linksDiv.innerHTML += `
-                        <a href="${link.url}" target="_blank" class="link-item">
-                            <span class="link-name">${link.name}</span>
-                            <span style="font-size:12px; opacity:0.6;">새창에서 열기 ↗</span>
-                        </a>`;
+                    const a = document.createElement('a');
+                    a.href = link.url;
+                    a.target = "_blank";
+                    a.className = "link-item";
+                    a.innerHTML = `
+                        <span class="link-name">${link.name}</span>
+                        <span style="font-size:12px; opacity:0.6;">새창에서 열기 ↗</span>
+                    `;
+                    linksDiv.appendChild(a);
                 });
             }
 
@@ -292,7 +291,7 @@
         });
     }
 
-    // 4. 댓글 목록 로드
+    // 5. 댓글 목록 실시간 로드
     function loadComments() {
         const q = query(collection(db, "h-resources", postId, "comments"), orderBy("createdAt", "asc"));
         onSnapshot(q, (snap) => {
@@ -310,43 +309,56 @@
                 const isCommentOwner = currentUser && currentUser.uid === c.uid;
                 const isPostOwner = currentUser && currentUser.uid === postData?.uid;
                 const isAdmin = currentUser && currentUser.email === ADMIN_EMAIL;
-                const myHighlight = isCommentOwner ? "border: 1px solid var(--accent);" : "";
+                
+                const item = document.createElement('div');
+                item.className = "comment-item";
+                if(isCommentOwner) item.style.border = "1px solid var(--accent)";
 
-                list.innerHTML += `
-                    <div class="comment-item" style="${myHighlight}">
-                        <div class="comment-meta">
-                            <span class="comment-author">
-                                ${c.author} ${isCommentOwner ? '<small style="color:var(--accent)">(나)</small>' : ''}
-                            </span>
-                            <div class="comment-actions">
-                                <span>${c.createdAt?.toDate().toLocaleString() || "작성 중..."}</span>
-                                ${c.isEdited ? '<small style="opacity:0.5">(수정됨)</small>' : ''}
-                            </div>
+                item.innerHTML = `
+                    <div class="comment-meta">
+                        <span class="comment-author">
+                            ${c.author} ${isCommentOwner ? '<small style="color:var(--accent)">(나)</small>' : ''}
+                        </span>
+                        <div class="comment-actions">
+                            <span>${c.createdAt?.toDate().toLocaleString() || "작성 중..."}</span>
+                            ${c.isEdited ? '<small style="opacity:0.5">(수정됨)</small>' : ''}
                         </div>
-                        <div class="comment-text">${c.content}</div>
-                        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;">
-                            ${isCommentOwner ? `<button class="btn-small" onclick="editComment('${cid}', \`${c.content.replace(/`/g, '\\`')}\`)">수정</button>` : ""}
-                            ${(isCommentOwner || isPostOwner || isAdmin) ? `<button class="btn-small" style="color:#ff4d4d; border-color:#ff4d4d;" onclick="deleteComment('${cid}')">삭제</button>` : ""}
-                        </div>
-                    </div>`;
+                    </div>
+                    <div class="comment-text">${c.content}</div>
+                    <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;">
+                        ${isCommentOwner ? `<button class="btn-small edit-btn">수정</button>` : ""}
+                        ${(isCommentOwner || isPostOwner || isAdmin) ? `<button class="btn-small delete-btn" style="color:#ff4d4d; border-color:#ff4d4d;">삭제</button>` : ""}
+                    </div>
+                `;
+
+                // 수정/삭제 버튼 이벤트 연결
+                if(isCommentOwner) {
+                    item.querySelector('.edit-btn').onclick = () => window.editComment(cid, c.content);
+                }
+                if(isCommentOwner || isPostOwner || isAdmin) {
+                    item.querySelector('.delete-btn').onclick = () => window.deleteComment(cid);
+                }
+
+                list.appendChild(item);
             });
         });
     }
 
-    // 5. 댓글 작성 (App Check 토큰 자동 전송)
+    // 6. 댓글 작성
     document.getElementById("btnPostComment").onclick = async () => {
         const input = document.getElementById("commentInput");
         const btn = document.getElementById("btnPostComment");
         const content = input.value.trim();
 
         if (!content) return alert("내용을 입력해주세요.");
+        if (!currentUser) return alert("로그인이 필요합니다.");
         
         btn.disabled = true;
         btn.innerText = "UPDATING...";
 
         try {
             const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-            const authorName = userDoc.exists() ? userDoc.data().name : "익명 연구원";
+            const authorName = userDoc.exists() ? userDoc.data().name : (currentUser.displayName || "익명 연구원");
 
             await addDoc(collection(db, "h-resources", postId, "comments"), {
                 author: authorName,
@@ -371,22 +383,21 @@
             }
 
             input.value = "";
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         } catch (err) {
-            alert("저장 실패: " + err.message + "\n(보안 검증 오류가 발생했을 수 있습니다.)");
+            alert("저장 실패: " + err.message);
         } finally {
             btn.disabled = false;
             btn.innerText = "POST";
         }
     };
 
-    // 6. 전역 함수 (수정/삭제)
+    // 7. 수정/삭제 전역 함수
     window.deleteComment = async (cid) => {
         if (confirm("댓글을 삭제하시겠습니까?")) {
             try {
                 await deleteDoc(doc(db, "h-resources", postId, "comments", cid));
             } catch (err) {
-                alert("삭제 권한이 없거나 오류가 발생했습니다.");
+                alert("삭제 실패: " + err.message);
             }
         }
     };
@@ -401,18 +412,19 @@
                     updatedAt: serverTimestamp()
                 });
             } catch (err) {
-                alert("수정 권한이 없거나 오류가 발생했습니다.");
+                alert("수정 실패: " + err.message);
             }
         }
     };
 
+    // 8. 게시글 관리 버튼 이벤트
     document.getElementById("btnDeletePost").onclick = async () => {
         if (confirm("게시글을 영구 삭제하시겠습니까?")) {
             try {
                 await deleteDoc(doc(db, "h-resources", postId));
                 location.href = "hearyong.html";
             } catch (err) {
-                alert("게시글 삭제 중 오류가 발생했습니다.");
+                alert("삭제 권한이 없습니다.");
             }
         }
     };
@@ -421,11 +433,13 @@
         location.href = `h-write.html?id=${postId}`;
     };
 
+    // 9. 로그아웃 이벤트
     document.getElementById('logout-btn').onclick = async () => {
-    if (confirm("로그아웃 하시겠습니까?")) {
-        await signOut(auth);
-        location.reload(); 
-    }
+        if (confirm("로그아웃 하시겠습니까?")) {
+            await signOut(auth);
+            location.reload(); 
+        }
+    };
 </script>
 </body>
 </html>
