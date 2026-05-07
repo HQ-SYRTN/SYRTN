@@ -9,7 +9,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         :root { --bg-dark: #050505; --accent: #00E5FF; --card-bg: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.1); }
-        body { margin: 0; font-family: 'Noto Sans KR', sans-serif; background: var(--bg-dark); color: white; line-height: 1.6; }
+        body { margin: 0; font-family: 'Noto Sans KR', sans-serif; background: var(--bg-dark); color: white; line-height: 1.6; padding-top: 70px; }
+        /* Auth Bar Style */
+        .auth-bar {
+            position: fixed; top: 0; width: 100%; height: 70px;
+            background: rgba(5, 5, 5, 0.8); backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 40px; box-sizing: border-box; z-index: 1000;
+        }
+        .logo-link { display: flex; align-items: center; gap: 12px; text-decoration: none; color: white; font-weight: 700; font-size: 1.2rem; }
+        .nav-logo { width: 38px; height: 38px; border-radius: 50%; background: white; padding: 2px; }
+        .auth-user-zone { display: flex; align-items: center; gap: 15px; }
+        .user-name-tag { font-size: 0.9rem; color: #ccc; }
+        .auth-btn { 
+            text-decoration: none; color: white; border: 1px solid var(--border); 
+            padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 700;
+            transition: 0.3s; cursor: pointer; background: transparent;
+        }
+        .auth-btn:hover { background: var(--accent); color: black; border-color: var(--accent); }
         .container { max-width: 850px; margin: 60px auto; padding: 0 20px; }
         .view-card { background: var(--card-bg); border-radius: 20px; border: 1px solid var(--border); padding: 45px; position: relative; }
         .post-header { border-bottom: 1px solid var(--border); margin-bottom: 35px; padding-bottom: 25px; }
@@ -137,22 +155,43 @@
     let currentUserData = null;
     let postData = null;
 
-    // 3. 인증 상태 감시 및 초기 UI 제어
+    // 인증 상태 감시 및 UI 동기화 로직
     onAuthStateChanged(auth, async (user) => {
         currentUser = user;
         const form = document.getElementById("commentFormArea");
         const notice = document.getElementById("loginNotice");
+        const loginBtn = document.getElementById("loginBtn");
+        const logoutBtn = document.getElementById("logoutBtn");
+        const userNameDisplay = document.getElementById("userNameDisplay");
         
         if (user) {
-            // 로그인 시 유저 컬렉션에서 상세 정보(실명, 역할) 로드
+            // [상단바] 로그인 상태 UI
+            loginBtn.classList.add("hidden");
+            logoutBtn.classList.remove("hidden");
+            userNameDisplay.classList.remove("hidden");
+
             try {
                 const userDoc = await getDoc(doc(db, "users", user.uid));
-                if (userDoc.exists()) currentUserData = userDoc.data();
-            } catch (e) { console.error("사용자 정보 로딩 실패:", e); }
+                if (userDoc.exists()) {
+                    currentUserData = userDoc.data();
+                    userNameDisplay.innerText = `${currentUserData.name}님`;
+                } else {
+                    userNameDisplay.innerText = `${user.displayName}님`;
+                }
+            } catch (e) { 
+                userNameDisplay.innerText = "연결됨"; 
+            }
 
+            // [댓글창] 활성화
             if (form) form.classList.remove("hidden");
             if (notice) notice.classList.add("hidden");
         } else {
+            // [상단바] 로그아웃 상태 UI
+            loginBtn.classList.remove("hidden");
+            logoutBtn.classList.add("hidden");
+            userNameDisplay.classList.add("hidden");
+
+            // [댓글창] 비활성화
             if (form) form.classList.add("hidden");
             if (notice) notice.classList.remove("hidden");
         }
@@ -161,8 +200,7 @@
             loadPost();
             loadComments();
         } else {
-            alert("잘못된 접근입니다.");
-            location.href = "resource.html";
+            location.href = "block.html";
         }
     });
 
@@ -354,6 +392,13 @@
         location.href = `write.html?id=${postId}`;
     };
 
+    // 로그아웃 로직
+    document.getElementById("logoutBtn").onclick = async () => {
+        if(confirm("로그아웃 하시겠습니까?")) {
+            await signOut(auth);
+            location.reload();
+        }
+    };
 </script>
 </body>
 </html>
