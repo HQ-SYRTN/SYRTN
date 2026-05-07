@@ -10,6 +10,32 @@
     <style>
         :root { --bg-dark: #050505; --accent: #00E5FF; --card-bg: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.1); }
         body { margin: 0; font-family: 'Noto Sans KR', sans-serif; background: var(--bg-dark); color: white; line-height: 1.6; }
+        /* Auth Bar Style */
+        .auth-bar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 60px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            box-sizing: border-box;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: white;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
         .container { max-width: 850px; margin: 60px auto; padding: 0 20px; }
         .view-card { background: var(--card-bg); border-radius: 20px; border: 1px solid var(--border); padding: 45px; position: relative; }
         .post-header { border-bottom: 1px solid var(--border); margin-bottom: 35px; padding-bottom: 25px; }
@@ -49,6 +75,18 @@
     </style>
 </head>
 <body>
+    <div class="auth-bar">
+    <a href="index.html" class="logo-link">
+        <img src="SYRTN-logo-homepage.png" alt="Logo" class="nav-logo">
+        <span>SYRTN</span>
+    </a>
+    <div class="auth-user-zone">
+        <span id="userNameDisplay" class="user-name-tag hidden"></span>
+        <a href="login.html" id="loginBtn" class="auth-btn">LOGIN</a>
+        <button id="logoutBtn" class="auth-btn hidden">LOGOUT</button>
+    </div>
+</div>
+
 
 <div class="container">
     <div class="view-card">
@@ -130,30 +168,55 @@
     let currentUserRole = "member";
     let postData = null;
 
-    // 인증 상태 감시 및 사용자 정보 로드
+    // 인증 상태 감시 및 UI 동기화 로직
     onAuthStateChanged(auth, async (user) => {
         currentUser = user;
         const form = document.getElementById("commentFormArea");
         const notice = document.getElementById("loginNotice");
+        const loginBtn = document.getElementById("loginBtn");
+        const logoutBtn = document.getElementById("logoutBtn");
+        const userNameDisplay = document.getElementById("userNameDisplay");
         
         if (user) {
-            form.classList.remove("hidden");
-            notice.classList.add("hidden");
-            // getDoc 호출 시 App Check 토큰이 자동으로 포함됩니다.
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (userDoc.exists()) currentUserRole = userDoc.data().role || "member";
+            // [상단바] 로그인 상태 UI
+            loginBtn.classList.add("hidden");
+            logoutBtn.classList.remove("hidden");
+            userNameDisplay.classList.remove("hidden");
+
+            try {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    currentUserData = userDoc.data();
+                    userNameDisplay.innerText = `${currentUserData.name}님`;
+                } else {
+                    userNameDisplay.innerText = `${user.displayName}님`;
+                }
+            } catch (e) { 
+                userNameDisplay.innerText = " "; 
+            }
+
+            // [댓글창] 활성화
+            if (form) form.classList.remove("hidden");
+            if (notice) notice.classList.add("hidden");
         } else {
-            form.classList.add("hidden");
-            notice.classList.remove("hidden");
+            // [상단바] 로그아웃 상태 UI
+            loginBtn.classList.remove("hidden");
+            logoutBtn.classList.add("hidden");
+            userNameDisplay.classList.add("hidden");
+
+            // [댓글창] 비활성화
+            if (form) form.classList.add("hidden");
+            if (notice) notice.classList.remove("hidden");
         }
         
         if (postId) {
             loadPost();
             loadComments();
         } else {
-            location.href = "suncheon.html";
+            location.href = "block.html";
         }
     });
+
 
     // 1. 게시글 본문 로드
     async function loadPost() {
@@ -317,6 +380,14 @@
 
     document.getElementById("btnEditPost").onclick = () => {
         location.href = `s-write.html?id=${postId}`;
+    };
+
+    // 로그아웃 로직
+    document.getElementById("logoutBtn").onclick = async () => {
+        if(confirm("로그아웃 하시겠습니까?")) {
+            await signOut(auth);
+            location.reload();
+        }
     };
 </script>
 </body>
