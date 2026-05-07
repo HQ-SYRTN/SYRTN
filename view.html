@@ -12,13 +12,30 @@
         body { margin: 0; font-family: 'Noto Sans KR', sans-serif; background: var(--bg-dark); color: white; line-height: 1.6; padding-top: 70px; }
         /* Auth Bar Style */
         .auth-bar {
-            position: fixed; top: 0; width: 100%; height: 70px;
-            background: rgba(5, 5, 5, 0.8); backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 40px; box-sizing: border-box; z-index: 1000;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 60px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            box-sizing: border-box;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .logo-link { display: flex; align-items: center; gap: 12px; text-decoration: none; color: white; font-weight: 700; font-size: 1.2rem; }
+
+        .logo-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: white;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
         .nav-logo { width: 38px; height: 38px; border-radius: 50%; background: white; padding: 2px; }
         .auth-user-zone { display: flex; align-items: center; gap: 15px; }
         .user-name-tag { font-size: 0.9rem; color: #ccc; }
