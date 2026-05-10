@@ -332,12 +332,15 @@
             const authorName = userDoc.exists() ? userDoc.data().name : (currentUser.displayName || "익명");
 
             // Firestore 저장
-            await addDoc(collection(db, "h-resources", postId, "comments"), {
-                author: authorName,
-                content: content,
-                uid: currentUser.uid,
-                createdAt: serverTimestamp()
-            });
+            // 게시글 저장 시 현재 로그인된 유저의 이메일을 함께 저장
+await addDoc(collection(db, "h-resources"), {
+    title: title,
+    description: desc,
+    author: userName, 
+    authorEmail: auth.currentUser.email,
+    uid: user.uid,
+    createdAt: serverTimestamp()
+});
 
             // GAS 알림 발송 (비동기)
             if (postData && postData.authorEmail) {
