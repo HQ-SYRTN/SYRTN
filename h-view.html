@@ -71,6 +71,12 @@
         .comment-form { display: flex; gap: 12px; margin-top: 30px; }
         .comment-input { flex: 1; background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border); border-radius: 10px; color: white; padding: 15px; outline: none; }
         .btn-comment { background: var(--accent); border: none; padding: 0 25px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .user-name-tag { 
+    font-size: 0.9rem; 
+    color: #ffffff; /* 가독성을 위해 흰색으로 변경 */
+    font-weight: 500;
+    margin-right: 5px; /* 버튼과의 간격 */
+}
         
         .hidden { display: none; }
         footer { text-align: center; padding: 60px; color: #444; font-size: 0.8rem; border-top: 1px solid var(--border); }
@@ -144,12 +150,13 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { 
         getFirestore, doc, getDoc, updateDoc, deleteDoc, 
         collection, addDoc, query, orderBy, onSnapshot, serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+    // 1. Firebase 설정
     const firebaseConfig = {
         apiKey: "AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU",
         authDomain: "syrt-2026.firebaseapp.com",
@@ -161,7 +168,7 @@
 
     const app = initializeApp(firebaseConfig);
 
-    // --- [App Check 초기화] ---
+    // 2. App Check 초기화
     const appCheck = initializeAppCheck(app, {
         provider: new ReCaptchaV3Provider('6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq'),
         isTokenAutoRefreshEnabled: true 
@@ -170,13 +177,16 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // 전역 변수
     const ADMIN_EMAIL = "2jw5464@gmail.com";
     const postId = new URLSearchParams(window.location.search).get("id");
     let currentUser = null;
     let currentUserRole = "member";
     let postData = null;
 
-    // 인증 상태 감시 및 UI 동기화 로직
+    /**
+     * 3. 인증 상태 감시 및 상단 바 UI 업데이트
+     */
     onAuthStateChanged(auth, async (user) => {
         currentUser = user;
         const form = document.getElementById("commentFormArea");
@@ -191,27 +201,29 @@
             userNameDisplay.classList.remove("hidden");
 
             try {
+                // Firestore에서 사용자 실명 및 역할 정보 가져오기
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 if (userDoc.exists()) {
-                    currentUserData = userDoc.data();
-                    userNameDisplay.innerText = `${currentUserData.name}님`;
+                    const userData = userDoc.data();
+                    userNameDisplay.innerText = `${userData.name || user.displayName || '회원'}님`;
+                    currentUserRole = userData.role || "member";
                 } else {
-                    userNameDisplay.innerText = `${user.displayName}님`;
+                    userNameDisplay.innerText = `${user.displayName || '회원'}님`;
                 }
             } catch (e) { 
-                userNameDisplay.innerText = " "; 
+                console.error("유저 정보 로드 에러:", e);
+                userNameDisplay.innerText = `${user.displayName || '사용자'}님`; 
             }
 
-            // [댓글창] 활성화
             if (form) form.classList.remove("hidden");
             if (notice) notice.classList.add("hidden");
         } else {
-            // [상단바] 로그아웃 상태 UI
             loginBtn.classList.remove("hidden");
             logoutBtn.classList.add("hidden");
             userNameDisplay.classList.add("hidden");
+            userNameDisplay.innerText = "";
+            currentUserRole = "member";
 
-            // [댓글창] 비활성화
             if (form) form.classList.add("hidden");
             if (notice) notice.classList.remove("hidden");
         }
@@ -224,8 +236,9 @@
         }
     });
 
-
-    // 1. 게시글 본문 로드
+    /**
+     * 4. 게시글 로드
+     */
     async function loadPost() {
         const docRef = doc(db, "h-resources", postId);
         onSnapshot(docRef, (snap) => {
@@ -245,14 +258,16 @@
             linksDiv.innerHTML = "";
             if (postData.links && postData.links.length > 0) {
                 postData.links.forEach(link => {
-                    linksDiv.innerHTML += `
-                        <a href="${link.url}" target="_blank" class="link-item">
-                            <span class="link-name">${link.name}</span>
-                            <span style="font-size:12px; opacity:0.6;">새창에서 열기 ↗</span>
-                        </a>`;
+                    const a = document.createElement('a');
+                    a.href = link.url;
+                    a.target = "_blank";
+                    a.className = "link-item";
+                    a.innerHTML = `<span class="link-name">${link.name}</span><span style="font-size:12px; opacity:0.6;">새창에서 열기 ↗</span>`;
+                    linksDiv.appendChild(a);
                 });
             }
 
+            // 관리 권한 체크 (수정/삭제 버튼 노출)
             if (currentUser) {
                 const isOwner = currentUser.uid === postData.uid;
                 const isManager = (currentUserRole === 'admin' || currentUserRole === 'teacher' || currentUserRole === 'h-leader' || currentUser.email === ADMIN_EMAIL);
@@ -262,7 +277,9 @@
         });
     }
 
-    // 2. 댓글 목록 로드
+    /**
+     * 5. 댓글 목록 로드
+     */
     function loadComments() {
         const q = query(collection(db, "h-resources", postId, "comments"), orderBy("createdAt", "asc"));
         onSnapshot(q, (snap) => {
@@ -298,63 +315,63 @@
         });
     }
 
-   // 3. 댓글 작성 및 GAS 알림
-document.getElementById("btnPostComment").onclick = async () => {
-    const input = document.getElementById("commentInput");
-    const content = input.value.trim();
-    if (!content) return;
+    /**
+     * 6. 댓글 작성 및 이메일 알림 (GAS 연동)
+     */
+    document.getElementById("btnPostComment").onclick = async () => {
+        const input = document.getElementById("commentInput");
+        const content = input.value.trim();
+        if (!content || !currentUser) return;
 
-    const btn = document.getElementById("btnPostComment");
-    btn.disabled = true;
-    btn.innerText = "SENDING...";
+        const btn = document.getElementById("btnPostComment");
+        btn.disabled = true;
+        btn.innerText = "SENDING...";
 
-    try {
-        // 1. 사용자 정보 가져오기
-        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-        const authorName = userDoc.exists() ? userDoc.data().name : "익명";
+        try {
+            const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+            const authorName = userDoc.exists() ? userDoc.data().name : (currentUser.displayName || "익명");
 
-        // 2. Firebase 저장 (App Check 토큰 자동 포함)
-        await addDoc(collection(db, "h-resources", postId, "comments"), {
-            author: authorName,
-            content: content,
-            uid: currentUser.uid,
-            createdAt: serverTimestamp()
-        });
+            // Firestore 저장
+            await addDoc(collection(db, "h-resources", postId, "comments"), {
+                author: authorName,
+                content: content,
+                uid: currentUser.uid,
+                createdAt: serverTimestamp()
+            });
 
-        // 3. GAS 알림 발송 (비동기 처리 최적화)
-        if (postData && postData.authorEmail) {
-            const GAS_URL = "https://script.google.com/macros/s/AKfycbxwDx5UzcTNUg-Er_AkUN2oA8-5s0zxyLYGz4MOsJUKoVzRThoEhAsO0zNDalZ5nkxi/exec";
-            fetch(GAS_URL, {
-                method: "POST",
-                headers: { "Content-Type": "text/plain" }, 
-                body: JSON.stringify({
-                    postTitle: postData.title,
-                    commentAuthor: authorName,
-                    commentContent: content,
-                    postAuthorEmail: postData.authorEmail,
-                    postId: postId
-                })
-            })
-            .then(() => console.log("알림 요청 완료"))
-            .catch(e => console.error("알림 발송 네트워크 에러:", e));
+            // GAS 알림 발송 (비동기)
+            if (postData && postData.authorEmail) {
+                const GAS_URL = "https://script.google.com/macros/s/AKfycbxwDx5UzcTNUg-Er_AkUN2oA8-5s0zxyLYGz4MOsJUKoVzRThoEhAsO0zNDalZ5nkxi/exec";
+                fetch(GAS_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain" }, 
+                    body: JSON.stringify({
+                        postTitle: postData.title,
+                        commentAuthor: authorName,
+                        commentContent: content,
+                        postAuthorEmail: postData.authorEmail,
+                        postId: postId
+                    })
+                }).catch(e => console.error("GAS 알림 실패:", e));
+            }
+
+            input.value = "";
+            setTimeout(() => {
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            }, 100);
+
+        } catch (err) {
+            console.error(err);
+            alert("댓글 저장 중 오류가 발생했습니다.");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "POST";
         }
+    };
 
-        // 4. 입력창 초기화 및 화면 이동
-        input.value = "";
-        setTimeout(() => {
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        }, 100);
-
-    } catch (err) {
-        console.error("댓글 저장 에러:", err);
-        alert("댓글 저장 중 오류가 발생했습니다.");
-    } finally {
-        btn.disabled = false;
-        btn.innerText = "POST";
-    }
-};
-
-    // 4. 댓글 수정 및 삭제 함수 (전역 등록)
+    /**
+     * 7. 수정/삭제/로그아웃 관련 함수들
+     */
     window.editComment = async (cid, oldContent) => {
         const newContent = prompt("댓글 수정:", oldContent);
         if (newContent && newContent !== oldContent) {
@@ -363,9 +380,7 @@ document.getElementById("btnPostComment").onclick = async () => {
                     content: newContent,
                     updatedAt: serverTimestamp()
                 });
-            } catch (err) {
-                alert("수정 실패: " + err.message);
-            }
+            } catch (err) { alert("수정 실패: " + err.message); }
         }
     };
 
@@ -373,21 +388,16 @@ document.getElementById("btnPostComment").onclick = async () => {
         if (confirm("댓글을 삭제하시겠습니까?")) {
             try {
                 await deleteDoc(doc(db, "h-resources", postId, "comments", cid));
-            } catch (err) {
-                alert("삭제 실패: " + err.message);
-            }
+            } catch (err) { alert("삭제 실패: " + err.message); }
         }
     };
 
-    // 5. 게시글 수정/삭제 핸들러
     document.getElementById("btnDeletePost").onclick = async () => {
         if (confirm("게시글을 영구 삭제하시겠습니까?")) {
             try {
                 await deleteDoc(doc(db, "h-resources", postId));
                 location.href = "hearyong.html";
-            } catch (err) {
-                alert("게시글 삭제 실패: " + err.message);
-            }
+            } catch (err) { alert("삭제 실패: " + err.message); }
         }
     };
 
@@ -395,7 +405,6 @@ document.getElementById("btnPostComment").onclick = async () => {
         location.href = `h-write.html?id=${postId}`;
     };
 
-    // 로그아웃 로직
     document.getElementById("logoutBtn").onclick = async () => {
         if(confirm("로그아웃 하시겠습니까?")) {
             await signOut(auth);
