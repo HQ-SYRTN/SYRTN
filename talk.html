@@ -231,11 +231,11 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    // [추가] App Check 라이브러리 임포트
     import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+    // Firebase 설정
     const firebaseConfig = {
         apiKey: "AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU",
         authDomain: "syrt-2026.firebaseapp.com",
@@ -246,40 +246,44 @@
         measurementId: "G-Q0BKR95VH2"
     };
 
-    // Firebase 초기화
+    // 초기화
     const app = initializeApp(firebaseConfig);
-
-    // --- [App Check 초기화] ---
     const appCheck = initializeAppCheck(app, {
         provider: new ReCaptchaV3Provider('6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq'),
         isTokenAutoRefreshEnabled: true 
     });
-
     const auth = getAuth(app);
     const db = getFirestore(app);
-
     const loginLink = document.getElementById('login-link');
     const logoutBtn = document.getElementById('logout-btn');
     const userName = document.getElementById('user-name');
 
+    // 권한 체크를 위한 전역 변수
     let userDataCache = null;
 
-    // 사용자 인증 상태 및 Firestore 데이터 로드
     onAuthStateChanged(auth, async (user) => {
         if (user) {
+            // UI 초기 전환
             loginLink.style.display = 'none';
             userName.style.display = 'inline';
             logoutBtn.style.display = 'inline';
-            userName.innerText = `${user.displayName || '회원'}님`;
             
             try {
-                // App Check가 활성화되면 이 getDoc 요청 시 토큰이 함께 전송됩니다.
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                if (userDoc.exists()) {
-                    userDataCache = userDoc.data();
+                // Firestore에서 사용자 정보(이름, 역할 등) 가져오기
+                const userDocRef = doc(db, "users", user.uid);
+                const userDocSnap = await getDoc(userDocRef);
+
+                if (userDocSnap.exists()) {
+                    userDataCache = userDocSnap.data();
+                    // 상단바에 Firestore 실명 표시 (필드명이 'name'인 경우)
+                    userName.innerText = `${userDataCache.name || user.displayName}님`;
+                } else {
+                    userName.innerText = `${user.displayName}님`;
+                    console.warn("Firestore에 사용자 정보가 없습니다.");
                 }
             } catch (error) {
-                console.error("데이터 로드 중 오류:", error);
+                console.error("사용자 데이터 로드 실패:", error);
+                userName.innerText = `${user.displayName}님`;
             }
         } else {
             loginLink.style.display = 'inline';
@@ -289,7 +293,6 @@
         }
     });
 
-    // 게시판 접근 권한 체크 함수
     window.gateCheck = (targetUrl, studentRole, leaderRole) => {
         if (!auth.currentUser) {
             location.href = "block.html";
@@ -297,27 +300,28 @@
         }
 
         if (!userDataCache) {
+            alert("권한 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
             return;
         }
 
         const role = userDataCache.role;
-        const isAdmin = (role === "admin" || role === "teacher");
+        
+        // 권한 판단 로직
+        const isAdmin = (role === 'admin' || role === 'teacher');
         const isTargetStudent = (role === studentRole);
         const isTargetLeader = (role === leaderRole);
         const isPublicAccess = (studentRole === 'all');
 
         if (isAdmin || isTargetStudent || isTargetLeader || isPublicAccess) {
-            if (!isAdmin && !isPublicAccess && (role === "member" || (!isTargetStudent && !isTargetLeader))) {
-                location.href = "block.html";
-            } else {
-                location.href = targetUrl;
-            }
+            location.href = targetUrl;
         } else {
             location.href = "block.html";
         }
     };
 
-    // 로그아웃 처리
+    /**
+     * 3. 로그아웃 처리
+     */
     logoutBtn.onclick = async () => {
         if (confirm("로그아웃 하시겠습니까?")) {
             try {
@@ -325,7 +329,7 @@
                 alert("로그아웃 되었습니다.");
                 location.reload();
             } catch (err) {
-                console.error("로그아웃 실패:", err);
+                console.error("로그아웃 오류:", err);
             }
         }
     };
