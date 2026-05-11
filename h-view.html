@@ -70,6 +70,14 @@
         .comment-actions { display: flex; gap: 8px; }
         .comment-form { display: flex; gap: 12px; margin-top: 30px; }
         .comment-input { flex: 1; background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border); border-radius: 10px; color: white; padding: 15px; outline: none; }
+        .comment-text {
+    font-size: 15px;
+    color: #ddd;
+    word-break: break-all;      /* 아주 긴 단어도 박스 끝에서 강제 줄바꿈 */
+    overflow-wrap: break-word;  /* 단어 단위로 최대한 줄바꿈 시도 */
+    white-space: pre-wrap;      /* 작성 시 입력한 엔터(줄바꿈) 유지 */
+    line-height: 1.5;
+}
         .btn-comment { background: var(--accent); border: none; padding: 0 25px; border-radius: 10px; font-weight: bold; cursor: pointer; }
         .user-name-tag { 
     font-size: 0.9rem; 
