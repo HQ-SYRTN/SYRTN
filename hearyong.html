@@ -137,14 +137,29 @@
 
         .resource-container { display: flex; flex-direction: column; gap: 12px; }
         .resource-item { 
-            display: flex; align-items: center; background: var(--card-bg); 
-            padding: 20px; border-radius: 12px; border: 1px solid var(--border-color);
-            transition: 0.3s; cursor: pointer;
-        }
+    display: flex; 
+    align-items: center; 
+    background: var(--card-bg); 
+    padding: 20px; 
+    border-radius: 12px; 
+    border: 1px solid var(--border-color);
+    transition: 0.3s; 
+    cursor: pointer;
+    overflow: hidden; /* 영역 밖으로 나가는 것 방지 */
+}
         .resource-item:hover { background: rgba(255, 255, 255, 0.06); border-color: var(--accent); transform: translateY(-2px); }
 
         .item-content { flex-grow: 1; }
-        .item-title { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 5px; display: block; }
+        .item-title { 
+    font-size: 1.1rem; 
+    font-weight: 700; 
+    color: #fff; 
+    margin-bottom: 5px; 
+    display: block;
+            .item-content { 
+    flex: 1; 
+    min-width: 0; /* flex 자식 요소에서 텍스트 생략(...)이 작동하기 위한 필수 속성 */
+}
         .item-meta { font-size: 0.8rem; color: #777; display: flex; align-items: center; gap: 10px; }
 
         .btn-delete-left {
