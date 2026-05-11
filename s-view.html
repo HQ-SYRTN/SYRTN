@@ -308,7 +308,7 @@
         btn.innerText = "SENDING...";
 
         try {
-            const authorName = currentUserData ? currentUserData.name : "익명 학우";
+            const authorName = currentUserData ? currentUserData.name : "익명";
 
             await addDoc(collection(db, "s-resources", postId, "comments"), {
                 author: authorName,
@@ -370,29 +370,31 @@
     };
 
     // 5. 게시글 수정/삭제 핸들러 (댓글 일괄 삭제 포함)
-    document.getElementById("btnDeletePost").onclick = async () => {
-        if (confirm("게시글을 영구 삭제하시겠습니까? 연결된 댓글도 함께 삭제됩니다.")) {
-            try {
-                // [보강] 댓글 서브 컬렉션 데이터 먼저 가져오기
-                const commentsRef = collection(db, "s-resources", postId, "comments");
-                const commentsSnap = await getDocs(commentsRef);
-                
-                // 댓글 삭제 작업들
-                const deletePromises = commentsSnap.docs.map(cDoc => deleteDoc(cDoc.ref));
-                await Promise.all(deletePromises);
+document.getElementById("btnDeletePost").onclick = async () => {
+    if (confirm("게시글을 영구 삭제하시겠습니까? 연결된 댓글도 함께 삭제됩니다.")) {
+        try {
+            // [수정] postId와 db 변수를 직접 사용하여 참조 생성
+            const commentsRef = collection(db, "s-resources", postId, "comments");
+            const commentsSnap = await getDocs(commentsRef);
+            
+            // 1. 모든 댓글 삭제 프로세스 실행
+            const deletePromises = commentsSnap.docs.map(cDoc => deleteDoc(cDoc.ref));
+            await Promise.all(deletePromises);
 
-                // 게시글 본문 삭제
-                await deleteDoc(doc(docRef.db, "s-resources", postId));
-                
-                alert("게시글이 성공적으로 삭제되었습니다.");
-                // 삭제 후 리스트로 이동 (replace를 사용하여 뒤로가기 방지)
-                location.replace("suncheon.html");
-            } catch (err) {
-                console.error("삭제 중 오류 발생:", err);
-                alert("게시글 삭제 실패: " + err.message);
-            }
+            // 2. 게시글 본문 삭제 (docRef 대신 doc(db, ...) 사용)
+            await deleteDoc(doc(db, "s-resources", postId));
+            
+            alert("게시글이 성공적으로 삭제되었습니다.");
+            
+            // 3. 삭제 후 리스트로 이동
+            location.replace("suncheon.html");
+        } catch (err) {
+            console.error("삭제 중 오류 발생:", err);
+            // 권한 부족 시 Rules에 의해 이 블록으로 들어옵니다.
+            alert("게시글 삭제 실패: " + err.message);
         }
-    };
+    }
+};
 
     document.getElementById("btnEditPost").onclick = () => {
         location.href = `s-write.html?id=${postId}`;
