@@ -1,0 +1,211 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="SYRTN-logo-homepage.png" type="image/png">
+    <link rel="apple-touch-icon" href="SYRTN-logo-homepage.png">
+    <title>SYRTN | View</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-dark:#050505; --accent:#00E5FF; --card-bg:rgba(255,255,255,.05); --border:rgba(255,255,255,.1); --nav-bg:rgba(0,0,0,.9); }
+        body { margin:0; font-family:'Noto Sans KR',sans-serif; background:var(--bg-dark); color:white; line-height:1.6; padding-top:70px; }
+        .auth-bar { position:fixed; top:0; width:100%; height:60px; background:var(--nav-bg); backdrop-filter:blur(10px); display:flex; justify-content:space-between; align-items:center; padding:0 40px; box-sizing:border-box; z-index:1000; border-bottom:1px solid var(--border); }
+        .logo-link { display:flex; align-items:center; gap:12px; text-decoration:none; color:white; font-weight:700; letter-spacing:2px; }
+        .nav-logo { width:38px; height:38px; border-radius:50%; background:white; padding:2px; }
+        .auth-user-zone { display:flex; align-items:center; gap:15px; }
+        .auth-btn { text-decoration:none; color:white; border:1px solid var(--border); padding:8px 18px; border-radius:8px; font-size:13px; font-weight:700; transition:.3s; cursor:pointer; background:transparent; }
+        .auth-btn:hover { background:var(--accent); color:black; border-color:var(--accent); }
+        .container { max-width:850px; margin:60px auto; padding:0 20px; }
+        .view-card { background:var(--card-bg); border-radius:20px; border:1px solid var(--border); padding:45px; position:relative; }
+        .post-header { border-bottom:1px solid var(--border); margin-bottom:35px; padding-bottom:25px; }
+        .post-category { color:var(--accent); font-size:.9rem; font-weight:700; margin-bottom:12px; }
+        .post-title { font-size:2.2rem; margin:0 0 15px; }
+        .post-info { font-size:14px; color:#777; display:flex; justify-content:space-between; gap:16px; }
+        .post-content { font-size:1.1rem; color:#ccc; white-space:pre-wrap; min-height:200px; margin-bottom:50px; }
+        .links-container { display:flex; flex-direction:column; gap:10px; margin-bottom:40px; }
+        .link-item { background:rgba(0,229,255,.1); border:1px solid var(--accent); padding:12px 20px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; text-decoration:none; color:white; transition:.3s; }
+        .link-item:hover { background:var(--accent); color:black; }
+        .admin-zone { position:absolute; top:45px; right:45px; display:flex; gap:10px; }
+        .btn-small { padding:5px 12px; font-size:12px; border-radius:4px; cursor:pointer; border:1px solid #555; background:transparent; color:#ccc; }
+        .btn-small:hover { background:white; color:black; }
+        .comment-section { margin-top:50px; border-top:1px solid var(--border); padding-top:40px; }
+        .comment-title { font-size:1.3rem; color:var(--accent); margin-bottom:25px; }
+        .comment-item { background:rgba(255,255,255,.02); padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid var(--border); }
+        .comment-meta { display:flex; justify-content:space-between; font-size:13px; color:#666; margin-bottom:8px; gap:12px; }
+        .comment-author { color:var(--accent); font-weight:bold; }
+        .comment-form { display:flex; gap:12px; margin-top:30px; }
+        .comment-input { flex:1; background:rgba(255,255,255,.08); border:1px solid var(--border); border-radius:10px; color:white; padding:15px; outline:none; }
+        .btn-comment { background:var(--accent); border:none; padding:0 25px; border-radius:10px; font-weight:bold; cursor:pointer; color:black; }
+        .hidden { display:none; }
+        footer { text-align:center; padding:60px; color:#444; font-size:.8rem; border-top:1px solid var(--border); }
+        @media (max-width:600px) { .auth-bar { padding:0 18px; } .view-card { padding:28px; } .admin-zone { position:static; justify-content:flex-end; margin-bottom:18px; } .post-info, .comment-meta, .comment-form { flex-direction:column; } }
+    </style>
+</head>
+<body>
+<div class="auth-bar">
+    <a href="index.html" class="logo-link"><img src="SYRTN-logo-homepage.png" alt="Logo" class="nav-logo"><span>SYRTN</span></a>
+    <div class="auth-user-zone"><span id="userNameDisplay" class="hidden" style="font-size:.9rem; color:#ccc;"></span><a href="login.html" id="loginBtn" class="auth-btn">LOGIN</a><button id="logoutBtn" class="auth-btn hidden">LOGOUT</button></div>
+</div>
+<div class="container">
+    <div class="view-card">
+        <div class="admin-zone"><button class="btn-small hidden" id="btnEditPost">수정</button><button class="btn-small hidden" id="btnDeletePost" style="color:#ff4d4d; border-color:#ff4d4d;">삭제</button></div>
+        <div class="post-header"><div id="viewCategory" class="post-category">RESOURCE</div><h1 id="viewTitle" class="post-title">불러오는 중...</h1><div class="post-info"><span id="viewAuthor">-</span><span id="viewDate">-</span></div></div>
+        <div id="viewContent" class="post-content"></div>
+        <div class="links-container" id="linksContainer"></div>
+        <div class="comment-section">
+            <div class="comment-title">COMMENTS</div>
+            <div id="commentList"></div>
+            <div id="commentFormArea" class="hidden"><div class="comment-form"><input type="text" id="commentInput" class="comment-input" placeholder="의견을 남겨주세요"><button class="btn-comment" id="btnPostComment">POST</button></div></div>
+            <div id="loginNotice" class="hidden" style="text-align:center; color:#888; margin-top:20px;">댓글 작성을 위해 <a href="login.html" style="color:var(--accent)">로그인</a>이 필요합니다.</div>
+        </div>
+        <a href="resource.html" style="display:block; margin-top:40px; color:#555; text-decoration:none;">← BACK TO LIST</a>
+    </div>
+</div>
+<footer><p>&copy; 2026 SYRTN Collaboration. All Rights Reserved.</p><p>영광해룡고등학교 | 순천고등학교 | 순천복성고등학교 물리·천문·지구과학 동아리 연합</p><p>designed by SYRTN Team | 문의 : 2jw5464@gmail.com</p></footer>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const API_BASE_URL = "https://hypocrite-depletion-until.ngrok-free.dev";
+    const COLLECTION = "resources";
+    const ADMIN_EMAIL = "2jw5464@gmail.com";
+    const postId = new URLSearchParams(window.location.search).get('id');
+    const firebaseConfig = { apiKey:"AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU", authDomain:"syrt-2026.firebaseapp.com", projectId:"syrt-2026", storageBucket:"syrt-2026.firebasestorage.app", messagingSenderId:"848896876364", appId:"1:848896876364:web:42edc690489962f76df9e9" };
+    const app = initializeApp(firebaseConfig);
+    initializeAppCheck(app, { provider:new ReCaptchaV3Provider('6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq'), isTokenAutoRefreshEnabled:true });
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    let currentUser = null;
+    let currentRole = 'guest';
+    let currentUserName = '익명';
+    let postData = null;
+
+    if (!postId) location.replace('block.html');
+    document.getElementById('logoutBtn').addEventListener('click', async () => { if (confirm('로그아웃 하시겠습니까?')) { await signOut(auth); location.reload(); } });
+
+    onAuthStateChanged(auth, async (user) => {
+        currentUser = user;
+        if (!user) {
+            setAuthUi(false);
+            currentRole = 'guest';
+            await loadPost();
+            await loadComments();
+            return;
+        }
+        try {
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            const userData = userDoc.exists() ? userDoc.data() : {};
+            currentRole = user.email === ADMIN_EMAIL ? 'admin' : (userData.role || 'member');
+            currentUserName = userData.name || user.displayName || '사용자';
+            setAuthUi(true);
+            await loadPost();
+            await loadComments();
+        } catch (err) {
+            console.error(err);
+            currentRole = 'member';
+            setAuthUi(true);
+            await loadPost();
+            await loadComments();
+        }
+    });
+
+    function setAuthUi(isLoggedIn) {
+        document.getElementById('loginBtn').classList.toggle('hidden', isLoggedIn);
+        document.getElementById('logoutBtn').classList.toggle('hidden', !isLoggedIn);
+        document.getElementById('userNameDisplay').classList.toggle('hidden', !isLoggedIn);
+        document.getElementById('commentFormArea').classList.toggle('hidden', !isLoggedIn);
+        document.getElementById('loginNotice').classList.toggle('hidden', isLoggedIn);
+        if (isLoggedIn) document.getElementById('userNameDisplay').innerText = `${currentUserName}님`;
+    }
+
+    async function getHeaders(contentType = false) {
+        const headers = { 'X-User-Role': currentRole, 'ngrok-skip-browser-warning': '69420' };
+        if (currentUser) headers.Authorization = `Bearer ${await currentUser.getIdToken()}`;
+        if (contentType) headers['Content-Type'] = 'application/json';
+        return headers;
+    }
+
+    async function loadPost() {
+        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${postId}`, { headers: await getHeaders() });
+        if (!res.ok) { alert('자료를 찾을 수 없습니다.'); location.replace('resource.html'); return; }
+        postData = await res.json();
+        document.getElementById('viewTitle').innerText = postData.title || '제목 없음';
+        document.getElementById('viewAuthor').innerText = `BY. ${postData.author_name || postData.author || '익명'}`;
+        document.getElementById('viewCategory').innerText = postData.category || 'RESOURCE';
+        document.getElementById('viewDate').innerText = formatDate(postData.created_at || postData.createdAt);
+        document.getElementById('viewContent').innerText = postData.content || postData.description || '';
+        const linksDiv = document.getElementById('linksContainer');
+        linksDiv.innerHTML = '';
+        (postData.links || []).forEach(link => {
+            const a = document.createElement('a');
+            a.href = link.url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.className = 'link-item';
+            a.innerHTML = `<span>${escapeHtml(link.name || '첨부 링크')}</span><span style="font-size:12px; opacity:.6;">새 창에서 열기</span>`;
+            linksDiv.appendChild(a);
+        });
+        const isOwner = currentUser && postData.uid === currentUser.uid;
+        const canManage = isOwner || ['admin', 'teacher', 's-leader', 'h-leader', 'b-leader'].includes(currentRole);
+        document.getElementById('btnEditPost').classList.toggle('hidden', !isOwner && !['admin', 'teacher'].includes(currentRole));
+        document.getElementById('btnDeletePost').classList.toggle('hidden', !canManage);
+    }
+
+    async function loadComments() {
+        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${postId}/comments`, { headers: await getHeaders() });
+        if (!res.ok) return;
+        const comments = await res.json();
+        const list = document.getElementById('commentList');
+        list.innerHTML = '';
+        if (!comments.length) { list.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">등록된 댓글이 없습니다.</div>'; return; }
+        comments.forEach(c => {
+            const isCommentOwner = currentUser && c.uid === currentUser.uid;
+            const isPostOwner = currentUser && postData && postData.uid === currentUser.uid;
+            const canDelete = isCommentOwner || isPostOwner || ['admin', 'teacher', 's-leader', 'h-leader', 'b-leader'].includes(currentRole);
+            const item = document.createElement('div');
+            item.className = 'comment-item';
+            if (isCommentOwner) item.style.border = '1px solid var(--accent)';
+            item.innerHTML = `<div class="comment-meta"><span class="comment-author">${escapeHtml(c.author_name || c.author || '익명')}</span><span>${formatDate(c.created_at || c.createdAt)}</span></div><div>${escapeHtml(c.content || '')}</div><div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;">${canDelete ? `<button class="btn-small" style="color:#ff4d4d; border-color:#ff4d4d;" data-comment-id="${c.id}">삭제</button>` : ''}</div>`;
+            const deleteBtn = item.querySelector('[data-comment-id]');
+            if (deleteBtn) deleteBtn.onclick = () => deleteComment(c.id);
+            list.appendChild(item);
+        });
+    }
+
+    document.getElementById('btnPostComment').addEventListener('click', async () => {
+        const input = document.getElementById('commentInput');
+        const content = input.value.trim();
+        if (!content || !currentUser) return;
+        const btn = document.getElementById('btnPostComment');
+        btn.disabled = true;
+        btn.innerText = 'SENDING...';
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${postId}/comments`, { method:'POST', headers: await getHeaders(true), body: JSON.stringify({ content, authorName: currentUserName }) });
+            if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data.error || '댓글 작성 실패'); }
+            input.value = '';
+            await loadComments();
+        } catch (err) { alert(err.message); }
+        finally { btn.disabled = false; btn.innerText = 'POST'; }
+    });
+
+    async function deleteComment(commentId) {
+        if (!confirm('댓글을 삭제하시겠습니까?')) return;
+        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${postId}/comments/${commentId}`, { method:'DELETE', headers: await getHeaders() });
+        if (res.ok) await loadComments(); else alert('댓글 삭제에 실패했습니다.');
+    }
+
+    document.getElementById('btnEditPost').onclick = () => { location.href = `write.html?id=${postId}`; };
+    document.getElementById('btnDeletePost').onclick = async () => {
+        if (!confirm('자료를 삭제하시겠습니까? 관련 댓글도 함께 삭제됩니다.')) return;
+        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${postId}`, { method:'DELETE', headers: await getHeaders() });
+        if (res.ok) location.href = 'resource.html'; else alert('삭제 권한이 없거나 오류가 발생했습니다.');
+    };
+
+    function formatDate(value) { if (!value) return '-'; if (value.seconds) return new Date(value.seconds * 1000).toLocaleString(); return new Date(value).toLocaleString(); }
+    function escapeHtml(value) { return String(value || '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;'); }
+</script>
+</body>
+</html>

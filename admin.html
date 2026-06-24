@@ -1,0 +1,603 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="SYRTN-logo-homepage.png" type="image/png">
+    <link rel="apple-touch-icon" href="SYRTN-logo-homepage.png">
+    <title>SYRTN | Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --accent: #00E5FF;
+            --text-main: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --nav-bg: rgba(0, 0, 0, 0.8);
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        /* --- ?곷떒 Bar --- */
+        .auth-bar {
+            position: fixed; top: 0; width: 100%; height: 60px;
+            background: var(--nav-bg); backdrop-filter: blur(10px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 40px; box-sizing: border-box;
+            z-index: 1000; border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-link {
+            display: flex; align-items: center; gap: 12px;
+            text-decoration: none; color: white; font-weight: 700; letter-spacing: 2px;
+        }
+
+        .nav-logo { height: 40px; width: 40px; border-radius: 50%; background-color: white; object-fit: contain; }
+
+        .auth-user-zone { display: flex; align-items: center; gap: 15px; }
+
+        .auth-btn {
+            background: transparent; border: 1px solid var(--text-main);
+            color: var(--text-main); padding: 6px 15px; cursor: pointer;
+            text-decoration: none; font-size: 0.85rem; transition: 0.3s; border-radius: 4px;
+        }
+
+        .auth-btn:hover { background: var(--text-main); color: black; }
+
+        #user-name {
+            color: #ffffff !important; /* 媛뺤젣濡??곗깋 ?곸슜 */
+        }
+
+        /* --- Header (Hero Section) --- */
+        header.intro-hero {
+            height: 45vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), 
+                        url('https://images.unsplash.com/photo-1614313913007-2b4ae8ce32d6?q=80&w=2074') no-repeat center/cover;
+            text-align: center; padding-top: 60px;
+        }
+
+        .intro-hero h1 { font-size: 2.5rem; margin-bottom: 10px; color: var(--accent); }
+        .intro-hero p { font-size: 1rem; opacity: 0.8; font-weight: 300; }
+
+        /* --- 以묎컙 Navigation Menu --- */
+        .sub-nav-container {
+            width: 100%; background: #111;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky; top: 60px; z-index: 900;
+        }
+
+        .nav-menu { display: flex; justify-content: center; gap: 40px; padding: 15px 0; }
+
+        .nav-menu a {
+            color: rgba(255, 255, 255, 0.7); text-decoration: none;
+            font-size: 0.9rem; font-weight: 400; letter-spacing: 1.5px;
+            transition: 0.3s; position: relative;
+        }
+
+        .nav-menu a:hover, .nav-menu a.active { color: var(--accent); }
+
+        .nav-menu a.active::after {
+            content: ''; position: absolute; width: 100%; height: 2px;
+            bottom: -5px; left: 0; background-color: var(--accent);
+        }
+        .nav-item {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding-bottom: 5px;
+            border-bottom: 2px solid transparent;
+            transition: 0.3s;
+        }
+
+        .nav-item:hover { border-bottom: 2px solid var(--accent); color: var(--accent); }
+
+        /* --- Main Content --- */
+        .content-section { max-width: 1000px; margin: 60px auto 100px; padding: 0 20px; }
+
+        .section-title {
+            font-size: 1.8rem; border-left: 4px solid var(--accent);
+            padding-left: 20px; margin-bottom: 30px; font-weight: 700;
+        }
+
+        .admin-card {
+            background: var(--card-bg); border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1); padding: 30px;
+            overflow-x: auto;
+        }
+
+        .user-table {
+            width: 100%; border-collapse: collapse; font-size: 0.9rem;
+        }
+
+        .user-table th {
+            text-align: left; padding: 15px; color: var(--accent);
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .user-table td {
+            padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* --- 沅뚰븳 ?좏깮 諛뺤뒪 ?섏젙 遺遺?--- */
+        .role-select {
+            background: rgba(255,255,255,0.1); 
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2); 
+            padding: 6px 30px 6px 12px; /* ?붿궡??怨듦컙 ?뺣낫 */
+            border-radius: 6px; 
+            outline: none; 
+            cursor: pointer; 
+            transition: 0.3s;
+            appearance: none; /* 釉뚮씪?곗? 湲곕낯 ?붿궡???쒓굅 */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            /* 而ㅼ뒪? ?곗깋 ?붿궡??異붽? */
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+        }
+
+        /* ?쒕∼?ㅼ슫 由ъ뒪??option) ?대? ?ㅽ???*/
+        .role-select option {
+            background-color: #1a1a1a; /* ?듭뀡 諛곌꼍???대몼寃?*/
+            color: #ffffff;           /* ?듭뀡 湲?먮? 諛앷쾶 */
+            padding: 10px;
+        }
+
+        .role-select:focus { 
+            border-color: var(--accent); 
+            background-color: rgba(0, 229, 255, 0.1); 
+        }
+
+        .btn-update {
+            background: var(--accent); color: #000; border: none;
+            padding: 7px 15px; border-radius: 6px; cursor: pointer;
+            font-weight: 700; font-size: 0.8rem; transition: 0.3s;
+            margin-left: 5px;
+        }
+
+        .btn-update:hover { background: #ffffff; transform: scale(1.05); }
+
+        footer {
+            background: #000; padding: 60px 20px; text-align: center;
+            font-size: 0.8rem; color: #666; border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        @media (max-width: 600px) {
+            .logo-area span { font-size: 16px; }
+            nav a { padding: 10px 12px; font-size: 13px; }
+            header h1 { font-size: 22px; }
+            .header-logo { width: 100px; height: 100px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-bar">
+    <a href="index.html" class="logo-link">
+        <img src="SYRTN-logo-homepage.png" alt="SYRTN Logo" class="nav-logo">
+        <span>SYRTN</span>
+    </a>
+
+    <div class="auth-user-zone">
+        <span id="user-name" style="display:none; font-size: 0.9rem; margin-right: 10px; color: var(--accent);"></span>
+        <button id="logout-btn" class="auth-btn" style="display:none;">LOGOUT</button>
+    </div>
+</div>
+
+<header class="intro-hero">
+    <h1>Admin Panel</h1>
+    <p>遺??沅뚰븳 愿由??쒖뒪??/p>
+</header>
+
+<nav class="sub-nav-container">
+    <div class="nav-menu">
+        <a href="index.html" class="nav-item">HOME</a>
+        <a href="introduction.html" class="nav-item">INTRODUCTION</a>
+        <a href="talk.html" class="nav-item">TALK</a>
+        <a href="resource.html" class="nav-item">RESOURCE</a>
+        <a href="suggest.html" class="nav-item">SUGGESTION</a>
+        <a href="mypage.html" class="nav-item">MY PAGE</a>
+        <a href="adjust.html" class="nav-item">REQUEST AUTHORITY</a>
+        <a href="admin.html" class="nav-item active">ADMIN</a>
+    </div>
+</nav>
+
+<main class="content-section">
+    <div class="section-title">遺??沅뚰븳 愿由?諛??뱀씤</div>
+    <p style="color: #888; margin-bottom: 20px;">* 媛??숆탳蹂?遺?먯쓽 ??븷??留욎떠 ?깃툒??議곗젙??二쇱꽭?? 愿由ъ옄 ?뱀씤 ???ъ씠???댁슜??媛?ν빀?덈떎.</p>
+    
+    <div class="admin-card" style="margin-bottom: 60px;">
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>?대쫫</th><th>?숆탳</th><th>?대찓??/th><th>?꾩옱 ?깃툒</th><th>議곗젙</th>
+                </tr>
+            </thead>
+            <tbody id="user-list">
+                <tr><td colspan='5' style="text-align:center; padding: 50px;">?곗씠?곕? 遺덈윭?ㅻ뒗 以?..</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section-title"><br>?묒닔??嫄댁쓽 ?ы빆</div>
+    <div class="admin-card">
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>?좎쭨</th><th>遺꾨쪟</th><th>?쒕ぉ 諛??댁슜</th><th>?묒꽦??/th><th>愿由?/th>
+                </tr>
+            </thead>
+            <tbody id="suggestion-list">
+                <tr><td colspan='5' style="text-align:center; padding: 50px;">?곗씠?곕? 遺덈윭?ㅻ뒗 以?..</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section-title">?묒닔???깃툒 議곗젙 ?좎껌</div>
+    <div class="admin-card">
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>?좎껌??/th><th>?대쫫</th><th>?숆탳</th><th>?붿껌 ?깃툒</th><th>?ъ쑀</th><th>愿由?/th>
+                </tr>
+            </thead>
+            <tbody id="request-list">
+                <tr><td colspan='6' style="text-align:center; padding: 50px;">?곗씠?곕? 遺덈윭?ㅻ뒗 以?..</td></tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<footer>
+    <p>&copy; 2026 SYRTN Collaboration. All Rights Reserved.</p>
+    <p>?곴킅?대！怨좊벑?숆탳 | ?쒖쿇怨좊벑?숆탳 | ?쒖쿇蹂듭꽦怨좊벑?숆탳 臾쇰━쨌泥쒕Ц쨌吏援ш낵???숈븘由??고빀</p>
+    <p>designed by SYRTN Team | 臾몄쓽 : 2jw5464@gmail.com</p>
+</footer>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { 
+        getFirestore, collection, getDocs, doc, getDoc, updateDoc, deleteDoc, 
+        query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // 1. Firebase ?ㅼ젙
+    const firebaseConfig = {
+        apiKey: "AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU",
+        authDomain: "syrt-2026.firebaseapp.com",
+        projectId: "syrt-2026",
+        storageBucket: "syrt-2026.firebasestorage.app",
+        messagingSenderId: "848896876364",
+        appId: "1:848896876364:web:42edc690489962f76df9e9",
+        measurementId: "G-Q0BKR95VH2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+
+    // 2. App Check 珥덇린??(reCAPTCHA v3)
+    const appCheck = initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider('6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq'),
+        isTokenAutoRefreshEnabled: true
+    });
+
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const API_BASE_URL = "https://hypocrite-depletion-until.ngrok-free.dev";
+    let currentAdminUser = null;
+    let currentAdminRole = 'guest';
+
+    const roleMap = {
+        "admin": "관리자(admin)",
+        "s-student": "순천고 부원",
+        "b-student": "복성고 부원",
+        "h-student": "해룡고 부원",
+        "s-leader": "순천고 리더",
+        "b-leader": "복성고 리더",
+        "h-leader": "해룡고 리더",
+        "teacher": "교사",
+        "member": "일반 회원"
+    };
+
+    const userNameDisplay = document.getElementById('user-name');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    // 3. 沅뚰븳 泥댄겕 諛??섏씠吏 珥덇린??
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            console.warn("濡쒓렇???뺣낫媛 ?놁뒿?덈떎. block.html濡??대룞?⑸땲??");
+            window.location.replace("block.html");
+            return;
+        }
+
+        try {
+            // ?곗꽑 Firestore?먯꽌 ?꾩옱 濡쒓렇?명븳 ?좎????뺣낫瑜?媛?몄샃?덈떎.
+            const userDocRef = doc(db, "users", user.uid);
+            const userDocSnap = await getDoc(userDocRef);
+            
+            // 1. ?덊띁 愿由ъ옄 ?대찓??'2jw5464@gmail.com')??寃쎌슦
+            if (user.email === '2jw5464@gmail.com') {
+                console.log("愿由ъ옄 ?몄쬆 ?깃났");
+                
+                let userData;
+                if (userDocSnap.exists()) {
+                    // DB???뺣낫媛 ?덉쑝硫?DB????λ맂 ?대쫫 ?ъ슜
+                    userData = userDocSnap.data();
+                } else {
+                    // DB???꾩쭅 臾몄꽌媛 ?녿떎硫??대찓???뺣낫 ?깆쓣 湲곕컲?쇰줈 ?꾩떆 ?곗씠???앹꽦
+                    userData = { name: "愿由ъ옄", role: "admin" };
+                }
+                
+                initAdminPage(user, userData);
+                return;
+            }
+
+            // 2. ?쇰컲 愿由ъ옄/遺??沅뚰븳 泥댄겕
+            if (userDocSnap.exists()) {
+                const userData = userDocSnap.data();
+                console.log("?꾩옱 ?좎? ?곗씠??", userData);
+
+                const allowedRoles = ['admin', 's-leader', 'h-leader', 'b-leader'];
+                
+                if (allowedRoles.includes(userData.role)) {
+                    initAdminPage(user, userData);
+                } else {
+                    console.error("?묎렐 沅뚰븳???녿뒗 ??븷?낅땲??", userData.role);
+                    window.location.replace("block.html");
+                }
+            } else {
+                // ?덊띁 愿由ъ옄 ?대찓?쇰룄 ?꾨땲怨? DB??臾몄꽌???녿뒗 寃쎌슦
+                console.error("Firestore???ъ슜???뺣낫媛 ?놁뒿?덈떎.");
+                window.location.replace("block.html");
+            }
+        } catch (error) {
+            console.error("沅뚰븳 ?뺤씤 以??ㅻ쪟 諛쒖깮:", error);
+            setTimeout(() => window.location.replace("block.html"), 2000);
+        }
+    });
+
+    // 愿由ъ옄 ?섏씠吏 ?곗씠??濡쒕뱶 ?쒖옉 ?⑥닔 (?대쫫 ?쒖떆 遺遺??섏젙)
+    // 愿由ъ옄 ?섏씠吏 ?곗씠??濡쒕뱶 ?쒖옉 ?⑥닔 ?섏젙
+function initAdminPage(user, userData) {
+    currentAdminUser = user;
+    currentAdminRole = user.email === '2jw5464@gmail.com' ? 'admin' : (userData.role || 'member');
+    console.log("?섏씠吏 珥덇린???쒖옉:", userData.name);
+    
+    if (userNameDisplay) {
+        userNameDisplay.style.display = 'inline';
+        const finalName = userData.name || '관리자';
+        userNameDisplay.innerText = `${finalName}님`;
+    }
+    
+    if (logoutBtn) {
+        logoutBtn.style.display = 'inline';
+    }
+    
+    // [?섏젙] ?곗씠??濡쒕뱶 ?ㅽ뻾 紐⑸줉??loadRequests() 異붽?
+    loadUsers();
+    loadSuggestions();
+    loadRequests(); // ??遺遺꾩씠 鍮좎졇?덉뼱??紐⑸줉???섏삤吏 ?딆븯??寃껋엯?덈떎.
+}
+
+    // 4. 遺??紐⑸줉 遺덈윭?ㅺ린
+    async function loadUsers() {
+        const userList = document.getElementById('user-list');
+        try {
+            const querySnapshot = await getDocs(query(collection(db, "users"), orderBy("name", "asc")));
+            userList.innerHTML = "";
+
+            querySnapshot.forEach((docSnap) => {
+                const u = docSnap.data();
+                const uid = docSnap.id;
+                const tr = document.createElement('tr');
+                
+                // ?깃툒 ?좏깮 ??됲듃 諛뺤뒪 ?앹꽦
+                let options = "";
+                for (const [val, label] of Object.entries(roleMap)) {
+                    options += `<option value="${val}" ${u.role === val ? 'selected' : ''}>${label}</option>`;
+                }
+
+                tr.innerHTML = `
+                    <td>${u.name || '?대쫫?놁쓬'}</td>
+                    <td>${u.school || '-'}</td>
+                    <td>${u.email || '-'}</td>
+                    <td><span style="color:var(--accent)">${roleMap[u.role] || u.role}</span></td>
+                    <td>
+                        <select id="role-${uid}" class="role-select">${options}</select>
+                        <button class="btn-update" onclick="updateUserRole('${uid}')">蹂寃?/button>
+                    </td>
+                `;
+                userList.appendChild(tr);
+            });
+        } catch (err) {
+            console.error("?좎? 濡쒕뱶 ?ㅽ뙣:", err);
+            userList.innerHTML = "<tr><td colspan='5' style='text-align:center;'>?곗씠?곕? ?쎌뼱??沅뚰븳???놁뒿?덈떎.</td></tr>";
+        }
+    }
+
+    // 5. 嫄댁쓽 ?ы빆 遺덈윭?ㅺ린
+    async function loadSuggestions() {
+        const suggestionList = document.getElementById('suggestion-list');
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/syrtn/suggestions`, {
+                headers: {
+                    "Authorization": `Bearer ${await currentAdminUser.getIdToken()}`,
+                    "X-User-Role": currentAdminRole,
+                    "ngrok-skip-browser-warning": "69420"
+                }
+            });
+            if (!res.ok) throw new Error('건의사항을 불러오지 못했습니다.');
+            const suggestions = await res.json();
+            suggestionList.innerHTML = "";
+
+            if (!suggestions.length) {
+                suggestionList.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:30px;'>접수된 건의 사항이 없습니다.</td></tr>";
+                return;
+            }
+
+            suggestions.forEach((s) => {
+                const sid = s.id;
+                const date = formatDate(s.created_at || s.createdAt || s.timestamp);
+                const author = s.author_name || s.authorName || '익명';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${date}</td>
+                    <td><span style="color:#00E5FF">[${escapeHtml(s.category || '-')}]</span></td>
+                    <td><strong>${escapeHtml(s.subject || '제목 없음')}</strong><br><small style="color:#ccc">${escapeHtml(s.content || '')}</small></td>
+                    <td>${escapeHtml(author)}</td>
+                    <td><button class="btn-update" style="background:#ff4444; color:white;" onclick="deleteSuggestion('${sid}')">해결 완료</button></td>
+                `;
+                suggestionList.appendChild(tr);
+            });
+        } catch (err) {
+            console.error("건의사항 로드 실패:", err);
+            suggestionList.innerHTML = "<tr><td colspan='5' style='text-align:center;'>데이터를 불러올 수 없습니다.</td></tr>";
+        }
+    }
+    // 9. ?깃툒 議곗젙 ?좎껌 紐⑸줉 遺덈윭?ㅺ린
+    async function loadRequests() {
+    const requestList = document.getElementById('request-list');
+    try {
+        // 留뚯빟 荑쇰━?먯꽌 ?먮윭媛 ?쒕떎硫?orderBy瑜??좎떆 ?쒓굅?섍퀬 ?뚯뒪?명빐蹂댁꽭??
+        const q = query(collection(db, "pending_requests"), orderBy("timestamp", "desc"));
+        const querySnapshot = await getDocs(q);
+        requestList.innerHTML = "";
+
+        if (querySnapshot.empty) {
+            requestList.innerHTML = "<tr><td colspan='6' style='text-align:center; padding:30px;'>?묒닔???좎껌???놁뒿?덈떎.</td></tr>";
+            return;
+        }
+
+        querySnapshot.forEach((docSnap) => {
+            const r = docSnap.data();
+            const rid = docSnap.id;
+            
+            // ?좎쭨 泥섎━ ?덉쟾?섍쾶 蹂寃?
+            let date = "-";
+            if (r.timestamp) {
+                // firestore timestamp 媛앹껜??寃쎌슦? ?쇰컲 string/number??寃쎌슦 ???
+                const dateObj = r.timestamp.seconds ? new Date(r.timestamp.seconds * 1000) : new Date(r.timestamp);
+                date = dateObj.toLocaleDateString();
+            }
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${date}</td>
+                <td>${r.name || '?대쫫?놁쓬'}</td>
+                <td>${r.school || '-'}</td>
+                <td><span style="color:var(--accent)">${roleMap[r.requestedRole] || r.requestedRole}</span></td>
+                <td><small style="color:#ccc">${r.reason || '-'}</small></td>
+                <td>
+                    <button class="btn-update" onclick="handleRequest('${rid}', '${r.requestedRole}', 'approve')">?뱀씤</button>
+                    <button class="btn-update" style="background:#ff4444; color:white;" onclick="handleRequest('${rid}', null, 'reject')">嫄곗젅</button>
+                </td>
+            `;
+            requestList.appendChild(tr);
+        });
+    } catch (err) {
+        console.error("?붿껌 濡쒕뱶 ?ㅽ뙣 ?곸꽭:", err);
+        requestList.innerHTML = `<tr><td colspan='6' style='text-align:center;'>?곗씠??濡쒕뱶 ?ㅻ쪟: ${err.message}</td></tr>`;
+    }
+}
+
+    // 10. ?좎껌 ?뱀씤/嫄곗젅 泥섎━ ?⑥닔
+    window.handleRequest = async (uid, requestedRole, action) => {
+        const actionText = action === 'approve' ? "?뱀씤" : "嫄곗젅";
+        if (!confirm(`???좎껌??${actionText}?섏떆寃좎뒿?덇퉴?`)) return;
+
+        try {
+            if (action === 'approve') {
+                // 1. users 而щ젆?섏쓽 ?깃툒 ?낅뜲?댄듃
+                await updateDoc(doc(db, "users", uid), { 
+                    role: requestedRole 
+                });
+                alert("?깃툒???뱀씤?섏뼱 ?낅뜲?댄듃?섏뿀?듬땲??");
+            } else {
+                alert("?좎껌??嫄곗젅?섏뿀?듬땲??");
+            }
+
+            // 2. 泥섎━媛 ?꾨즺???좎껌 臾몄꽌??pending_requests?먯꽌 ??젣
+            await deleteDoc(doc(db, "pending_requests", uid));
+            
+            // 3. 紐⑸줉 ?덈줈怨좎묠
+            loadRequests();
+            loadUsers();
+        } catch (err) {
+            console.error(err);
+            alert("泥섎━ 以??ㅻ쪟媛 諛쒖깮?덉뒿?덈떎.");
+        }
+    };
+
+    // 6. ?좎? ?깃툒 ?낅뜲?댄듃
+    window.updateUserRole = async (uid) => {
+        const roleSelect = document.getElementById(`role-${uid}`);
+        const newRole = roleSelect.value;
+        const roleName = roleMap[newRole];
+
+        if (confirm(`?대떦 ?좎????깃툒??${roleName}(??濡?蹂寃쏀븯?쒓쿋?듬땲源?`)) {
+            try {
+                await updateDoc(doc(db, "users", uid), { role: newRole });
+                alert("?깃툒???깃났?곸쑝濡?蹂寃쎈릺?덉뒿?덈떎.");
+                loadUsers();
+            } catch (err) {
+                console.error(err);
+                alert("沅뚰븳???녾굅???붿껌??嫄곕??섏뿀?듬땲??");
+            }
+        }
+    };
+
+    // 7. 嫄댁쓽 ?ы빆 ??젣 諛?硫붿씪 諛쒖넚
+    window.deleteSuggestion = async (sid) => {
+        if (confirm("이 건의 사항을 해결 완료 처리하고 삭제하시겠습니까?")) {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/syrtn/suggestions/${sid}`, {
+                    method: 'DELETE',
+                    headers: {
+                        "Authorization": `Bearer ${await currentAdminUser.getIdToken()}`,
+                        "X-User-Role": currentAdminRole,
+                        "ngrok-skip-browser-warning": "69420"
+                    }
+                });
+                if (!res.ok) throw new Error('삭제 실패');
+                alert("삭제되었습니다.");
+                loadSuggestions();
+            } catch (err) {
+                console.error(err);
+                alert("처리 중 오류가 발생했습니다.");
+            }
+        }
+    };
+
+    function formatDate(value) {
+        if (!value) return "-";
+        if (value.seconds) return new Date(value.seconds * 1000).toLocaleDateString();
+        return new Date(value).toLocaleDateString();
+    }
+
+    function escapeHtml(value) {
+        return String(value || '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
+    }
+    // 8. 濡쒓렇?꾩썐
+    logoutBtn.onclick = async () => {
+        if (confirm("濡쒓렇?꾩썐 ?섏떆寃좎뒿?덇퉴?")) {
+            await signOut(auth);
+            location.href = 'index.html';
+        }
+    };
+</script>
+</body>
+</html>
+
+
+

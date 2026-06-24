@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="SYRTN-logo-homepage.png" type="image/png">
+    <link rel="apple-touch-icon" href="SYRTN-logo-homepage.png">
+    <title>SYRTN | Introduce</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --accent: #00E5FF;
+            --text-main: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --nav-bg: rgba(0, 0, 0, 0.8);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        /* --- 상단 Bar (Logo & Login Only) --- */
+        .auth-bar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 60px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            box-sizing: border-box;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: white;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .nav-logo {
+            height: 40px;
+            width: 40px;
+            border-radius: 50%;
+            background-color: white;
+            object-fit: contain;
+        }
+
+        /* --- 사용자 구역 --- */
+        .auth-user-zone {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .auth-btn {
+            background: transparent;
+            border: 1px solid var(--text-main);
+            color: var(--text-main);
+            padding: 6px 15px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: 0.3s;
+            border-radius: 4px;
+        }
+
+        .auth-btn:hover {
+            background: var(--text-main);
+            color: black;
+        }
+
+        #user-name {
+            color: #ffffff !important; /* 강제로 흰색 적용 */
+        }
+
+        /* --- Header (Hero Section) --- */
+        header.intro-hero {
+            height: 45vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.9)), 
+                        url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2022') no-repeat center/cover;
+            text-align: center;
+            padding-top: 60px;
+        }
+
+        .intro-hero h1 { font-size: 3.5rem; margin-bottom: 10px; color: var(--accent); }
+        .intro-hero p { font-size: 1.2rem; opacity: 0.8; font-weight: 300; }
+
+        /* --- 중간 Navigation Menu (Header와 Main 사이) --- */
+        .sub-nav-container {
+            width: 100%;
+            background: #111;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 60px; /* auth-bar 바로 아래 붙음 */
+            z-index: 900;
+        }
+
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding: 15px 0;
+        }
+
+        .nav-menu a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 400;
+            letter-spacing: 1.5px;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .nav-menu a:hover, .nav-menu a.active {
+            color: var(--accent);
+        }
+
+        .nav-menu a.active::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--accent);
+        }
+
+        .nav-item {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding-bottom: 5px;
+            border-bottom: 2px solid transparent;
+            transition: 0.3s;
+        }
+
+        .nav-item:hover { border-bottom: 2px solid var(--accent); color: var(--accent); }
+
+        /* --- Main Content --- */
+        .content-section {
+            max-width: 1000px;
+            margin: 60px auto 100px;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            border-left: 4px solid var(--accent);
+            padding-left: 20px;
+            margin-bottom: 40px;
+            font-weight: 700;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .info-card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: 0.3s;
+        }
+
+        .info-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent);
+            background: rgba(0, 229, 255, 0.05);
+        }
+
+        .info-card h3 { color: var(--accent); margin-top: 0; margin-bottom: 15px; }
+
+        .school-tag {
+            background: rgba(255,255,255,0.1);
+            padding: 0; /* 내부 a태그가 꽉 차도록 0으로 수정 */
+            border-radius: 50px;
+            font-size: 1rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: 0.3s;
+            overflow: hidden; /* 테두리 밖으로 링크 배경이 나가지 않게 */
+        }
+
+        /* 하이퍼링크 스타일 초기화 및 커스텀 */
+        .school-tag a {
+            display: block; /* 태그 전체를 클릭 가능하게 */
+            padding: 12px 25px; /* 패딩을 a태그로 이동 */
+            color: var(--text-main); /* 텍스트 흰색 */
+            text-decoration: none; /* 밑줄 제거 */
+            transition: 0.3s;
+        }
+
+        .school-tag:hover {
+            border-color: var(--accent);
+        }
+
+        .school-tag:hover a {
+            color: var(--accent); /* 마우스 올리면 글자색 변경 */
+            background: rgba(0, 229, 255, 0.1); /* 살짝 배경색 추가 */
+        }
+
+        /* --- Footer --- */
+        footer {
+            background: #000;
+            padding: 60px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        @media (max-width: 600px) {
+            .logo-area span { font-size: 16px; }
+            nav a { padding: 10px 12px; font-size: 13px; }
+            header h1 { font-size: 22px; }
+            .header-logo { width: 100px; height: 100px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-bar">
+    <a href="index.html" class="logo-link">
+        <img src="SYRTN-logo-homepage.png" alt="SYRTN Logo" class="nav-logo">
+        <span>SYRTN</span>
+    </a>
+
+    <div class="auth-user-zone">
+        <a href="login.html" id="login-link" class="auth-btn">LOGIN</a>
+        <span id="user-name" style="display:none; font-size: 0.9rem; margin-right: 10px; color: var(--accent);"></span>
+        <button id="logout-btn" class="auth-btn" style="display:none;">LOGOUT</button>
+    </div>
+</div>
+
+<header class="intro-hero">
+    <h1>About SYRTN</h1>
+    <p>탁상형 전파 망원경 간섭계 프로젝트</p>
+</header>
+
+<nav class="sub-nav-container">
+    <div class="nav-menu">
+        <a href="index.html" class="nav-item">HOME</a>
+        <a href="introduction.html" class="active">INTRODUCTION</a>
+        <a href="talk.html" class="nav-item">TALK</a>
+        <a href="resource.html"class="nav-item">RESOURCE</a>
+        <a href="suggest.html" class="nav-item">SUGGESTION</a>
+        <a href="mypage.html" class="nav-item">MY PAGE</a>
+        <a href="adjust.html" class="nav-item">REQUEST AUTHORITY</a>
+        <a href="admin.html" class="nav-item">ADMIN</a>
+    </div>
+</nav>
+
+<main class="content-section">
+    <div class="section-title">프로젝트 개요</div>
+    <p style="font-size: 1.1rem; color: #ccc;">
+        <strong>SYRTN (Suncheon-Yeonggwang Radio Telescope Network)</strong>은 전라남도 순천과 영광 지역의 3개 과학 중점 고등학교의 일부 과학 동아리가 연합하여 구축하고 있는 전파 망원경 네트워크 프로젝트입니다. 
+        우리는 각 학교에 만든 전파 망원경을 통해 데이터를 수집하고 이를 공유함으로써 하나의 거대한 가상 망원경을 만드는 것을 목표로 합니다.
+    </p>
+
+    <div class="grid-container">
+        <div class="info-card">
+            <h3>우리의 목표</h3>
+            <p>직접 소형 전파 망원경을 제작하고 운영함으로써 데이터 분석 역량을 키우고, 지역 간 네트워크를 통해 전파 간섭계의 원리를 실천적으로 학습합니다.</p>
+        </div>
+        <div class="info-card">
+            <h3>주요 연구</h3>
+            <p>21cm 수소선 관측을 통한 우리 은하 즁심 부분의 중성수소 분석, 태양의 중성수소 모니터링을 수행합니다.</p>
+        </div>
+    </div>
+
+    <div style="margin-top: 80px;">
+        <div class="section-title">참여 기관</div>
+        <div class="school-tags-container">
+            <div class="school-tag"><a href="https://haeryong.hs.jne.kr/haeryong_hs/main.do">영광해룡고등학교</a></div><br>
+            <div class="school-tag"><a href="https://suncheon.hs.jne.kr/sunchon_hs/main.do?sysId=sunchon_hs">순천고등학교</a></div><br>
+            <div class="school-tag"><a href="https://bokseong.hs.jne.kr/bokseong_hs/main.do?sysId=bokseong_hs">순천복성고등학교</a></div>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <p>&copy; 2026 SYRTN Collaboration. All Rights Reserved.</p>
+    <p>영광해룡고등학교 | 순천고등학교 | 순천복성고등학교 물리·천문·지구과학 동아리 연합</p>
+    <p>designed by SYRTN Team | 문의 : 2jw5464@gmail.com</p>
+</footer>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU",
+        authDomain: "syrt-2026.firebaseapp.com",
+        projectId: "syrt-2026",
+        storageBucket: "syrt-2026.firebasestorage.app",
+        messagingSenderId: "848896876364",
+        appId: "1:848896876364:web:42edc690489962f76df9e9",
+        measurementId: "G-Q0BKR95VH2"
+    };
+
+    // Firebase 초기화
+    const app = initializeApp(firebaseConfig);
+
+    // --- [App Check 초기화] ---
+    const appCheck = initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider('6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq'),
+        isTokenAutoRefreshEnabled: true 
+    });
+
+    // 서비스 객체 생성
+    const auth = getAuth(app);
+    const db = getFirestore(app); 
+    const loginLink = document.getElementById('login-link');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userName = document.getElementById('user-name');
+
+    // 사용자 인증 상태 관찰
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            loginLink.style.display = 'none';
+            userName.style.display = 'inline';
+            logoutBtn.style.display = 'inline';
+
+            try {
+                const userDocRef = doc(db, "users", user.uid);
+                const userDocSnap = await getDoc(userDocRef);
+
+                if (userDocSnap.exists()) {
+                    const userData = userDocSnap.data();
+                    userName.innerText = `${userData.name || user.displayName}님`;
+                } else {
+                    userName.innerText = `${user.displayName}님`;
+                }
+            } catch (error) {
+                console.error("사용자 정보를 불러오는 중 에러:", error);
+                userName.innerText = `${user.displayName}님`;
+            }
+        } else {
+            loginLink.style.display = 'inline';
+            userName.style.display = 'none';
+            logoutBtn.style.display = 'none';
+        }
+    });
+
+    // 로그아웃 처리
+    logoutBtn.onclick = async () => {
+        if (confirm("로그아웃 하시겠습니까?")) {
+            try {
+                await signOut(auth);
+                alert("로그아웃 되었습니다.");
+                location.reload();
+            } catch (err) {
+                console.error("로그아웃 에러:", err);
+                alert("로그아웃 중 오류가 발생했습니다.");
+            }
+        }
+    };
+</script>
+</body>
+</html>
