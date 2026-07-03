@@ -198,6 +198,9 @@
                 </div>
             </div>
         </div>
+        <label>첨부파일</label>
+        <input type="file" id="fileInput" multiple>
+        <p style="margin:-10px 0 20px; color:#888; font-size:13px;">최대 25MB까지 업로드할 수 있습니다. 위험한 실행 파일 형식은 차단됩니다.</p>
         <label>설명</label>
         <textarea id="postContent" placeholder="자료에 대한 상세 설명을 입력하세요..."></textarea>
         <button id="submitBtn" class="btn-submit">자료 등록하기</button>
@@ -290,9 +293,11 @@
             if (!url) return null;
             if (!url.startsWith('http')) url = 'https://' + url;
             const name = document.querySelectorAll('.postFileName')[index].value.trim() || '첨부 링크';
-            return { url, name };
+            return { url, name, type: url.includes('/api/syrtn/uploads/') ? 'file' : 'link' };
         }).filter(Boolean);
         try {
+            const uploadedFiles = await uploadSelectedFiles();
+            links.push(...uploadedFiles);
             const url = editPostId ? `${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${editPostId}` : `${API_BASE_URL}/api/syrtn/board/${COLLECTION}`;
             const res = await fetch(url, { method: editPostId ? 'PUT' : 'POST', headers: await getHeaders(true), body: JSON.stringify({ title, content, category, links, authorName: currentUserName }) });
             if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data.error || '저장 실패'); }
@@ -303,6 +308,26 @@
             submitBtn.disabled = false;
             submitBtn.innerText = editPostId ? '수정 완료' : '자료 등록하기';
         }
+    }
+
+    async function uploadSelectedFiles() {
+        const files = Array.from(document.getElementById('fileInput')?.files || []);
+        const uploaded = [];
+        for (const file of files) {
+            const formData = new FormData();
+            formData.append('file', file);
+            const res = await fetch(`${API_BASE_URL}/api/syrtn/uploads/${COLLECTION}`, {
+                method: 'POST',
+                headers: await getHeaders(false),
+                body: formData
+            });
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(`${file.name}: ${data.error || '업로드 실패'}`);
+            }
+            uploaded.push(await res.json());
+        }
+        return uploaded;
     }
 
     function addLinkField(url = '', name = '') {

@@ -329,6 +329,25 @@
         finally { btn.disabled = false; btn.innerText = 'POST'; }
     });
 
+    async function openAttachment(url, filename) {
+        try {
+            const res = await fetch(url, { headers: await getHeaders() });
+            if (!res.ok) throw new Error('??? ? ? ????.');
+            const blob = await res.blob();
+            const objectUrl = URL.createObjectURL(blob);
+            const opened = window.open(objectUrl, '_blank', 'noopener,noreferrer');
+            if (!opened) {
+                const a = document.createElement('a');
+                a.href = objectUrl;
+                a.download = filename;
+                a.click();
+            }
+            setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+        } catch (err) {
+            alert(err.message || '??? ? ? ????.');
+        }
+    }
+
     async function deleteComment(commentId) {
         if (!confirm('댓글을 삭제하시겠습니까?')) return;
         const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${postId}/comments/${commentId}`, { method:'DELETE', headers: await getHeaders() });

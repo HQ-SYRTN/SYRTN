@@ -168,10 +168,21 @@
         document.getElementById("post-date").textContent = post.created_at ? new Date(post.created_at).toLocaleString() : "-";
         document.getElementById("post-title").textContent = post.title || "제목 없음";
         document.getElementById("post-content").textContent = post.content || "";
-        document.getElementById("post-links").innerHTML = (post.links || []).map(link => {
+        const linksEl = document.getElementById("post-links");
+        linksEl.innerHTML = "";
+        (post.links || []).forEach((link, index) => {
             const href = safeUrl(link.url);
-            return href ? `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.name || href)}</a>` : "";
-        }).join("");
+            if (!href) return;
+            const a = document.createElement("a");
+            a.href = link.type === "file" ? "#" : href;
+            a.target = link.type === "file" ? "_self" : "_blank";
+            a.rel = "noopener noreferrer";
+            a.textContent = `${link.name || href}${link.type === "file" ? " (?? / ????)" : ""}`;
+            if (link.type === "file") {
+                a.onclick = (event) => { event.preventDefault(); openAttachment(href, link.name || `attachment-${index + 1}`); };
+            }
+            linksEl.appendChild(a);
+        });
         document.getElementById("btn-edit").classList.toggle("hidden", !canManagePost());
         document.getElementById("btn-delete").classList.toggle("hidden", !canManagePost());
     }
@@ -186,6 +197,25 @@
             const canDelete = c.uid === currentUser.uid || canManagePost();
             return `<div class="comment"><div class="comment-meta"><strong>${escapeHtml(c.author_name || "익명")}</strong><span>${c.created_at ? new Date(c.created_at).toLocaleString() : ""}</span>${canDelete ? `<button class="btn-small btn-danger" onclick="deleteComment(${c.id})">삭제</button>` : ""}</div><div>${escapeHtml(c.content || "")}</div></div>`;
         }).join("");
+    }
+
+    async function openAttachment(url, filename) {
+        try {
+            const res = await fetch(url, { headers: await headers() });
+            if (!res.ok) throw new Error("??? ? ? ????.");
+            const blob = await res.blob();
+            const objectUrl = URL.createObjectURL(blob);
+            const opened = window.open(objectUrl, "_blank", "noopener,noreferrer");
+            if (!opened) {
+                const a = document.createElement("a");
+                a.href = objectUrl;
+                a.download = filename;
+                a.click();
+            }
+            setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+        } catch (err) {
+            alert(err.message || "??? ? ? ????.");
+        }
     }
 
     async function createComment() {
