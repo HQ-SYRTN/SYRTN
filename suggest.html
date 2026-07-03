@@ -1,0 +1,276 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="SYRTN-logo-homepage.png" type="image/png">
+    <link rel="apple-touch-icon" href="SYRTN-logo-homepage.png">
+    <title>SYRTN | Suggestion</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-dark:#050505; --accent:#00E5FF; --text-main:#fff; --card-bg:rgba(255,255,255,.05); --nav-bg:rgba(0,0,0,.8); --input-bg:rgba(255,255,255,.1); }
+        body, html { margin:0; padding:0; font-family:'Noto Sans KR',sans-serif; background:var(--bg-dark); color:var(--text-main); line-height:1.6; scroll-behavior:smooth; }
+        .auth-bar { position:fixed; top:0; width:100%; height:60px; background:var(--nav-bg); backdrop-filter:blur(10px); display:flex; justify-content:space-between; align-items:center; padding:0 40px; box-sizing:border-box; z-index:1000; border-bottom:1px solid rgba(255,255,255,.1); }
+        .logo-link { display:flex; align-items:center; gap:12px; text-decoration:none; color:white; font-weight:700; letter-spacing:2px; }
+        .nav-logo { height:40px; width:40px; border-radius:50%; background:white; object-fit:contain; }
+        .auth-user-zone { display:flex; align-items:center; gap:15px; }
+        .auth-btn { background:transparent; border:1px solid var(--text-main); color:var(--text-main); padding:6px 15px; cursor:pointer; text-decoration:none; font-size:.85rem; transition:.3s; border-radius:4px; }
+        .auth-btn:hover { background:var(--text-main); color:black; }
+        header.intro-hero { height:45vh; display:flex; flex-direction:column; justify-content:center; align-items:center; background:linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.9)), url('https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=2072') no-repeat center/cover; text-align:center; padding-top:60px; }
+        .intro-hero h1 { font-size:3.5rem; margin-bottom:10px; color:var(--accent); }
+        .intro-hero p { font-size:1.2rem; opacity:.8; font-weight:300; }
+        .sub-nav-container { width:100%; background:#111; border-top:1px solid rgba(255,255,255,.1); border-bottom:1px solid rgba(255,255,255,.1); position:sticky; top:60px; z-index:900; }
+        .nav-menu { display:flex; justify-content:center; gap:40px; padding:15px 0; flex-wrap:wrap; }
+        .nav-menu a { color:rgba(255,255,255,.7); text-decoration:none; font-size:1rem; letter-spacing:1.5px; transition:.3s; position:relative; }
+        .nav-menu a:hover, .nav-menu a.active { color:var(--accent); }
+        .nav-menu a.active::after { content:''; position:absolute; width:100%; height:2px; bottom:-5px; left:0; background:var(--accent); }
+        .content-section { max-width:800px; margin:60px auto 100px; padding:0 20px; }
+        .section-title { font-size:2rem; border-left:4px solid var(--accent); padding-left:20px; margin-bottom:40px; font-weight:700; }
+        .suggestion-form-card { background:var(--card-bg); padding:40px; border-radius:20px; border:1px solid rgba(255,255,255,.1); }
+        .input-group { text-align:left; margin-bottom:25px; }
+        .input-group label { display:block; font-size:.9rem; margin-bottom:10px; color:#aaa; }
+        input, select, textarea { width:100%; padding:12px 15px; border-radius:8px; border:1px solid rgba(255,255,255,.2); background:var(--input-bg); color:#fff; box-sizing:border-box; outline:none; transition:.3s; font-family:inherit; font-size:1rem; }
+        select { cursor:pointer; appearance:none; }
+        select option { background-color:#1a1a1a; color:#fff; }
+        textarea { height:200px; resize:none; }
+        input:focus, select:focus, textarea:focus { border-color:var(--accent); background:rgba(255,255,255,.15); }
+        .anon-container { display:flex; align-items:center; gap:10px; margin-bottom:25px; cursor:pointer; color:#ccc; }
+        .anon-container input { width:18px; height:18px; accent-color:var(--accent); cursor:pointer; }
+        .submit-btn { width:100%; padding:16px; border-radius:10px; border:none; background:var(--accent); color:#000; font-weight:700; font-size:1.1rem; cursor:pointer; transition:.3s; }
+        .submit-btn:hover { background:#00b8cc; transform:translateY(-3px); box-shadow:0 10px 20px rgba(0,229,255,.2); }
+        footer { background:#000; padding:60px 20px; text-align:center; font-size:.9rem; color:#666; border-top:1px solid rgba(255,255,255,.05); }
+        @media (max-width:600px) { .auth-bar { padding:0 18px; } .intro-hero h1 { font-size:2.4rem; } .suggestion-form-card { padding:26px; } }
+    
+        /* Unified responsive navigation */
+        .auth-bar {
+            height: 60px !important;
+            padding: 0 clamp(16px, 4vw, 40px) !important;
+            gap: 16px !important;
+        }
+        .logo-link {
+            min-width: 0 !important;
+            flex: 0 1 auto !important;
+            letter-spacing: 1.2px !important;
+            white-space: nowrap !important;
+        }
+        .nav-logo {
+            width: 40px !important;
+            height: 40px !important;
+            flex: 0 0 40px !important;
+        }
+        .auth-user-zone {
+            min-width: 0 !important;
+            flex: 0 1 auto !important;
+            justify-content: flex-end !important;
+            gap: 10px !important;
+        }
+        .auth-btn {
+            min-height: 32px !important;
+            padding: 6px 14px !important;
+            box-sizing: border-box !important;
+            white-space: nowrap !important;
+            line-height: 1.2 !important;
+        }
+        .sub-nav-container {
+            height: 52px !important;
+            top: 60px !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            -webkit-overflow-scrolling: touch !important;
+            scrollbar-width: thin !important;
+        }
+        .nav-menu {
+            min-height: 52px !important;
+            width: max-content !important;
+            min-width: 100% !important;
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0 !important;
+            padding: 0 16px !important;
+            box-sizing: border-box !important;
+        }
+        .nav-menu a {
+            height: 52px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 0 14px !important;
+            box-sizing: border-box !important;
+            font-size: 0.9rem !important;
+            line-height: 1.1 !important;
+            letter-spacing: 0.8px !important;
+            white-space: nowrap !important;
+            flex: 0 0 auto !important;
+        }
+        .nav-menu a.active::after {
+            bottom: 8px !important;
+        }
+        @media (max-width: 700px) {
+            .auth-bar {
+                height: 56px !important;
+                padding: 0 14px !important;
+            }
+            .logo-link span {
+                font-size: 0.95rem !important;
+            }
+            .nav-logo {
+                width: 34px !important;
+                height: 34px !important;
+                flex-basis: 34px !important;
+            }
+            .auth-user-zone {
+                gap: 8px !important;
+            }
+            .auth-user-zone span[id*="user"], #user-name, #userNameDisplay {
+                max-width: 34vw !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                white-space: nowrap !important;
+            }
+            .auth-btn {
+                min-height: 30px !important;
+                padding: 5px 10px !important;
+                font-size: 0.78rem !important;
+            }
+            .sub-nav-container {
+                top: 56px !important;
+                height: 48px !important;
+            }
+            .nav-menu {
+                min-height: 48px !important;
+                justify-content: flex-start !important;
+                padding: 0 10px !important;
+            }
+            .nav-menu a {
+                height: 48px !important;
+                padding: 0 11px !important;
+                font-size: 0.78rem !important;
+                letter-spacing: 0.4px !important;
+            }
+            header.intro-hero,
+            header.board-hero {
+                min-height: 260px !important;
+                height: 38vh !important;
+                padding-top: 56px !important;
+            }
+            .intro-hero h1,
+            .board-hero h1,
+            header h1 {
+                font-size: clamp(2rem, 10vw, 2.6rem) !important;
+                line-height: 1.12 !important;
+                padding: 0 16px !important;
+                box-sizing: border-box !important;
+            }
+            .intro-hero p,
+            .board-hero p {
+                font-size: 0.95rem !important;
+                padding: 0 18px !important;
+                box-sizing: border-box !important;
+            }
+            .content-section,
+            .container {
+                width: 100% !important;
+                max-width: 100% !important;
+                padding-left: 16px !important;
+                padding-right: 16px !important;
+                box-sizing: border-box !important;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="auth-bar"><a href="index.html" class="logo-link"><img src="SYRTN-logo-homepage.png" alt="SYRTN Logo" class="nav-logo"><span>SYRTN</span></a><div class="auth-user-zone"><a href="login.html" id="login-link" class="auth-btn">LOGIN</a><span id="user-name" style="display:none; font-size:.9rem; margin-right:10px; color:var(--accent);"></span><button id="logout-btn" class="auth-btn" style="display:none;">LOGOUT</button></div></div>
+<header class="intro-hero"><h1>Suggestion</h1><p>SYRTN의 더 나은 미래를 위한 의견을 남겨주세요</p></header>
+<nav class="sub-nav-container"><div class="nav-menu"><a href="index.html">HOME</a><a href="introduction.html">INTRODUCTION</a><a href="talk.html">TALK</a><a href="resource.html">RESOURCE</a><a href="suggest.html" class="active">SUGGESTION</a><a href="mypage.html">MY PAGE</a><a href="adjust.html">REQUEST AUTHORITY</a><a href="admin.html">ADMIN</a></div></nav>
+<main class="content-section"><div class="section-title">의견 보내기</div><div class="suggestion-form-card"><form id="suggestion-form"><div class="input-group" id="name-input-group"><label>성함</label><input type="text" id="user-name-input" placeholder="성함을 입력하세요" required></div><label class="anon-container"><input type="checkbox" id="anon-check"><span>익명으로 제출하기</span></label><div class="input-group"><label>분류</label><select id="category" required><option value="" disabled selected>분류를 선택하세요</option><option value="기능 제안">기능 제안</option><option value="버그 제보">버그 제보</option><option value="디자인 의견">디자인 의견</option><option value="기타">기타</option></select></div><div class="input-group"><label>제목</label><input type="text" id="subject" placeholder="제목을 입력하세요" required></div><div class="input-group"><label>내용</label><textarea id="content" placeholder="건의 내용을 상세히 작성해주세요." required></textarea></div><button type="submit" class="submit-btn">제출하기</button></form></div></main>
+<footer><p>&copy; 2026 SYRTN Collaboration. All Rights Reserved.</p><p>영광해룡고등학교 | 순천고등학교 | 순천복성고등학교 물리·천문·지구과학 동아리 연합</p><p>designed by SYRTN Team | 문의 : 2jw5464@gmail.com</p></footer>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const API_BASE_URL = "https://hypocrite-depletion-until.ngrok-free.dev";
+    const ADMIN_EMAIL = "2jw5464@gmail.com";
+    const firebaseConfig = { apiKey:"AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU", authDomain:"syrt-2026.firebaseapp.com", projectId:"syrt-2026", storageBucket:"syrt-2026.firebasestorage.app", messagingSenderId:"848896876364", appId:"1:848896876364:web:42edc690489962f76df9e9", measurementId:"G-Q0BKR95VH2" };
+    const app = initializeApp(firebaseConfig);
+    initializeAppCheck(app, { provider:new ReCaptchaV3Provider('6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq'), isTokenAutoRefreshEnabled:true });
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const loginLink = document.getElementById('login-link');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userNameDisplay = document.getElementById('user-name');
+    const nameInput = document.getElementById('user-name-input');
+    const anonCheck = document.getElementById('anon-check');
+    const submitBtn = document.querySelector('.submit-btn');
+    let currentUser = null;
+    let currentUserData = null;
+    let currentRole = 'guest';
+
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) { location.replace('block.html'); return; }
+        currentUser = user;
+        try {
+            const userDocSnap = await getDoc(doc(db, 'users', user.uid));
+            if (!userDocSnap.exists()) { location.replace('block.html'); return; }
+            currentUserData = userDocSnap.data();
+            currentRole = user.email === ADMIN_EMAIL ? 'admin' : (currentUserData.role || 'member');
+            if (!['admin', 'teacher', 's-leader', 'h-leader', 'b-leader', 's-student', 'h-student', 'b-student'].includes(currentRole)) { location.replace('block.html'); return; }
+            loginLink.style.display = 'none';
+            userNameDisplay.style.display = 'inline';
+            userNameDisplay.innerText = `${currentUserData.name || '사용자'}님`;
+            logoutBtn.style.display = 'inline';
+            if (!anonCheck.checked) nameInput.value = currentUserData.name || '';
+        } catch (error) {
+            console.error(error);
+            location.replace('block.html');
+        }
+    });
+
+    anonCheck.addEventListener('change', () => {
+        if (anonCheck.checked) {
+            nameInput.value = '';
+            nameInput.disabled = true;
+            nameInput.placeholder = '익명으로 안전하게 제출합니다';
+            nameInput.required = false;
+        } else {
+            nameInput.disabled = false;
+            nameInput.placeholder = '성함을 입력하세요';
+            nameInput.required = true;
+            if (currentUserData) nameInput.value = currentUserData.name || '';
+        }
+    });
+
+    document.getElementById('suggestion-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        submitBtn.disabled = true;
+        submitBtn.innerText = '제출 중...';
+        const isAnon = anonCheck.checked;
+        const authorName = isAnon ? '익명' : nameInput.value.trim();
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/syrtn/suggestions`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${await currentUser.getIdToken()}`, 'X-User-Role': currentRole, 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '69420' },
+                body: JSON.stringify({ authorName, isAnonymous: isAnon, category: document.getElementById('category').value, subject: document.getElementById('subject').value.trim(), content: document.getElementById('content').value.trim(), userEmail: currentUser.email })
+            });
+            if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data.error || '제출 실패'); }
+            alert('소중한 의견이 제출되었습니다. 관리자가 확인 후 반영하겠습니다.');
+            document.getElementById('suggestion-form').reset();
+            if (currentUserData) nameInput.value = currentUserData.name || '';
+        } catch (err) {
+            alert('제출 중 오류가 발생했습니다: ' + err.message);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerText = '제출하기';
+        }
+    });
+
+    logoutBtn.onclick = async () => { if (confirm('로그아웃 하시겠습니까?')) { await signOut(auth); location.replace('index.html'); } };
+</script>
+</body>
+</html>
+
+
+

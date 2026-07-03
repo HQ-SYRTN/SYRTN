@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="SYRTN-logo-homepage.png" type="image/png">
+    <link rel="apple-touch-icon" href="SYRTN-logo-homepage.png">
+    <title>SYRTN | School Board</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-dark:#050505; --accent:#00E5FF; --text-main:#fff; --card-bg:rgba(255,255,255,.03); --nav-bg:rgba(0,0,0,.9); --border-color:rgba(255,255,255,.1); }
+        body, html { margin:0; padding:0; font-family:'Noto Sans KR',sans-serif; background:var(--bg-dark); color:var(--text-main); line-height:1.6; }
+        .auth-bar { position:fixed; top:0; width:100%; height:60px; background:var(--nav-bg); backdrop-filter:blur(10px); display:flex; justify-content:space-between; align-items:center; padding:0 clamp(16px,4vw,40px); box-sizing:border-box; z-index:1000; border-bottom:1px solid var(--border-color); gap:16px; }
+        .logo-link { display:flex; align-items:center; gap:12px; text-decoration:none; color:white; font-weight:700; letter-spacing:1.2px; white-space:nowrap; min-width:0; }
+        .nav-logo { width:40px; height:40px; flex:0 0 40px; border-radius:50%; background:white; object-fit:contain; }
+        .auth-user-zone { display:flex; align-items:center; justify-content:flex-end; gap:10px; min-width:0; }
+        #user-name { color:var(--accent); font-weight:700; font-size:.9rem; }
+        .auth-btn, .btn-write, .btn-delete-left { background:transparent; border:1px solid var(--text-main); color:var(--text-main); min-height:32px; padding:6px 14px; box-sizing:border-box; cursor:pointer; text-decoration:none; border-radius:4px; font-size:.85rem; line-height:1.2; white-space:nowrap; }
+        .auth-btn:hover { background:var(--text-main); color:#000; }
+        header.board-hero { min-height:280px; height:40vh; display:flex; flex-direction:column; justify-content:center; align-items:center; background:linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.9)), var(--hero-image) center/cover no-repeat; text-align:center; padding:60px 16px 0; box-sizing:border-box; }
+        .board-hero h1 { font-size:clamp(2.2rem,6vw,3.2rem); margin:0 0 10px; color:var(--accent); line-height:1.12; }
+        .board-hero p { font-size:1rem; opacity:.82; font-weight:300; margin:0; }
+        .sub-nav-container { width:100%; height:52px; background:#111; border-top:1px solid rgba(255,255,255,.1); border-bottom:1px solid rgba(255,255,255,.1); position:sticky; top:60px; z-index:900; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; scrollbar-width:thin; }
+        .nav-menu { min-height:52px; width:max-content; min-width:100%; display:flex; flex-wrap:nowrap; align-items:center; justify-content:center; gap:0; padding:0 16px; box-sizing:border-box; }
+        .nav-menu a { height:52px; display:inline-flex; align-items:center; justify-content:center; padding:0 14px; color:rgba(255,255,255,.7); text-decoration:none; font-size:.9rem; line-height:1.1; letter-spacing:.8px; white-space:nowrap; flex:0 0 auto; }
+        .nav-menu a:hover, .nav-menu a.active { color:var(--accent); }
+        .content-section { width:100%; max-width:1000px; margin:40px auto 100px; padding:0 20px; box-sizing:border-box; }
+        .board-header { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:20px; }
+        .board-header h2 { margin:0; font-size:1.3rem; border-left:4px solid var(--accent); padding-left:15px; }
+        .btn-write { border-color:var(--accent); color:var(--accent); }
+        .btn-write:hover { background:var(--accent); color:#000; }
+        .search-filter-section { background:rgba(255,255,255,.02); padding:20px; border-radius:8px; margin-bottom:30px; display:flex; flex-wrap:wrap; gap:15px; align-items:center; border:1px solid var(--border-color); }
+        .search-input { flex:1; min-width:240px; background:rgba(0,0,0,.3); border:1px solid var(--border-color); padding:10px 15px; color:white; border-radius:6px; outline:none; box-sizing:border-box; }
+        .filter-select { background:#111; color:white; border:1px solid var(--border-color); padding:10px; border-radius:6px; outline:none; cursor:pointer; }
+        .resource-container { display:flex; flex-direction:column; gap:12px; }
+        .resource-item { display:flex; align-items:center; background:var(--card-bg); padding:20px; border-radius:8px; border:1px solid var(--border-color); transition:.2s; cursor:pointer; }
+        .resource-item:hover { background:rgba(255,255,255,.06); border-color:var(--accent); transform:translateY(-2px); }
+        .item-content { flex-grow:1; min-width:0; }
+        .item-title { font-size:1.1rem; font-weight:700; color:#fff; margin-bottom:5px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .item-meta { font-size:.8rem; color:#777; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+        .btn-delete-left { margin-right:15px; color:#ff4d4d; border-color:#ff4d4d; font-size:.75rem; }
+        .tag { font-size:.7rem; padding:2px 8px; border-radius:4px; background:rgba(0,229,255,.1); color:var(--accent); border:1px solid var(--accent); }
+        .empty-msg { padding:80px 20px; text-align:center; color:#666; font-size:1.05rem; }
+        footer { text-align:center; padding:60px 20px; color:#444; font-size:.8rem; border-top:1px solid var(--border-color); }
+        @media (max-width:700px) {
+            .auth-bar { height:56px; padding:0 14px; }
+            .logo-link span { font-size:.95rem; }
+            .nav-logo { width:34px; height:34px; flex-basis:34px; }
+            #user-name { max-width:34vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+            .auth-btn { min-height:30px; padding:5px 10px; font-size:.78rem; }
+            .sub-nav-container { top:56px; height:48px; }
+            .nav-menu { min-height:48px; justify-content:flex-start; padding:0 10px; }
+            .nav-menu a { height:48px; padding:0 11px; font-size:.78rem; letter-spacing:.4px; }
+            header.board-hero { min-height:260px; height:38vh; padding-top:56px; }
+            .content-section { padding-left:16px; padding-right:16px; }
+            .board-header { align-items:flex-start; flex-direction:column; }
+            .search-input { min-width:100%; }
+            .resource-item { align-items:flex-start; }
+        }
+    </style>
+</head>
+<body>
+<div class="auth-bar">
+    <a href="index.html" class="logo-link"><img src="SYRTN-logo-homepage.png" alt="Logo" class="nav-logo"><span>SYRTN</span></a>
+    <div class="auth-user-zone">
+        <a href="login.html" id="login-link" class="auth-btn">LOGIN</a>
+        <span id="user-name" style="display:none;"></span>
+        <button id="logout-btn" class="auth-btn" style="display:none;">LOGOUT</button>
+    </div>
+</div>
+
+<header class="board-hero">
+    <h1 id="hero-title">학교 게시판</h1>
+    <p id="hero-subtitle">소속 학교 전용 자료와 소통 공간</p>
+</header>
+
+<nav class="sub-nav-container">
+    <div class="nav-menu">
+        <a href="index.html">HOME</a><a href="introduction.html">INTRODUCTION</a><a href="talk.html" class="active">TALK</a><a href="resource.html">RESOURCE</a><a href="suggest.html">SUGGESTION</a><a href="mypage.html">MY PAGE</a><a href="adjust.html">REQUEST AUTHORITY</a><a href="admin.html">ADMIN</a>
+    </div>
+</nav>
+
+<main class="content-section">
+    <div class="board-header">
+        <h2 id="board-title">학교 아카이브</h2>
+        <button class="btn-write" id="write-btn" style="display:none;">자료 등록</button>
+    </div>
+    <div class="search-filter-section">
+        <select id="filter-category" class="filter-select">
+            <option value="all">전체 카테고리</option>
+            <option value="천체 관측 데이터">천체 관측 데이터</option>
+            <option value="실험 보고서">실험 보고서</option>
+            <option value="훈련 자료">훈련 자료</option>
+            <option value="소스 코드">소스 코드</option>
+            <option value="기타">기타</option>
+        </select>
+        <input type="text" id="search-keyword" class="search-input" placeholder="제목 또는 작성자 검색...">
+    </div>
+    <div id="resource-list" class="resource-container"><div class="empty-msg">데이터를 불러오는 중...</div></div>
+</main>
+
+<footer>
+    <p>&copy; 2026 SYRTN Collaboration. All Rights Reserved.</p>
+    <p>영광해룡고등학교 | 순천고등학교 | 순천복성고등학교 물리·천문·지구과학 동아리 연합</p>
+    <p>designed by SYRTN Team | 문의 : 2jw5464@gmail.com</p>
+</footer>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const API_BASE_URL = "https://hypocrite-depletion-until.ngrok-free.dev";
+    const ADMIN_EMAIL = "2jw5464@gmail.com";
+    const SCHOOLS = {
+        s: { collection:"s-resources", title:"순천고 전용 자료실", boardTitle:"순천고 아카이브", subtitle:"순천고 전용 연구 데이터 및 결과물 아카이브", student:"s-student", leader:"s-leader", writeUrl:"school-write.html?school=s", viewUrl:"school-view.html?school=s", hero:"url('https://images.unsplash.com/photo-1614732414444-096e5f1122d5?q=80&w=2074')" },
+        h: { collection:"h-resources", title:"해룡고 전용 자료실", boardTitle:"해룡고 아카이브", subtitle:"해룡고 전용 연구 데이터 및 결과물 아카이브", student:"h-student", leader:"h-leader", writeUrl:"school-write.html?school=h", viewUrl:"school-view.html?school=h", hero:"url('https://images.unsplash.com/photo-1630839437035-dac17da580d0?q=80&w=2030')" }
+    };
+
+    const params = new URLSearchParams(location.search);
+    const schoolKey = params.get("school");
+    const school = SCHOOLS[schoolKey];
+    if (!school) {
+        location.replace("talk.html");
+        throw new Error("Invalid school.");
+    }
+
+    document.documentElement.style.setProperty("--hero-image", school.hero);
+    document.title = `SYRTN | ${school.boardTitle}`;
+    document.getElementById("hero-title").textContent = school.title;
+    document.getElementById("hero-subtitle").textContent = school.subtitle;
+    document.getElementById("board-title").textContent = school.boardTitle;
+    document.getElementById("write-btn").onclick = () => location.href = school.writeUrl;
+
+    const firebaseConfig = { apiKey:"AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU", authDomain:"syrt-2026.firebaseapp.com", projectId:"syrt-2026", storageBucket:"syrt-2026.firebasestorage.app", messagingSenderId:"848896876364", appId:"1:848896876364:web:42edc690489962f76df9e9" };
+    const app = initializeApp(firebaseConfig);
+    initializeAppCheck(app, { provider:new ReCaptchaV3Provider("6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq"), isTokenAutoRefreshEnabled:true });
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let currentRole = "guest";
+    let allPosts = [];
+
+    const roleAllowed = (role) => ["admin", "teacher", school.student, school.leader].includes(role);
+    const canManage = (post) => currentUser && (post.uid === currentUser.uid || ["admin", "teacher", school.leader].includes(currentRole));
+    const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch]));
+
+    document.getElementById("logout-btn").addEventListener("click", async () => {
+        if (confirm("로그아웃 하시겠습니까?")) {
+            await signOut(auth);
+            location.href = "index.html";
+        }
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) { location.replace("block.html"); return; }
+        try {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (!userDoc.exists()) { location.replace("block.html"); return; }
+            const userData = userDoc.data();
+            const role = user.email === ADMIN_EMAIL ? "admin" : (userData.role || "member");
+            if (!roleAllowed(role)) { location.replace("block.html"); return; }
+            currentUser = user;
+            currentRole = role;
+            document.getElementById("user-name").style.display = "inline";
+            document.getElementById("user-name").textContent = `${userData.name || "사용자"}님`;
+            document.getElementById("logout-btn").style.display = "inline";
+            document.getElementById("login-link").style.display = "none";
+            document.getElementById("write-btn").style.display = "inline";
+            await loadPosts();
+        } catch (err) {
+            console.error(err);
+            location.replace("block.html");
+        }
+    });
+
+    async function authHeaders() {
+        return { "Authorization": `Bearer ${await currentUser.getIdToken()}`, "X-User-Role": currentRole, "ngrok-skip-browser-warning": "69420" };
+    }
+
+    async function loadPosts() {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${school.collection}`, { headers: await authHeaders() });
+            if (!res.ok) { location.replace("block.html"); return; }
+            allPosts = await res.json();
+            renderPosts();
+        } catch (err) {
+            document.getElementById("resource-list").innerHTML = '<div class="empty-msg">서버 연결에 실패했습니다.</div>';
+        }
+    }
+
+    function renderPosts() {
+        const keyword = document.getElementById("search-keyword").value.toLowerCase();
+        const category = document.getElementById("filter-category").value;
+        const filtered = allPosts.filter(p => (category === "all" || p.category === category) && ((p.title || "").toLowerCase().includes(keyword) || (p.author_name || "").toLowerCase().includes(keyword)));
+        const listDiv = document.getElementById("resource-list");
+        if (filtered.length === 0) {
+            listDiv.innerHTML = '<div class="empty-msg">등록된 자료가 없습니다.</div>';
+            return;
+        }
+        listDiv.innerHTML = filtered.map(p => `
+            <div class="resource-item" onclick="location.href='${school.viewUrl}&id=${p.id}'">
+                ${canManage(p) ? `<button class="btn-delete-left" onclick="deletePost(event, ${p.id})">삭제</button>` : ""}
+                <div class="item-content">
+                    <span class="item-title">${escapeHtml(p.title || "제목 없음")}</span>
+                    <div class="item-meta"><span class="tag">${escapeHtml(p.category || "기타")}</span><span>${escapeHtml(p.author_name || "익명")}</span><span>|</span><span>${p.created_at ? new Date(p.created_at).toLocaleDateString() : "-"}</span></div>
+                </div>
+            </div>
+        `).join("");
+    }
+
+    window.deletePost = async (event, postId) => {
+        event.stopPropagation();
+        if (!confirm("이 자료를 삭제하시겠습니까?")) return;
+        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${school.collection}/${postId}`, { method:"DELETE", headers: await authHeaders() });
+        if (res.ok) await loadPosts();
+        else alert("삭제 권한이 없거나 오류가 발생했습니다.");
+    };
+
+    document.getElementById("search-keyword").oninput = renderPosts;
+    document.getElementById("filter-category").onchange = renderPosts;
+</script>
+</body>
+</html>

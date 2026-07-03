@@ -1,0 +1,491 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="SYRTN-logo-homepage.png" type="image/png">
+    <link rel="apple-touch-icon" href="SYRTN-logo-homepage.png">
+    <title>SYRTN | Request Authority</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --accent: #00E5FF;
+            --text-main: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --nav-bg: rgba(0, 0, 0, 0.8);
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* --- ?곷떒 Bar (Auth Bar) --- */
+        .auth-bar {
+            position: fixed; top: 0; width: 100%; height: 60px;
+            background: var(--nav-bg); backdrop-filter: blur(10px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 40px; box-sizing: border-box; z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-link {
+            display: flex; align-items: center; gap: 12px;
+            text-decoration: none; color: white; font-weight: 700; letter-spacing: 2px;
+        }
+
+        .nav-logo { height: 40px; width: 40px; border-radius: 50%; background-color: white; object-fit: contain; }
+
+        .auth-user-zone { display: flex; align-items: center; gap: 15px; }
+
+        .auth-btn {
+            background: transparent; border: 1px solid var(--text-main);
+            color: var(--text-main); padding: 6px 15px; cursor: pointer;
+            text-decoration: none; font-size: 0.85rem; transition: 0.3s; border-radius: 4px;
+        }
+
+        .auth-btn:hover { background: var(--text-main); color: black; }
+        #user-display-name {
+            color: #ffffff !important;
+        }
+
+        /* --- Header (Hero) --- */
+        header.intro-hero {
+            height: 45vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.9)), 
+                        url('https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?q=80&w=2042') no-repeat center/cover;
+            text-align: center; padding-top: 60px;
+        }
+
+        .intro-hero h1 { font-size: 2.5rem; margin-bottom: 10px; color: var(--accent); }
+
+        /* --- 以묎컙 Navigation Menu (Sticky) --- */
+        .sub-nav-container {
+            width: 100%;
+            background: #111;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 60px; /* auth-bar 諛붾줈 ?꾨옒 遺숈쓬 */
+            z-index: 900;
+        }
+
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding: 15px 0;
+        }
+
+        .nav-menu a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 400;
+            letter-spacing: 1.5px;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .nav-menu a:hover, .nav-menu a.active {
+            color: var(--accent);
+        }
+
+        .nav-menu a.active::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--accent);
+        }
+
+        .nav-item {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding-bottom: 5px;
+            border-bottom: 2px solid transparent;
+            transition: 0.3s;
+        }
+
+        .nav-item:hover { border-bottom: 2px solid var(--accent); color: var(--accent); }
+
+        /* --- Main Content --- */
+        .content-section { max-width: 700px; margin: 40px auto 100px; padding: 0 20px; }
+
+        .request-card {
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px);
+            padding: 40px; border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .form-group { margin-bottom: 25px; }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 0.9rem; color: var(--accent); font-weight: bold; }
+        
+        .form-input, .form-select, .form-textarea {
+            width: 100%; padding: 12px; border-radius: 8px;
+            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
+            color: white; font-size: 1rem; box-sizing: border-box; outline: none;
+            transition: 0.3s;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus { 
+            border-color: var(--accent); 
+            background: rgba(0, 229, 255, 0.05); 
+        }
+
+        /* 移댄뀒怨좊━ ??ぉ 媛?낆꽦 ?닿껐 肄붾뱶 */
+        .form-select option {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .form-select { color-scheme: dark; cursor: pointer; }
+
+        .submit-btn {
+            width: 100%; padding: 15px; border: none; border-radius: 8px;
+            background: var(--accent); color: #000; font-weight: 700;
+            font-size: 1.1rem; cursor: pointer; transition: 0.3s;
+        }
+
+        .submit-btn:hover { background: #ffffff; transform: translateY(-3px); }
+
+        footer {
+            background: #000; padding: 40px 20px; text-align: center;
+            font-size: 0.85rem; color: #444; border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        @media (max-width: 600px) {
+            .logo-area span { font-size: 16px; }
+            nav a { padding: 10px 12px; font-size: 13px; }
+            header h1 { font-size: 22px; }
+            .header-logo { width: 100px; height: 100px; }
+        }
+    
+        /* Unified responsive navigation */
+        .auth-bar {
+            height: 60px !important;
+            padding: 0 clamp(16px, 4vw, 40px) !important;
+            gap: 16px !important;
+        }
+        .logo-link {
+            min-width: 0 !important;
+            flex: 0 1 auto !important;
+            letter-spacing: 1.2px !important;
+            white-space: nowrap !important;
+        }
+        .nav-logo {
+            width: 40px !important;
+            height: 40px !important;
+            flex: 0 0 40px !important;
+        }
+        .auth-user-zone {
+            min-width: 0 !important;
+            flex: 0 1 auto !important;
+            justify-content: flex-end !important;
+            gap: 10px !important;
+        }
+        .auth-btn {
+            min-height: 32px !important;
+            padding: 6px 14px !important;
+            box-sizing: border-box !important;
+            white-space: nowrap !important;
+            line-height: 1.2 !important;
+        }
+        .sub-nav-container {
+            height: 52px !important;
+            top: 60px !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            -webkit-overflow-scrolling: touch !important;
+            scrollbar-width: thin !important;
+        }
+        .nav-menu {
+            min-height: 52px !important;
+            width: max-content !important;
+            min-width: 100% !important;
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0 !important;
+            padding: 0 16px !important;
+            box-sizing: border-box !important;
+        }
+        .nav-menu a {
+            height: 52px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 0 14px !important;
+            box-sizing: border-box !important;
+            font-size: 0.9rem !important;
+            line-height: 1.1 !important;
+            letter-spacing: 0.8px !important;
+            white-space: nowrap !important;
+            flex: 0 0 auto !important;
+        }
+        .nav-menu a.active::after {
+            bottom: 8px !important;
+        }
+        @media (max-width: 700px) {
+            .auth-bar {
+                height: 56px !important;
+                padding: 0 14px !important;
+            }
+            .logo-link span {
+                font-size: 0.95rem !important;
+            }
+            .nav-logo {
+                width: 34px !important;
+                height: 34px !important;
+                flex-basis: 34px !important;
+            }
+            .auth-user-zone {
+                gap: 8px !important;
+            }
+            .auth-user-zone span[id*="user"], #user-name, #userNameDisplay {
+                max-width: 34vw !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                white-space: nowrap !important;
+            }
+            .auth-btn {
+                min-height: 30px !important;
+                padding: 5px 10px !important;
+                font-size: 0.78rem !important;
+            }
+            .sub-nav-container {
+                top: 56px !important;
+                height: 48px !important;
+            }
+            .nav-menu {
+                min-height: 48px !important;
+                justify-content: flex-start !important;
+                padding: 0 10px !important;
+            }
+            .nav-menu a {
+                height: 48px !important;
+                padding: 0 11px !important;
+                font-size: 0.78rem !important;
+                letter-spacing: 0.4px !important;
+            }
+            header.intro-hero,
+            header.board-hero {
+                min-height: 260px !important;
+                height: 38vh !important;
+                padding-top: 56px !important;
+            }
+            .intro-hero h1,
+            .board-hero h1,
+            header h1 {
+                font-size: clamp(2rem, 10vw, 2.6rem) !important;
+                line-height: 1.12 !important;
+                padding: 0 16px !important;
+                box-sizing: border-box !important;
+            }
+            .intro-hero p,
+            .board-hero p {
+                font-size: 0.95rem !important;
+                padding: 0 18px !important;
+                box-sizing: border-box !important;
+            }
+            .content-section,
+            .container {
+                width: 100% !important;
+                max-width: 100% !important;
+                padding-left: 16px !important;
+                padding-right: 16px !important;
+                box-sizing: border-box !important;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="auth-bar">
+    <a href="index.html" class="logo-link">
+        <img src="SYRTN-logo-homepage.png" alt="SYRTN Logo" class="nav-logo">
+        <span>SYRTN</span>
+    </a>
+
+    <div class="auth-user-zone">
+        <a href="login.html" id="login-link" class="auth-btn">LOGIN</a>
+        <span id="user-display-name" style="display:none; margin-right: 10px;"></span>
+        <button id="logout-btn" class="auth-btn" style="display:none;">LOGOUT</button>
+    </div>
+</div>
+
+<header class="intro-hero">
+    <h1>Request Authority</h1>
+    <p>?꾨줈?앺듃 李몄뿬瑜??꾪븳 沅뚰븳 ?좎껌</p>
+</header>
+
+<nav class="sub-nav-container">
+    <div class="nav-menu">
+        <a href="index.html" class="nav-item">HOME</a>
+        <a href="introduction.html" class="nav-item">INTRODUCTION</a>
+        <a href="talk.html" class="nav-item">TALK</a>
+        <a href="resource.html" class="nav-item">RESOURCE</a>
+        <a href="suggest.html" class="nav-item">SUGGESTION</a>
+        <a href="mypage.html" class="nav-item">MY PAGE</a>
+        <a href="adjust.html" class="nav-item active">REQUEST AUTHORITY</a>
+        <a href="admin.html" class="nav-item">ADMIN</a>
+    </div>
+</nav>
+
+<main class="content-section">
+    <div class="request-card">
+        <form id="adjustment-form">
+            <div class="form-group">
+                <label>?대쫫</label>
+                <input type="text" id="user-name" class="form-input" placeholder="?깊븿???낅젰?섏꽭?? required>
+            </div>
+            <div class="form-group">
+                <label>?뚯냽 ?숆탳</label>
+                <select id="user-school" class="form-select" required>
+                    <option value="">?숆탳 ?좏깮</option>
+                    <option value="?곴킅?대！怨?>?곴킅?대！怨좊벑?숆탳</option>
+                    <option value="?쒖쿇怨?>?쒖쿇怨좊벑?숆탳</option>
+                    <option value="?쒖쿇蹂듭꽦怨?>?쒖쿇蹂듭꽦怨좊벑?숆탳</option>
+                    <option value="other">湲고?</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>?붿껌 沅뚰븳 ?깃툒</label>
+                <select id="requested-role" class="form-select" required>
+                    <option value="member">?쇰컲 ?뚯썝</option>
+                    <option value="s-student">?쒖쿇怨?遺??/option>
+                    <option value="b-student">蹂듭꽦怨?遺??/option>
+                    <option value="h-student">?대！怨?遺??/option>
+                    <option value="s-leader">?쒖쿇怨?遺??/option>
+                    <option value="b-leader">蹂듭꽦怨?遺??/option>
+                    <option value="h-leader">?대！怨?遺??/option>
+                    <option value="teacher">吏??援먯궗</option>
+                    <option value="admin">愿由ъ옄</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>?좎껌 ?ъ쑀 (李몄뿬 ?숈븘由щ챸 ?ы븿)</label>
+                <textarea id="request-reason" class="form-textarea" rows="5" placeholder="?좎껌 ?ъ쑀瑜?援ъ껜?곸쑝濡??곸뼱二쇱꽭??" required></textarea>
+            </div>
+            <button type="submit" class="submit-btn" id="submit-button">?좎껌???쒖텧?섍린</button>
+        </form>
+    </div>
+</main>
+
+<footer>
+    <p>&copy; 2026 SYRTN Collaboration. All Rights Reserved.</p>
+    <p>?곴킅?대！怨좊벑?숆탳 | ?쒖쿇怨좊벑?숆탳 | ?쒖쿇蹂듭꽦怨좊벑?숆탳 臾쇰━쨌泥쒕Ц쨌吏援ш낵???숈븘由??고빀</p>
+    <p>designed by SYRTN Team | 臾몄쓽 : 2jw5464@gmail.com</p>
+</footer>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    // [?꾩닔] App Check ?쇱씠釉뚮윭由??꾪룷??
+    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU",
+        authDomain: "syrt-2026.firebaseapp.com",
+        projectId: "syrt-2026",
+        storageBucket: "syrt-2026.firebasestorage.app",
+        messagingSenderId: "848896876364",
+        appId: "1:848896876364:web:42edc690489962f76df9e9"
+    };
+
+    const app = initializeApp(firebaseConfig);
+
+    // --- [異붽?] App Check 珥덇린??---
+    const appCheck = initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider('6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq'),
+        isTokenAutoRefreshEnabled: true
+    });
+
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxPK20lzkHYLR_49yX2UskWX_tjtfE5sWIALIKEo3QQ7HzVh4wdzoT7uMuEVj8naNNUKQ/exec";
+
+    const loginLink = document.getElementById('login-link');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userDisplayName = document.getElementById('user-display-name');
+    const submitBtn = document.getElementById('submit-button');
+    let currentUser = null;
+
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            if(loginLink) loginLink.style.display = 'none';
+            if(userDisplayName) {
+                userDisplayName.style.display = 'inline';
+                userDisplayName.innerText = `${user.displayName || '?ъ슜??}님`;
+            }
+            if(logoutBtn) logoutBtn.style.display = 'inline';
+            
+            document.getElementById('user-name').value = user.displayName || "";
+
+            // ?대? ?좎껌 以묒씤吏 ?뺤씤
+            const pendingDoc = await getDoc(doc(db, "pending_requests", user.uid));
+            if (pendingDoc.exists()) {
+                submitBtn.disabled = true;
+                submitBtn.innerText = "?대? ?좎껌 寃??以묒엯?덈떎.";
+                submitBtn.style.background = "#444";
+            }
+        } else {
+            location.replace("block.html");
+        }
+    });
+
+    // ?좎껌???쒖텧 濡쒖쭅
+    document.getElementById('adjustment-form').onsubmit = async (e) => {
+        e.preventDefault();
+        if (!currentUser) return;
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = "?꾩넚 以?..";
+
+        const formData = {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            name: document.getElementById('user-name').value,
+            school: document.getElementById('user-school').value,
+            requestedRole: document.getElementById('requested-role').value,
+            reason: document.getElementById('request-reason').value,
+            status: "pending",
+            timestamp: new Date().toISOString()
+        };
+
+        try {
+            // App Check媛 ?쒖꽦?붾릺???덉쑝硫? ?좏슚???좏겙???놁쓣 寃쎌슦 Firestore ?곌린媛 嫄곕??⑸땲??
+            await setDoc(doc(db, "pending_requests", currentUser.uid), formData);
+            
+            await fetch(GAS_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            alert("沅뚰븳 ?좎껌???꾨즺?섏뿀?듬땲??");
+            location.replace("index.html");
+        } catch (error) {
+            console.error(error);
+            alert("?ㅻ쪟媛 諛쒖깮?덉뒿?덈떎.");
+            submitBtn.disabled = false;
+            submitBtn.innerText = "?좎껌???쒖텧?섍린";
+        }
+    };
+</script>
+</body>
+</html>
+
+

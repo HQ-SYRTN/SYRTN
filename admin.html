@@ -1,0 +1,347 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="SYRTN-logo-homepage.png" type="image/png">
+    <link rel="apple-touch-icon" href="SYRTN-logo-homepage.png">
+    <title>SYRTN | Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-dark:#050505; --accent:#00E5FF; --text-main:#fff; --card-bg:rgba(255,255,255,.05); --nav-bg:rgba(0,0,0,.85); --border:rgba(255,255,255,.1); }
+        body, html { margin:0; padding:0; font-family:'Noto Sans KR',sans-serif; background:var(--bg-dark); color:var(--text-main); line-height:1.6; }
+        .auth-bar { position:fixed; top:0; width:100%; height:60px; background:var(--nav-bg); backdrop-filter:blur(10px); display:flex; justify-content:space-between; align-items:center; padding:0 40px; box-sizing:border-box; z-index:1000; border-bottom:1px solid var(--border); }
+        .logo-link { display:flex; align-items:center; gap:12px; text-decoration:none; color:white; font-weight:700; letter-spacing:2px; }
+        .nav-logo { height:40px; width:40px; border-radius:50%; background:white; object-fit:contain; }
+        .auth-user-zone { display:flex; align-items:center; gap:15px; }
+        .auth-btn { background:transparent; border:1px solid var(--text-main); color:var(--text-main); padding:6px 15px; cursor:pointer; text-decoration:none; font-size:.85rem; transition:.3s; border-radius:4px; }
+        .auth-btn:hover { background:white; color:black; }
+        header.intro-hero { height:42vh; display:flex; flex-direction:column; justify-content:center; align-items:center; background:linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.9)), url('https://images.unsplash.com/photo-1614313913007-2b4ae8ce32d6?q=80&w=2074') no-repeat center/cover; text-align:center; padding-top:60px; }
+        .intro-hero h1 { font-size:2.7rem; margin:0 0 10px; color:var(--accent); }
+        .intro-hero p { margin:0; font-size:1rem; opacity:.82; font-weight:300; }
+        .sub-nav-container { width:100%; background:#111; border-top:1px solid var(--border); border-bottom:1px solid var(--border); position:sticky; top:60px; z-index:900; }
+        .nav-menu { display:flex; justify-content:center; gap:34px; padding:15px 0; flex-wrap:wrap; }
+        .nav-menu a { color:rgba(255,255,255,.72); text-decoration:none; font-size:.9rem; letter-spacing:1.2px; transition:.3s; position:relative; }
+        .nav-menu a:hover, .nav-menu a.active { color:var(--accent); }
+        .nav-menu a.active::after { content:''; position:absolute; width:100%; height:2px; bottom:-5px; left:0; background:var(--accent); }
+        .content-section { max-width:1100px; margin:60px auto 100px; padding:0 20px; }
+        .section-title { font-size:1.7rem; border-left:4px solid var(--accent); padding-left:18px; margin:46px 0 18px; font-weight:700; }
+        .section-note { color:#888; margin:0 0 20px; }
+        .admin-card { background:var(--card-bg); border-radius:16px; border:1px solid var(--border); padding:26px; overflow-x:auto; }
+        .user-table { width:100%; border-collapse:collapse; font-size:.9rem; min-width:760px; }
+        .user-table th { text-align:left; padding:14px; color:var(--accent); border-bottom:2px solid var(--border); white-space:nowrap; }
+        .user-table td { padding:14px; border-bottom:1px solid rgba(255,255,255,.06); vertical-align:top; }
+        .role-select { background:rgba(255,255,255,.1); color:white; border:1px solid rgba(255,255,255,.2); padding:7px 12px; border-radius:6px; outline:none; cursor:pointer; }
+        .role-select option { background:#1a1a1a; color:white; }
+        .btn-update { background:var(--accent); color:#000; border:none; padding:7px 14px; border-radius:6px; cursor:pointer; font-weight:700; font-size:.8rem; transition:.25s; margin:2px; }
+        .btn-update:hover { background:white; }
+        .btn-danger { background:#ff4444; color:white; }
+        footer { background:#000; padding:60px 20px; text-align:center; font-size:.85rem; color:#666; border-top:1px solid rgba(255,255,255,.05); }
+        @media (max-width:700px) { .auth-bar { padding:0 18px; } .intro-hero h1 { font-size:2.1rem; } .nav-menu { gap:18px; } }
+    
+        /* Unified responsive navigation */
+        .auth-bar {
+            height: 60px !important;
+            padding: 0 clamp(16px, 4vw, 40px) !important;
+            gap: 16px !important;
+        }
+        .logo-link {
+            min-width: 0 !important;
+            flex: 0 1 auto !important;
+            letter-spacing: 1.2px !important;
+            white-space: nowrap !important;
+        }
+        .nav-logo {
+            width: 40px !important;
+            height: 40px !important;
+            flex: 0 0 40px !important;
+        }
+        .auth-user-zone {
+            min-width: 0 !important;
+            flex: 0 1 auto !important;
+            justify-content: flex-end !important;
+            gap: 10px !important;
+        }
+        .auth-btn {
+            min-height: 32px !important;
+            padding: 6px 14px !important;
+            box-sizing: border-box !important;
+            white-space: nowrap !important;
+            line-height: 1.2 !important;
+        }
+        .sub-nav-container {
+            height: 52px !important;
+            top: 60px !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            -webkit-overflow-scrolling: touch !important;
+            scrollbar-width: thin !important;
+        }
+        .nav-menu {
+            min-height: 52px !important;
+            width: max-content !important;
+            min-width: 100% !important;
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0 !important;
+            padding: 0 16px !important;
+            box-sizing: border-box !important;
+        }
+        .nav-menu a {
+            height: 52px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 0 14px !important;
+            box-sizing: border-box !important;
+            font-size: 0.9rem !important;
+            line-height: 1.1 !important;
+            letter-spacing: 0.8px !important;
+            white-space: nowrap !important;
+            flex: 0 0 auto !important;
+        }
+        .nav-menu a.active::after {
+            bottom: 8px !important;
+        }
+        @media (max-width: 700px) {
+            .auth-bar {
+                height: 56px !important;
+                padding: 0 14px !important;
+            }
+            .logo-link span {
+                font-size: 0.95rem !important;
+            }
+            .nav-logo {
+                width: 34px !important;
+                height: 34px !important;
+                flex-basis: 34px !important;
+            }
+            .auth-user-zone {
+                gap: 8px !important;
+            }
+            .auth-user-zone span[id*="user"], #user-name, #userNameDisplay {
+                max-width: 34vw !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                white-space: nowrap !important;
+            }
+            .auth-btn {
+                min-height: 30px !important;
+                padding: 5px 10px !important;
+                font-size: 0.78rem !important;
+            }
+            .sub-nav-container {
+                top: 56px !important;
+                height: 48px !important;
+            }
+            .nav-menu {
+                min-height: 48px !important;
+                justify-content: flex-start !important;
+                padding: 0 10px !important;
+            }
+            .nav-menu a {
+                height: 48px !important;
+                padding: 0 11px !important;
+                font-size: 0.78rem !important;
+                letter-spacing: 0.4px !important;
+            }
+            header.intro-hero,
+            header.board-hero {
+                min-height: 260px !important;
+                height: 38vh !important;
+                padding-top: 56px !important;
+            }
+            .intro-hero h1,
+            .board-hero h1,
+            header h1 {
+                font-size: clamp(2rem, 10vw, 2.6rem) !important;
+                line-height: 1.12 !important;
+                padding: 0 16px !important;
+                box-sizing: border-box !important;
+            }
+            .intro-hero p,
+            .board-hero p {
+                font-size: 0.95rem !important;
+                padding: 0 18px !important;
+                box-sizing: border-box !important;
+            }
+            .content-section,
+            .container {
+                width: 100% !important;
+                max-width: 100% !important;
+                padding-left: 16px !important;
+                padding-right: 16px !important;
+                box-sizing: border-box !important;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="auth-bar">
+    <a href="index.html" class="logo-link"><img src="SYRTN-logo-homepage.png" alt="SYRTN Logo" class="nav-logo"><span>SYRTN</span></a>
+    <div class="auth-user-zone"><span id="user-name" style="display:none; font-size:.9rem; color:var(--accent);"></span><button id="logout-btn" class="auth-btn" style="display:none;">LOGOUT</button></div>
+</div>
+<header class="intro-hero"><h1>Admin Panel</h1><p>부원 권한 관리 및 접수된 요청 확인</p></header>
+<nav class="sub-nav-container"><div class="nav-menu"><a href="index.html">HOME</a><a href="introduction.html">INTRODUCTION</a><a href="talk.html">TALK</a><a href="resource.html">RESOURCE</a><a href="suggest.html">SUGGESTION</a><a href="mypage.html">MY PAGE</a><a href="adjust.html">REQUEST AUTHORITY</a><a href="admin.html" class="active">ADMIN</a></div></nav>
+<main class="content-section">
+    <div class="section-title">부원 권한 관리</div>
+    <p class="section-note">각 학교별 역할에 맞게 등급을 조정합니다. 관리자와 리더만 이 화면에 접근할 수 있습니다.</p>
+    <div class="admin-card"><table class="user-table"><thead><tr><th>이름</th><th>학교</th><th>이메일</th><th>현재 등급</th><th>조정</th></tr></thead><tbody id="user-list"><tr><td colspan="5" style="text-align:center; padding:50px;">데이터를 불러오는 중...</td></tr></tbody></table></div>
+
+    <div class="section-title">접수된 건의 사항</div>
+    <div class="admin-card"><table class="user-table"><thead><tr><th>날짜</th><th>분류</th><th>제목 및 내용</th><th>작성자</th><th>관리</th></tr></thead><tbody id="suggestion-list"><tr><td colspan="5" style="text-align:center; padding:50px;">데이터를 불러오는 중...</td></tr></tbody></table></div>
+
+    <div class="section-title">접수된 등급 조정 요청</div>
+    <div class="admin-card"><table class="user-table"><thead><tr><th>요청일</th><th>이름</th><th>학교</th><th>요청 등급</th><th>사유</th><th>관리</th></tr></thead><tbody id="request-list"><tr><td colspan="6" style="text-align:center; padding:50px;">데이터를 불러오는 중...</td></tr></tbody></table></div>
+</main>
+<footer><p>&copy; 2026 SYRTN Collaboration. All Rights Reserved.</p><p>영광해룡고등학교 | 순천고등학교 | 순천복성고등학교 물리·천문·지구과학 동아리 연합</p><p>designed by SYRTN Team | 문의 : 2jw5464@gmail.com</p></footer>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const API_BASE_URL = "https://hypocrite-depletion-until.ngrok-free.dev";
+    const ADMIN_EMAIL = "2jw5464@gmail.com";
+    const firebaseConfig = { apiKey:"AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU", authDomain:"syrt-2026.firebaseapp.com", projectId:"syrt-2026", storageBucket:"syrt-2026.firebasestorage.app", messagingSenderId:"848896876364", appId:"1:848896876364:web:42edc690489962f76df9e9", measurementId:"G-Q0BKR95VH2" };
+    const roleMap = { admin:"관리자", "s-student":"순천고 부원", "b-student":"복성고 부원", "h-student":"해룡고 부원", "s-leader":"순천고 리더", "b-leader":"복성고 리더", "h-leader":"해룡고 리더", teacher:"교사", member:"일반 회원" };
+    const app = initializeApp(firebaseConfig);
+    initializeAppCheck(app, { provider:new ReCaptchaV3Provider('6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq'), isTokenAutoRefreshEnabled:true });
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const userNameDisplay = document.getElementById('user-name');
+    const logoutBtn = document.getElementById('logout-btn');
+    let currentAdminUser = null;
+    let currentAdminRole = 'guest';
+
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) { location.replace('block.html'); return; }
+        try {
+            const userDocSnap = await getDoc(doc(db, 'users', user.uid));
+            const userData = userDocSnap.exists() ? userDocSnap.data() : { name:'관리자', role:'member' };
+            const role = user.email === ADMIN_EMAIL ? 'admin' : (userData.role || 'member');
+            if (role !== 'admin') { location.replace('block.html'); return; }
+            currentAdminUser = user;
+            currentAdminRole = role;
+            userNameDisplay.style.display = 'inline';
+            userNameDisplay.innerText = `${userData.name || '관리자'}님`;
+            logoutBtn.style.display = 'inline';
+            await Promise.all([loadUsers(), loadSuggestions(), loadRequests()]);
+        } catch (error) {
+            console.error('권한 확인 실패:', error);
+            location.replace('block.html');
+        }
+    });
+
+    async function apiHeaders() {
+        return { Authorization:`Bearer ${await currentAdminUser.getIdToken()}`, 'X-User-Role':currentAdminRole, 'ngrok-skip-browser-warning':'69420' };
+    }
+
+    async function loadUsers() {
+        const userList = document.getElementById('user-list');
+        try {
+            const snapshot = await getDocs(query(collection(db, 'users'), orderBy('name', 'asc')));
+            userList.innerHTML = '';
+            if (snapshot.empty) { userList.innerHTML = '<tr><td colspan="5" style="text-align:center;">등록된 사용자가 없습니다.</td></tr>'; return; }
+            snapshot.forEach((docSnap) => {
+                const u = docSnap.data();
+                const uid = docSnap.id;
+                const options = Object.entries(roleMap).map(([value, label]) => `<option value="${value}" ${u.role === value ? 'selected' : ''}>${label}</option>`).join('');
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${escapeHtml(u.name || '이름 없음')}</td><td>${escapeHtml(u.school || '-')}</td><td>${escapeHtml(u.email || '-')}</td><td><span style="color:var(--accent)">${escapeHtml(roleMap[u.role] || u.role || 'member')}</span></td><td><select id="role-${uid}" class="role-select">${options}</select><button class="btn-update" data-uid="${uid}">변경</button></td>`;
+                tr.querySelector('button').onclick = () => updateUserRole(uid);
+                userList.appendChild(tr);
+            });
+        } catch (err) {
+            console.error('사용자 로드 실패:', err);
+            userList.innerHTML = '<tr><td colspan="5" style="text-align:center;">사용자 목록을 불러올 수 없습니다.</td></tr>';
+        }
+    }
+
+    async function loadSuggestions() {
+        const suggestionList = document.getElementById('suggestion-list');
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/syrtn/suggestions`, { headers: await apiHeaders() });
+            if (!res.ok) throw new Error('건의사항 로드 실패');
+            const suggestions = await res.json();
+            suggestionList.innerHTML = '';
+            if (!suggestions.length) { suggestionList.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px;">접수된 건의 사항이 없습니다.</td></tr>'; return; }
+            suggestions.forEach((s) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${formatDate(s.created_at || s.createdAt)}</td><td><span style="color:var(--accent)">[${escapeHtml(s.category || '-')}]</span></td><td><strong>${escapeHtml(s.subject || '제목 없음')}</strong><br><small style="color:#ccc">${escapeHtml(s.content || '')}</small></td><td>${escapeHtml(s.author_name || s.authorName || '익명')}</td><td><button class="btn-update btn-danger" data-id="${s.id}">해결 완료</button></td>`;
+                tr.querySelector('button').onclick = () => deleteSuggestion(s.id);
+                suggestionList.appendChild(tr);
+            });
+        } catch (err) {
+            console.error('건의사항 로드 실패:', err);
+            suggestionList.innerHTML = '<tr><td colspan="5" style="text-align:center;">건의사항을 불러올 수 없습니다.</td></tr>';
+        }
+    }
+
+    async function loadRequests() {
+        const requestList = document.getElementById('request-list');
+        try {
+            const snapshot = await getDocs(query(collection(db, 'pending_requests'), orderBy('timestamp', 'desc')));
+            requestList.innerHTML = '';
+            if (snapshot.empty) { requestList.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px;">접수된 요청이 없습니다.</td></tr>'; return; }
+            snapshot.forEach((docSnap) => {
+                const r = docSnap.data();
+                const uid = docSnap.id;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${formatDate(r.timestamp || r.createdAt)}</td><td>${escapeHtml(r.name || '이름 없음')}</td><td>${escapeHtml(r.school || '-')}</td><td><span style="color:var(--accent)">${escapeHtml(roleMap[r.requestedRole] || r.requestedRole || '-')}</span></td><td><small style="color:#ccc">${escapeHtml(r.reason || '-')}</small></td><td><button class="btn-update" data-action="approve">승인</button><button class="btn-update btn-danger" data-action="reject">거절</button></td>`;
+                tr.querySelector('[data-action="approve"]').onclick = () => handleRequest(uid, r.requestedRole, 'approve');
+                tr.querySelector('[data-action="reject"]').onclick = () => handleRequest(uid, null, 'reject');
+                requestList.appendChild(tr);
+            });
+        } catch (err) {
+            console.error('요청 로드 실패:', err);
+            requestList.innerHTML = `<tr><td colspan="6" style="text-align:center;">요청 목록을 불러올 수 없습니다: ${escapeHtml(err.message)}</td></tr>`;
+        }
+    }
+
+    window.updateUserRole = async (uid) => {
+        const newRole = document.getElementById(`role-${uid}`).value;
+        if (!confirm(`해당 사용자의 등급을 ${roleMap[newRole] || newRole}(으)로 변경하시겠습니까?`)) return;
+        try { await updateDoc(doc(db, 'users', uid), { role:newRole }); alert('등급이 변경되었습니다.'); await loadUsers(); }
+        catch (err) { console.error(err); alert('등급 변경에 실패했습니다.'); }
+    };
+
+    window.handleRequest = async (uid, requestedRole, action) => {
+        if (!confirm(`이 요청을 ${action === 'approve' ? '승인' : '거절'}하시겠습니까?`)) return;
+        try {
+            if (action === 'approve') await updateDoc(doc(db, 'users', uid), { role:requestedRole });
+            await deleteDoc(doc(db, 'pending_requests', uid));
+            alert(action === 'approve' ? '요청이 승인되었습니다.' : '요청이 거절되었습니다.');
+            await Promise.all([loadRequests(), loadUsers()]);
+        } catch (err) { console.error(err); alert('요청 처리에 실패했습니다.'); }
+    };
+
+    window.deleteSuggestion = async (id) => {
+        if (!confirm('이 건의 사항을 해결 완료 처리하고 삭제하시겠습니까?')) return;
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/syrtn/suggestions/${id}`, { method:'DELETE', headers: await apiHeaders() });
+            if (!res.ok) throw new Error('삭제 실패');
+            alert('삭제되었습니다.');
+            await loadSuggestions();
+        } catch (err) { console.error(err); alert('처리 중 오류가 발생했습니다.'); }
+    };
+
+    logoutBtn.onclick = async () => { if (confirm('로그아웃 하시겠습니까?')) { await signOut(auth); location.href = 'index.html'; } };
+
+    function formatDate(value) {
+        if (!value) return '-';
+        if (value.seconds) return new Date(value.seconds * 1000).toLocaleDateString();
+        return new Date(value).toLocaleDateString();
+    }
+
+    function escapeHtml(value) {
+        return String(value || '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
+    }
+</script>
+</body>
+</html>
+
+
+

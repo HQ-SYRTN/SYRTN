@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="SYRTN-logo-homepage.png" type="image/png">
+    <link rel="apple-touch-icon" href="SYRTN-logo-homepage.png">
+    <title>SYRTN | Write</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-dark:#050505; --accent:#00E5FF; --text-main:#fff; --card-bg:rgba(255,255,255,.04); --nav-bg:rgba(0,0,0,.9); --border-color:rgba(255,255,255,.1); }
+        body, html { margin:0; padding:0; font-family:'Noto Sans KR',sans-serif; background:var(--bg-dark); color:var(--text-main); line-height:1.6; }
+        .auth-bar { position:fixed; top:0; width:100%; height:60px; background:var(--nav-bg); backdrop-filter:blur(10px); display:flex; justify-content:space-between; align-items:center; padding:0 clamp(16px,4vw,40px); box-sizing:border-box; z-index:1000; border-bottom:1px solid var(--border-color); gap:16px; }
+        .logo-link { display:flex; align-items:center; gap:12px; text-decoration:none; color:white; font-weight:700; letter-spacing:1.2px; white-space:nowrap; }
+        .nav-logo { width:40px; height:40px; flex:0 0 40px; border-radius:50%; background:white; object-fit:contain; }
+        .auth-user-zone { display:flex; align-items:center; justify-content:flex-end; gap:10px; min-width:0; }
+        #user-name { color:var(--accent); font-weight:700; font-size:.9rem; }
+        .auth-btn, .btn { background:transparent; border:1px solid var(--text-main); color:var(--text-main); min-height:32px; padding:6px 14px; box-sizing:border-box; cursor:pointer; text-decoration:none; border-radius:4px; font-size:.85rem; line-height:1.2; white-space:nowrap; }
+        .auth-btn:hover { background:var(--text-main); color:#000; }
+        .sub-nav-container { width:100%; height:52px; background:#111; position:sticky; top:60px; z-index:900; overflow-x:auto; border-bottom:1px solid var(--border-color); }
+        .nav-menu { min-height:52px; width:max-content; min-width:100%; display:flex; align-items:center; justify-content:center; padding:0 16px; box-sizing:border-box; }
+        .nav-menu a { height:52px; display:inline-flex; align-items:center; padding:0 14px; color:rgba(255,255,255,.7); text-decoration:none; font-size:.9rem; letter-spacing:.8px; white-space:nowrap; }
+        .nav-menu a:hover, .nav-menu a.active { color:var(--accent); }
+        .container { width:100%; max-width:860px; margin:120px auto 90px; padding:0 20px; box-sizing:border-box; }
+        .editor { background:var(--card-bg); border:1px solid var(--border-color); border-radius:8px; padding:28px; box-sizing:border-box; }
+        h1 { margin:0 0 24px; font-size:clamp(1.8rem,5vw,2.4rem); color:var(--accent); }
+        label { display:block; margin:18px 0 8px; color:#ccc; font-size:.9rem; }
+        input, textarea, select { width:100%; box-sizing:border-box; background:rgba(0,0,0,.3); border:1px solid var(--border-color); color:white; border-radius:6px; padding:11px 12px; font-family:inherit; font-size:1rem; outline:none; }
+        textarea { min-height:260px; resize:vertical; }
+        .link-row { display:flex; gap:10px; margin-bottom:10px; }
+        .link-row input:first-child { flex:1; }
+        .link-row input:last-child { flex:2; }
+        .actions { display:flex; justify-content:flex-end; gap:10px; margin-top:24px; flex-wrap:wrap; }
+        .btn-primary { border-color:var(--accent); color:var(--accent); }
+        .btn-primary:hover { background:var(--accent); color:#000; }
+        footer { text-align:center; padding:50px 20px; color:#444; font-size:.8rem; border-top:1px solid var(--border-color); }
+        @media (max-width:700px) {
+            .auth-bar { height:56px; padding:0 14px; }
+            .nav-logo { width:34px; height:34px; flex-basis:34px; }
+            #user-name { max-width:34vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+            .auth-btn { min-height:30px; padding:5px 10px; font-size:.78rem; }
+            .sub-nav-container { top:56px; height:48px; }
+            .nav-menu { min-height:48px; justify-content:flex-start; padding:0 10px; }
+            .nav-menu a { height:48px; padding:0 11px; font-size:.78rem; letter-spacing:.4px; }
+            .container { margin-top:94px; padding:0 16px; }
+            .editor { padding:20px; }
+            .link-row { flex-direction:column; }
+        }
+    </style>
+</head>
+<body>
+<div class="auth-bar">
+    <a href="index.html" class="logo-link"><img src="SYRTN-logo-homepage.png" alt="Logo" class="nav-logo"><span>SYRTN</span></a>
+    <div class="auth-user-zone"><a href="login.html" id="login-link" class="auth-btn">LOGIN</a><span id="user-name" style="display:none;"></span><button id="logout-btn" class="auth-btn" style="display:none;">LOGOUT</button></div>
+</div>
+<nav class="sub-nav-container"><div class="nav-menu"><a href="index.html">HOME</a><a href="introduction.html">INTRODUCTION</a><a href="talk.html" class="active">TALK</a><a href="resource.html">RESOURCE</a><a href="suggest.html">SUGGESTION</a><a href="mypage.html">MY PAGE</a><a href="adjust.html">REQUEST AUTHORITY</a><a href="admin.html">ADMIN</a></div></nav>
+
+<main class="container">
+    <section class="editor">
+        <h1 id="form-title">자료 등록</h1>
+        <label for="category">카테고리</label>
+        <select id="category"><option value="천체 관측 데이터">천체 관측 데이터</option><option value="실험 보고서">실험 보고서</option><option value="훈련 자료">훈련 자료</option><option value="소스 코드">소스 코드</option><option value="기타">기타</option></select>
+        <label for="post-title">제목</label>
+        <input id="post-title" type="text" placeholder="제목을 입력하세요.">
+        <label for="post-content">내용</label>
+        <textarea id="post-content" placeholder="자료에 대한 설명을 입력하세요."></textarea>
+        <label>첨부 링크</label>
+        <div id="link-container"></div>
+        <button class="btn" id="add-link" type="button">링크 추가</button>
+        <div class="actions"><button class="btn" id="cancel-btn">취소</button><button class="btn btn-primary" id="submit-btn">등록</button></div>
+    </section>
+</main>
+
+<footer>
+    <p>&copy; 2026 SYRTN Collaboration. All Rights Reserved.</p>
+    <p>영광해룡고등학교 | 순천고등학교 | 순천복성고등학교 물리·천문·지구과학 동아리 연합</p>
+    <p>designed by SYRTN Team | 문의 : 2jw5464@gmail.com</p>
+</footer>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const API_BASE_URL = "https://hypocrite-depletion-until.ngrok-free.dev";
+    const ADMIN_EMAIL = "2jw5464@gmail.com";
+    const SCHOOLS = {
+        s: { collection:"s-resources", name:"순천고", student:"s-student", leader:"s-leader", boardUrl:"school-board.html?school=s", viewUrl:"school-view.html?school=s" },
+        h: { collection:"h-resources", name:"해룡고", student:"h-student", leader:"h-leader", boardUrl:"school-board.html?school=h", viewUrl:"school-view.html?school=h" }
+    };
+    const params = new URLSearchParams(location.search);
+    const school = SCHOOLS[params.get("school")];
+    const editId = params.get("id");
+    if (!school) {
+        location.replace("talk.html");
+        throw new Error("Invalid school.");
+    }
+
+    const firebaseConfig = { apiKey:"AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU", authDomain:"syrt-2026.firebaseapp.com", projectId:"syrt-2026", storageBucket:"syrt-2026.firebasestorage.app", messagingSenderId:"848896876364", appId:"1:848896876364:web:42edc690489962f76df9e9" };
+    const app = initializeApp(firebaseConfig);
+    initializeAppCheck(app, { provider:new ReCaptchaV3Provider("6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq"), isTokenAutoRefreshEnabled:true });
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let currentRole = "guest";
+    let currentUserName = "익명";
+    let editPost = null;
+
+    document.getElementById("form-title").textContent = editId ? `${school.name} 자료 수정` : `${school.name} 자료 등록`;
+    document.getElementById("submit-btn").textContent = editId ? "수정 완료" : "등록";
+    document.getElementById("cancel-btn").onclick = () => location.href = editId ? `${school.viewUrl}&id=${editId}` : school.boardUrl;
+    document.getElementById("add-link").onclick = () => addLinkField();
+    document.getElementById("submit-btn").onclick = submitPost;
+    addLinkField();
+
+    const roleAllowed = (role) => ["admin", "teacher", school.student, school.leader].includes(role);
+    const canEditPost = () => editPost && currentUser && (editPost.uid === currentUser.uid || ["admin", "teacher", school.leader].includes(currentRole));
+    const authHeaders = async () => ({ "Authorization": `Bearer ${await currentUser.getIdToken()}`, "X-User-Role": currentRole, "ngrok-skip-browser-warning": "69420" });
+    const isHttpUrl = (value) => {
+        try {
+            const url = new URL(value);
+            return ["http:", "https:"].includes(url.protocol);
+        } catch {
+            return false;
+        }
+    };
+
+    document.getElementById("logout-btn").onclick = async () => { if (confirm("로그아웃 하시겠습니까?")) { await signOut(auth); location.href = "index.html"; } };
+
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) { location.replace("block.html"); return; }
+        try {
+            const snap = await getDoc(doc(db, "users", user.uid));
+            if (!snap.exists()) { location.replace("block.html"); return; }
+            const data = snap.data();
+            const role = user.email === ADMIN_EMAIL ? "admin" : (data.role || "member");
+            if (!roleAllowed(role)) { location.replace("block.html"); return; }
+            currentUser = user;
+            currentRole = role;
+            currentUserName = data.name || "익명";
+            document.getElementById("user-name").style.display = "inline";
+            document.getElementById("user-name").textContent = `${currentUserName}님`;
+            document.getElementById("logout-btn").style.display = "inline";
+            document.getElementById("login-link").style.display = "none";
+            if (editId) await loadEditData();
+        } catch (err) {
+            console.error(err);
+            location.replace("block.html");
+        }
+    });
+
+    function addLinkField(url = "", name = "") {
+        const row = document.createElement("div");
+        row.className = "link-row";
+        const nameInput = document.createElement("input");
+        nameInput.className = "link-name";
+        nameInput.type = "text";
+        nameInput.placeholder = "링크 이름";
+        nameInput.value = name;
+        const urlInput = document.createElement("input");
+        urlInput.className = "link-url";
+        urlInput.type = "url";
+        urlInput.placeholder = "https://...";
+        urlInput.value = url;
+        const removeButton = document.createElement("button");
+        removeButton.className = "btn";
+        removeButton.type = "button";
+        removeButton.textContent = "삭제";
+        removeButton.onclick = () => row.remove();
+        row.append(nameInput, urlInput, removeButton);
+        document.getElementById("link-container").appendChild(row);
+    }
+
+    async function loadEditData() {
+        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${school.collection}/${editId}`, { headers: await authHeaders() });
+        if (!res.ok) { location.replace("block.html"); return; }
+        editPost = await res.json();
+        if (!canEditPost()) { location.replace("block.html"); return; }
+        document.getElementById("category").value = editPost.category || "기타";
+        document.getElementById("post-title").value = editPost.title || "";
+        document.getElementById("post-content").value = editPost.content || "";
+        document.getElementById("link-container").innerHTML = "";
+        const links = editPost.links && editPost.links.length ? editPost.links : [{}];
+        links.forEach(link => addLinkField(link.url || "", link.name || ""));
+    }
+
+    async function submitPost() {
+        const title = document.getElementById("post-title").value.trim();
+        const content = document.getElementById("post-content").value.trim();
+        if (!title || !content) { alert("제목과 내용을 입력해주세요."); return; }
+        const links = [...document.querySelectorAll(".link-row")].map(row => ({ name:row.querySelector(".link-name").value.trim(), url:row.querySelector(".link-url").value.trim() })).filter(link => link.url);
+        if (links.some(link => !isHttpUrl(link.url))) {
+            alert("첨부 링크는 http 또는 https 주소만 사용할 수 있습니다.");
+            return;
+        }
+        const payload = { title, content, category:document.getElementById("category").value, links, authorName:currentUserName };
+        const url = editId ? `${API_BASE_URL}/api/syrtn/board/${school.collection}/${editId}` : `${API_BASE_URL}/api/syrtn/board/${school.collection}`;
+        const res = await fetch(url, { method: editId ? "PUT" : "POST", headers:{ ...(await authHeaders()), "Content-Type":"application/json" }, body:JSON.stringify(payload) });
+        if (!res.ok) { alert("저장 권한이 없거나 오류가 발생했습니다."); return; }
+        if (editId) location.href = `${school.viewUrl}&id=${editId}`;
+        else {
+            const data = await res.json();
+            location.href = `${school.viewUrl}&id=${data.id}`;
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,527 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="SYRTN-logo-homepage.png" type="image/png">
+    <link rel="apple-touch-icon" href="SYRTN-logo-homepage.png">
+    <title>SYRTN | Introduce</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --accent: #00E5FF;
+            --text-main: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --nav-bg: rgba(0, 0, 0, 0.8);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        /* --- ?곷떒 Bar (Logo & Login Only) --- */
+        .auth-bar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 60px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            box-sizing: border-box;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: white;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .nav-logo {
+            height: 40px;
+            width: 40px;
+            border-radius: 50%;
+            background-color: white;
+            object-fit: contain;
+        }
+
+        /* --- ?ъ슜??援ъ뿭 --- */
+        .auth-user-zone {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .auth-btn {
+            background: transparent;
+            border: 1px solid var(--text-main);
+            color: var(--text-main);
+            padding: 6px 15px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: 0.3s;
+            border-radius: 4px;
+        }
+
+        .auth-btn:hover {
+            background: var(--text-main);
+            color: black;
+        }
+
+        #user-name {
+            color: #ffffff !important; /* 媛뺤젣濡??곗깋 ?곸슜 */
+        }
+
+        /* --- Header (Hero Section) --- */
+        header.intro-hero {
+            height: 45vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.9)), 
+                        url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2022') no-repeat center/cover;
+            text-align: center;
+            padding-top: 60px;
+        }
+
+        .intro-hero h1 { font-size: 3.5rem; margin-bottom: 10px; color: var(--accent); }
+        .intro-hero p { font-size: 1.2rem; opacity: 0.8; font-weight: 300; }
+
+        /* --- 以묎컙 Navigation Menu (Header? Main ?ъ씠) --- */
+        .sub-nav-container {
+            width: 100%;
+            background: #111;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 60px; /* auth-bar 諛붾줈 ?꾨옒 遺숈쓬 */
+            z-index: 900;
+        }
+
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding: 15px 0;
+        }
+
+        .nav-menu a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 400;
+            letter-spacing: 1.5px;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .nav-menu a:hover, .nav-menu a.active {
+            color: var(--accent);
+        }
+
+        .nav-menu a.active::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--accent);
+        }
+
+        .nav-item {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding-bottom: 5px;
+            border-bottom: 2px solid transparent;
+            transition: 0.3s;
+        }
+
+        .nav-item:hover { border-bottom: 2px solid var(--accent); color: var(--accent); }
+
+        /* --- Main Content --- */
+        .content-section {
+            max-width: 1000px;
+            margin: 60px auto 100px;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            border-left: 4px solid var(--accent);
+            padding-left: 20px;
+            margin-bottom: 40px;
+            font-weight: 700;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .info-card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: 0.3s;
+        }
+
+        .info-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent);
+            background: rgba(0, 229, 255, 0.05);
+        }
+
+        .info-card h3 { color: var(--accent); margin-top: 0; margin-bottom: 15px; }
+
+        .school-tag {
+            background: rgba(255,255,255,0.1);
+            padding: 0; /* ?대? a?쒓렇媛 苑?李⑤룄濡?0?쇰줈 ?섏젙 */
+            border-radius: 50px;
+            font-size: 1rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: 0.3s;
+            overflow: hidden; /* ?뚮몢由?諛뽰쑝濡?留곹겕 諛곌꼍???섍?吏 ?딄쾶 */
+        }
+
+        /* ?섏씠?쇰쭅???ㅽ???珥덇린??諛?而ㅼ뒪? */
+        .school-tag a {
+            display: block; /* ?쒓렇 ?꾩껜瑜??대┃ 媛?ν븯寃?*/
+            padding: 12px 25px; /* ?⑤뵫??a?쒓렇濡??대룞 */
+            color: var(--text-main); /* ?띿뒪???곗깋 */
+            text-decoration: none; /* 諛묒쨪 ?쒓굅 */
+            transition: 0.3s;
+        }
+
+        .school-tag:hover {
+            border-color: var(--accent);
+        }
+
+        .school-tag:hover a {
+            color: var(--accent); /* 留덉슦???щ━硫?湲?먯깋 蹂寃?*/
+            background: rgba(0, 229, 255, 0.1); /* ?댁쭩 諛곌꼍??異붽? */
+        }
+
+        /* --- Footer --- */
+        footer {
+            background: #000;
+            padding: 60px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        @media (max-width: 600px) {
+            .logo-area span { font-size: 16px; }
+            nav a { padding: 10px 12px; font-size: 13px; }
+            header h1 { font-size: 22px; }
+            .header-logo { width: 100px; height: 100px; }
+        }
+    
+        /* Unified responsive navigation */
+        .auth-bar {
+            height: 60px !important;
+            padding: 0 clamp(16px, 4vw, 40px) !important;
+            gap: 16px !important;
+        }
+        .logo-link {
+            min-width: 0 !important;
+            flex: 0 1 auto !important;
+            letter-spacing: 1.2px !important;
+            white-space: nowrap !important;
+        }
+        .nav-logo {
+            width: 40px !important;
+            height: 40px !important;
+            flex: 0 0 40px !important;
+        }
+        .auth-user-zone {
+            min-width: 0 !important;
+            flex: 0 1 auto !important;
+            justify-content: flex-end !important;
+            gap: 10px !important;
+        }
+        .auth-btn {
+            min-height: 32px !important;
+            padding: 6px 14px !important;
+            box-sizing: border-box !important;
+            white-space: nowrap !important;
+            line-height: 1.2 !important;
+        }
+        .sub-nav-container {
+            height: 52px !important;
+            top: 60px !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            -webkit-overflow-scrolling: touch !important;
+            scrollbar-width: thin !important;
+        }
+        .nav-menu {
+            min-height: 52px !important;
+            width: max-content !important;
+            min-width: 100% !important;
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0 !important;
+            padding: 0 16px !important;
+            box-sizing: border-box !important;
+        }
+        .nav-menu a {
+            height: 52px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 0 14px !important;
+            box-sizing: border-box !important;
+            font-size: 0.9rem !important;
+            line-height: 1.1 !important;
+            letter-spacing: 0.8px !important;
+            white-space: nowrap !important;
+            flex: 0 0 auto !important;
+        }
+        .nav-menu a.active::after {
+            bottom: 8px !important;
+        }
+        @media (max-width: 700px) {
+            .auth-bar {
+                height: 56px !important;
+                padding: 0 14px !important;
+            }
+            .logo-link span {
+                font-size: 0.95rem !important;
+            }
+            .nav-logo {
+                width: 34px !important;
+                height: 34px !important;
+                flex-basis: 34px !important;
+            }
+            .auth-user-zone {
+                gap: 8px !important;
+            }
+            .auth-user-zone span[id*="user"], #user-name, #userNameDisplay {
+                max-width: 34vw !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                white-space: nowrap !important;
+            }
+            .auth-btn {
+                min-height: 30px !important;
+                padding: 5px 10px !important;
+                font-size: 0.78rem !important;
+            }
+            .sub-nav-container {
+                top: 56px !important;
+                height: 48px !important;
+            }
+            .nav-menu {
+                min-height: 48px !important;
+                justify-content: flex-start !important;
+                padding: 0 10px !important;
+            }
+            .nav-menu a {
+                height: 48px !important;
+                padding: 0 11px !important;
+                font-size: 0.78rem !important;
+                letter-spacing: 0.4px !important;
+            }
+            header.intro-hero,
+            header.board-hero {
+                min-height: 260px !important;
+                height: 38vh !important;
+                padding-top: 56px !important;
+            }
+            .intro-hero h1,
+            .board-hero h1,
+            header h1 {
+                font-size: clamp(2rem, 10vw, 2.6rem) !important;
+                line-height: 1.12 !important;
+                padding: 0 16px !important;
+                box-sizing: border-box !important;
+            }
+            .intro-hero p,
+            .board-hero p {
+                font-size: 0.95rem !important;
+                padding: 0 18px !important;
+                box-sizing: border-box !important;
+            }
+            .content-section,
+            .container {
+                width: 100% !important;
+                max-width: 100% !important;
+                padding-left: 16px !important;
+                padding-right: 16px !important;
+                box-sizing: border-box !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-bar">
+    <a href="index.html" class="logo-link">
+        <img src="SYRTN-logo-homepage.png" alt="SYRTN Logo" class="nav-logo">
+        <span>SYRTN</span>
+    </a>
+
+    <div class="auth-user-zone">
+        <a href="login.html" id="login-link" class="auth-btn">LOGIN</a>
+        <span id="user-name" style="display:none; font-size: 0.9rem; margin-right: 10px; color: var(--accent);"></span>
+        <button id="logout-btn" class="auth-btn" style="display:none;">LOGOUT</button>
+    </div>
+</div>
+
+<header class="intro-hero">
+    <h1>About SYRTN</h1>
+    <p>?곸긽???꾪뙆 留앹썝寃?媛꾩꽠怨??꾨줈?앺듃</p>
+</header>
+
+<nav class="sub-nav-container">
+    <div class="nav-menu">
+        <a href="index.html" class="nav-item">HOME</a>
+        <a href="introduction.html" class="active">INTRODUCTION</a>
+        <a href="talk.html" class="nav-item">TALK</a>
+        <a href="resource.html"class="nav-item">RESOURCE</a>
+        <a href="suggest.html" class="nav-item">SUGGESTION</a>
+        <a href="mypage.html" class="nav-item">MY PAGE</a>
+        <a href="adjust.html" class="nav-item">REQUEST AUTHORITY</a>
+        <a href="admin.html" class="nav-item">ADMIN</a>
+    </div>
+</nav>
+
+<main class="content-section">
+    <div class="section-title">?꾨줈?앺듃 媛쒖슂</div>
+    <p style="font-size: 1.1rem; color: #ccc;">
+        <strong>SYRTN (Suncheon-Yeonggwang Radio Telescope Network)</strong>? ?꾨씪?⑤룄 ?쒖쿇怨??곴킅 吏??쓽 3媛?怨쇳븰 以묒젏 怨좊벑?숆탳???쇰? 怨쇳븰 ?숈븘由ш? ?고빀?섏뿬 援ъ텞?섍퀬 ?덈뒗 ?꾪뙆 留앹썝寃??ㅽ듃?뚰겕 ?꾨줈?앺듃?낅땲?? 
+        ?곕━??媛??숆탳??留뚮뱺 ?꾪뙆 留앹썝寃쎌쓣 ?듯빐 ?곗씠?곕? ?섏쭛?섍퀬 ?대? 怨듭쑀?⑥쑝濡쒖뜥 ?섎굹??嫄곕???媛??留앹썝寃쎌쓣 留뚮뱶??寃껋쓣 紐⑺몴濡??⑸땲??
+    </p>
+
+    <div class="grid-container">
+        <div class="info-card">
+            <h3>?곕━??紐⑺몴</h3>
+            <p>吏곸젒 ?뚰삎 ?꾪뙆 留앹썝寃쎌쓣 ?쒖옉?섍퀬 ?댁쁺?⑥쑝濡쒖뜥 ?곗씠??遺꾩꽍 ??웾???ㅼ슦怨? 吏??媛??ㅽ듃?뚰겕瑜??듯빐 ?꾪뙆 媛꾩꽠怨꾩쓽 ?먮━瑜??ㅼ쿇?곸쑝濡??숈뒿?⑸땲??</p>
+        </div>
+        <div class="info-card">
+            <h3>二쇱슂 ?곌뎄</h3>
+            <p>21cm ?섏냼??愿痢≪쓣 ?듯븳 ?곕━ ???利곸떖 遺遺꾩쓽 以묒꽦?섏냼 遺꾩꽍, ?쒖뼇??以묒꽦?섏냼 紐⑤땲?곕쭅???섑뻾?⑸땲??</p>
+        </div>
+    </div>
+
+    <div style="margin-top: 80px;">
+        <div class="section-title">李몄뿬 湲곌?</div>
+        <div class="school-tags-container">
+            <div class="school-tag"><a href="https://haeryong.hs.jne.kr/haeryong_hs/main.do">?곴킅?대！怨좊벑?숆탳</a></div><br>
+            <div class="school-tag"><a href="https://suncheon.hs.jne.kr/sunchon_hs/main.do?sysId=sunchon_hs">?쒖쿇怨좊벑?숆탳</a></div><br>
+            <div class="school-tag"><a href="https://bokseong.hs.jne.kr/bokseong_hs/main.do?sysId=bokseong_hs">?쒖쿇蹂듭꽦怨좊벑?숆탳</a></div>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <p>&copy; 2026 SYRTN Collaboration. All Rights Reserved.</p>
+    <p>?곴킅?대！怨좊벑?숆탳 | ?쒖쿇怨좊벑?숆탳 | ?쒖쿇蹂듭꽦怨좊벑?숆탳 臾쇰━쨌泥쒕Ц쨌吏援ш낵???숈븘由??고빀</p>
+    <p>designed by SYRTN Team | 臾몄쓽 : 2jw5464@gmail.com</p>
+</footer>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU",
+        authDomain: "syrt-2026.firebaseapp.com",
+        projectId: "syrt-2026",
+        storageBucket: "syrt-2026.firebasestorage.app",
+        messagingSenderId: "848896876364",
+        appId: "1:848896876364:web:42edc690489962f76df9e9",
+        measurementId: "G-Q0BKR95VH2"
+    };
+
+    // Firebase 珥덇린??
+    const app = initializeApp(firebaseConfig);
+
+    // --- [App Check 珥덇린?? ---
+    const appCheck = initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider('6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq'),
+        isTokenAutoRefreshEnabled: true 
+    });
+
+    // ?쒕퉬??媛앹껜 ?앹꽦
+    const auth = getAuth(app);
+    const db = getFirestore(app); 
+    const loginLink = document.getElementById('login-link');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userName = document.getElementById('user-name');
+
+    // ?ъ슜???몄쬆 ?곹깭 愿李?
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            loginLink.style.display = 'none';
+            userName.style.display = 'inline';
+            logoutBtn.style.display = 'inline';
+
+            try {
+                const userDocRef = doc(db, "users", user.uid);
+                const userDocSnap = await getDoc(userDocRef);
+
+                if (userDocSnap.exists()) {
+                    const userData = userDocSnap.data();
+                    userName.innerText = `${userData.name || user.displayName}님`;
+                } else {
+                    userName.innerText = `${user.displayName}님`;
+                }
+            } catch (error) {
+                console.error("?ъ슜???뺣낫瑜?遺덈윭?ㅻ뒗 以??먮윭:", error);
+                userName.innerText = `${user.displayName}님`;
+            }
+        } else {
+            loginLink.style.display = 'inline';
+            userName.style.display = 'none';
+            logoutBtn.style.display = 'none';
+        }
+    });
+
+    // 濡쒓렇?꾩썐 泥섎━
+    logoutBtn.onclick = async () => {
+        if (confirm("로그아웃 하시겠습니까?")) {
+            try {
+                await signOut(auth);
+                alert("로그아웃 되었습니다.");
+                location.reload();
+            } catch (err) {
+                console.error("濡쒓렇?꾩썐 ?먮윭:", err);
+                alert("濡쒓렇?꾩썐 以??ㅻ쪟媛 諛쒖깮?덉뒿?덈떎.");
+            }
+        }
+    };
+</script>
+</body>
+</html>
+
+
