@@ -149,16 +149,16 @@ a{color:inherit}
 }
 .nav-menu a:hover{color:var(--accent)}
 .hero{
-  min-height:calc(100svh - 112px);
+  min-height:430px;
   display:grid;
-  place-items:end start;
-  padding:140px clamp(18px,6vw,72px) 54px;
+  place-items:center start;
+  padding:132px clamp(18px,6vw,72px) 48px;
   background:
-    linear-gradient(90deg,rgba(7,9,13,.9) 0%,rgba(7,9,13,.58) 52%,rgba(7,9,13,.76) 100%),
+    linear-gradient(90deg,rgba(7,9,13,.92) 0%,rgba(7,9,13,.74) 58%,rgba(7,9,13,.86) 100%),
     url("https://images.unsplash.com/photo-1462332420958-a05d1e002413?q=80&w=1920&auto=format&fit=crop") center/cover;
 }
 .hero-content{
-  width:min(760px,100%);
+  width:min(900px,100%);
 }
 .hero-kicker{
   display:inline-flex;
@@ -176,43 +176,43 @@ a{color:inherit}
 .hero h1{
   margin:0;
   color:var(--text);
-  font-size:clamp(3rem,11vw,7.2rem);
-  line-height:.92;
+  font-size:clamp(2.7rem,9vw,5.6rem);
+  line-height:.96;
   letter-spacing:0;
 }
 .hero p{
-  width:min(660px,100%);
-  margin:22px 0 0;
+  width:min(720px,100%);
+  margin:18px 0 0;
   color:#d4dbe7;
   font-size:clamp(1rem,2.4vw,1.25rem);
 }
 .hero-actions{
-  display:flex;
-  flex-wrap:wrap;
+  width:min(760px,100%);
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
   gap:10px;
-  margin-top:28px;
+  margin-top:26px;
 }
 .container{
   width:100%;
   max-width:1120px;
   margin:0 auto;
-  padding:34px 20px 96px;
+  padding:30px 20px 86px;
 }
 .school-strip{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
   gap:12px;
-  margin-top:-78px;
+  margin-top:0;
   position:relative;
   z-index:2;
 }
 .school-item{
-  min-height:112px;
+  min-height:96px;
   border:1px solid var(--line);
   border-radius:8px;
-  padding:18px;
+  padding:16px;
   background:rgba(16,22,32,.9);
-  box-shadow:0 18px 42px rgba(0,0,0,.28);
 }
 .school-item strong{
   display:block;
@@ -225,13 +225,7 @@ a{color:inherit}
   color:var(--muted);
   font-size:.9rem;
 }
-.section-head{
-  display:flex;
-  align-items:end;
-  justify-content:space-between;
-  gap:20px;
-  margin:58px 0 18px;
-}
+.section-head{margin:38px 0 16px}
 .section-head h2{
   margin:0;
   font-size:clamp(1.35rem,3vw,2rem);
@@ -243,16 +237,19 @@ a{color:inherit}
 }
 .feature-grid{
   display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-template-columns:repeat(4,minmax(0,1fr));
   gap:14px;
 }
 .feature-card{
-  min-height:198px;
+  min-height:142px;
   border:1px solid var(--line);
   border-radius:8px;
-  padding:22px;
+  padding:18px;
   background:var(--surface);
+  text-decoration:none;
+  transition:border-color .15s ease,transform .15s ease;
 }
+.feature-card:hover{border-color:var(--accent);transform:translateY(-2px)}
 .feature-card .tag{
   display:inline-flex;
   align-items:center;
@@ -265,8 +262,8 @@ a{color:inherit}
   font-weight:800;
 }
 .feature-card h3{
-  margin:18px 0 10px;
-  font-size:1.15rem;
+  margin:14px 0 8px;
+  font-size:1.05rem;
 }
 .feature-card p{
   margin:0;
@@ -276,7 +273,7 @@ a{color:inherit}
   display:grid;
   grid-template-columns:1.15fr .85fr;
   gap:14px;
-  margin-top:14px;
+  margin-top:38px;
 }
 .notice-box,.link-box{
   border:1px solid var(--line);
@@ -313,8 +310,8 @@ footer{
 }
 footer p{margin:4px 0}
 @media(max-width:860px){
-  .school-strip,.feature-grid,.quick-panel{grid-template-columns:1fr}
-  .school-strip{margin-top:-42px}
+  .school-strip,.quick-panel{grid-template-columns:1fr}
+  .feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .section-head{display:block}
   .section-head p{margin-top:8px}
 }
@@ -349,18 +346,21 @@ footer p{margin:4px 0}
     font-size:.76rem;
   }
   .hero{
-    min-height:calc(100svh - 104px);
-    padding:124px 18px 58px;
-    place-items:end start;
+    min-height:auto;
+    padding:112px 18px 34px;
+    place-items:center start;
   }
   .hero-kicker{
     max-width:100%;
     font-size:.76rem;
   }
   .hero p{font-size:1rem}
+  .hero-actions{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
   .hero-actions .btn{
-    flex:1 1 150px;
-    min-height:42px;
+    min-height:44px;
+    padding:8px 10px;
   }
   .container{padding:26px 14px 72px}
   .school-item,.feature-card,.notice-box,.link-box{padding:18px}
@@ -369,6 +369,7 @@ footer p{margin:4px 0}
   .logo-link span{display:none}
   #user-name{max-width:24vw}
   .nav-menu a{padding:0 10px;font-size:.72rem}
+  .feature-grid,.hero-actions{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -400,62 +401,68 @@ footer p{margin:4px 0}
   <div class="hero-content">
     <div class="hero-kicker">Suncheon-Yeonggwang Radio Telescope Network</div>
     <h1>SYRTN</h1>
-    <p>전파망원경 관측, 자료 공유, 학교별 협업 게시판을 한 곳에서 연결하는 학생 연구 네트워크입니다.</p>
+    <p>전파망원경 관측 자료와 학교별 협업 게시판을 빠르게 확인할 수 있는 SYRTN 포털입니다.</p>
     <div class="hero-actions">
-      <a class="btn btn-primary" href="talk.html">커뮤니티 보기</a>
-      <a class="btn" href="resource.html">자료실 열기</a>
+      <a class="btn btn-primary" href="school-board.html">학교 게시판</a>
+      <a class="btn" href="talk.html">공용 게시판</a>
+      <a class="btn" href="resource.html">자료실</a>
+      <a class="btn" href="adjust.html">권한 요청</a>
     </div>
   </div>
 </header>
 <main class="container">
+  <section>
+    <div class="section-head">
+      <h2>빠른 이동</h2>
+      <p>자주 쓰는 기능을 첫 화면에서 바로 열 수 있습니다.</p>
+    </div>
+    <div class="feature-grid">
+      <a class="feature-card" href="school-board.html">
+        <span class="tag">SCHOOL</span>
+        <h3>학교 게시판</h3>
+        <p>소속 학교 게시글을 확인합니다.</p>
+      </a>
+      <a class="feature-card" href="talk.html">
+        <span class="tag">BOARD</span>
+        <h3>공용 게시판</h3>
+        <p>전체 커뮤니티 글을 확인합니다.</p>
+      </a>
+      <a class="feature-card" href="resource.html">
+        <span class="tag">FILE</span>
+        <h3>자료실</h3>
+        <p>문서와 첨부 자료를 봅니다.</p>
+      </a>
+      <a class="feature-card" href="suggest.html">
+        <span class="tag">SUGGEST</span>
+        <h3>제안</h3>
+        <p>개선 의견을 남깁니다.</p>
+      </a>
+    </div>
+  </section>
   <section class="school-strip" aria-label="참여 학교">
     <div class="school-item">
       <strong>영광 해룡고</strong>
-      <span>관측 장비와 연구 활동을 연결합니다.</span>
+      <span>관측 장비 및 연구 활동</span>
     </div>
     <div class="school-item">
       <strong>순천고</strong>
-      <span>전파 관측 데이터와 분석 자료를 공유합니다.</span>
+      <span>전파 관측 데이터 분석</span>
     </div>
     <div class="school-item">
       <strong>순천 복성고</strong>
-      <span>학교별 게시판으로 프로젝트를 관리합니다.</span>
-    </div>
-  </section>
-  <section>
-    <div class="section-head">
-      <h2>관측부터 공유까지</h2>
-      <p>SYRTN은 역할과 학교 권한을 기준으로 자료, 제안, 게시판 접근을 관리합니다.</p>
-    </div>
-    <div class="feature-grid">
-      <article class="feature-card">
-        <span class="tag">OBSERVATION</span>
-        <h3>관측 네트워크</h3>
-        <p>학교별 활동을 분리하면서도 공동 관측 자료는 함께 축적할 수 있게 구성했습니다.</p>
-      </article>
-      <article class="feature-card">
-        <span class="tag">ARCHIVE</span>
-        <h3>자료실</h3>
-        <p>보고서, 기술 문서, 첨부파일을 서버에 저장하고 권한이 있는 사용자에게 제공합니다.</p>
-      </article>
-      <article class="feature-card">
-        <span class="tag">ACCESS</span>
-        <h3>권한 기반 접근</h3>
-        <p>관리자, 선생님, 학교장, 학생 역할에 맞춰 메뉴와 게시판 접근을 정리했습니다.</p>
-      </article>
+      <span>학교별 프로젝트 협업</span>
     </div>
   </section>
   <section class="quick-panel" aria-label="빠른 이동">
     <div class="notice-box">
-      <h3>프로젝트 운영</h3>
-      <p>학교별 게시판과 공용 게시판을 분리해 필요한 정보만 빠르게 확인할 수 있습니다.</p>
+      <h3>권한 안내</h3>
+      <p>메뉴는 로그인 상태와 역할에 따라 자동으로 정리됩니다. 필요한 권한은 권한 요청에서 신청할 수 있습니다.</p>
     </div>
     <div class="link-box">
-      <h3>바로가기</h3>
-      <p>자주 쓰는 메뉴로 이동합니다.</p>
+      <h3>내 계정</h3>
+      <p>로그인 정보와 권한 상태를 확인합니다.</p>
       <div class="quick-links">
-        <a href="school-board.html">학교 게시판 <span>→</span></a>
-        <a href="suggest.html">제안 게시판 <span>→</span></a>
+        <a href="mypage.html">마이페이지 <span>→</span></a>
         <a href="adjust.html">권한 요청 <span>→</span></a>
       </div>
     </div>
