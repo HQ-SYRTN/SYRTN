@@ -8,13 +8,13 @@
 <title>SYRTN | Home</title>
 <style>
 :root{
-  --bg:#07090d;
-  --surface:#101620;
+  --bg:#050505;
+  --surface:rgba(255,255,255,.055);
   --surface-soft:rgba(255,255,255,.07);
   --line:rgba(255,255,255,.14);
   --text:#f5f7fb;
   --muted:#aeb8c7;
-  --accent:#31d7e8;
+  --accent:#00e5ff;
   --accent-2:#7ee06b;
   --warning:#f4c95d;
   --nav:rgba(5,8,13,.94);
@@ -149,123 +149,98 @@ a{color:inherit}
 }
 .nav-menu a:hover{color:var(--accent)}
 .hero{
-  min-height:430px;
-  display:grid;
-  place-items:center start;
-  padding:132px clamp(18px,6vw,72px) 48px;
+  min-height:380px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:112px 18px 42px;
+  text-align:center;
   background:
-    linear-gradient(90deg,rgba(7,9,13,.92) 0%,rgba(7,9,13,.74) 58%,rgba(7,9,13,.86) 100%),
+    linear-gradient(rgba(0,0,0,.58),rgba(0,0,0,.92)),
     url("https://images.unsplash.com/photo-1462332420958-a05d1e002413?q=80&w=1920&auto=format&fit=crop") center/cover;
 }
 .hero-content{
-  width:min(900px,100%);
+  width:min(720px,100%);
 }
-.hero-kicker{
-  display:inline-flex;
-  align-items:center;
-  min-height:30px;
-  margin-bottom:18px;
-  border:1px solid rgba(49,215,232,.45);
-  border-radius:999px;
-  padding:5px 12px;
-  background:rgba(49,215,232,.11);
-  color:#bdf7ff;
-  font-size:.84rem;
-  font-weight:800;
-}
+.hero-kicker{margin-bottom:12px;color:#bdf7ff;font-size:.86rem;font-weight:800}
 .hero h1{
   margin:0;
-  color:var(--text);
-  font-size:clamp(2.7rem,9vw,5.6rem);
+  color:var(--accent);
+  font-size:clamp(2.5rem,8vw,4.8rem);
   line-height:.96;
   letter-spacing:0;
 }
 .hero p{
-  width:min(720px,100%);
-  margin:18px 0 0;
+  margin:14px auto 0;
   color:#d4dbe7;
   font-size:clamp(1rem,2.4vw,1.25rem);
 }
 .hero-actions{
-  width:min(760px,100%);
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
   gap:10px;
-  margin-top:26px;
+  margin-top:24px;
 }
 .container{
   width:100%;
-  max-width:1120px;
-  margin:0 auto;
-  padding:30px 20px 86px;
+  max-width:960px;
+  margin:42px auto 86px;
+  padding:0 20px;
 }
-.school-strip{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:12px;
-  margin-top:0;
-  position:relative;
-  z-index:2;
-}
-.school-item{
-  min-height:96px;
-  border:1px solid var(--line);
-  border-radius:8px;
-  padding:16px;
-  background:rgba(16,22,32,.9);
-}
-.school-item strong{
-  display:block;
-  color:var(--text);
-  font-size:1rem;
-}
-.school-item span{
-  display:block;
-  margin-top:8px;
-  color:var(--muted);
-  font-size:.9rem;
-}
-.section-head{margin:38px 0 16px}
-.section-head h2{
-  margin:0;
-  font-size:clamp(1.35rem,3vw,2rem);
-}
-.section-head p{
-  max-width:520px;
-  margin:0;
-  color:var(--muted);
-}
-.feature-grid{
+.quick-menu{
   display:grid;
   grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:14px;
+  gap:12px;
+  margin-bottom:22px;
 }
-.feature-card{
-  min-height:142px;
+.quick-menu a{
+  min-height:58px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:10px 13px;
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  font-weight:800;
+  text-decoration:none;
+}
+.quick-menu a:hover{border-color:var(--accent);color:var(--accent)}
+.panel{
   border:1px solid var(--line);
   border-radius:8px;
-  padding:18px;
+  padding:28px;
   background:var(--surface);
-  text-decoration:none;
-  transition:border-color .15s ease,transform .15s ease;
 }
-.feature-card:hover{border-color:var(--accent);transform:translateY(-2px)}
-.feature-card .tag{
-  display:inline-flex;
-  align-items:center;
-  min-height:26px;
-  border-radius:999px;
-  padding:3px 10px;
-  background:var(--surface-soft);
+.section-title{
+  border-left:4px solid var(--accent);
+  padding-left:14px;
+  margin:0;
+  font-size:1.5rem;
+}
+.info-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px;
+  margin-top:22px;
+}
+.info-card{
+  min-height:154px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:22px;
+  background:rgba(255,255,255,.035);
+  color:white;
+}
+.info-card h3{
+  margin:0 0 8px;
   color:var(--accent);
-  font-size:.78rem;
-  font-weight:800;
+  font-size:1.08rem;
 }
-.feature-card h3{
-  margin:14px 0 8px;
-  font-size:1.05rem;
-}
-.feature-card p{
+.info-card p{
   margin:0;
   color:var(--muted);
 }
@@ -273,7 +248,7 @@ a{color:inherit}
   display:grid;
   grid-template-columns:1.15fr .85fr;
   gap:14px;
-  margin-top:38px;
+  margin-top:18px;
 }
 .notice-box,.link-box{
   border:1px solid var(--line);
@@ -310,10 +285,8 @@ footer{
 }
 footer p{margin:4px 0}
 @media(max-width:860px){
-  .school-strip,.quick-panel{grid-template-columns:1fr}
-  .feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .section-head{display:block}
-  .section-head p{margin-top:8px}
+  .quick-menu{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .info-grid,.quick-panel{grid-template-columns:1fr}
 }
 @media(max-width:700px){
   .auth-bar{
@@ -346,30 +319,25 @@ footer p{margin:4px 0}
     font-size:.76rem;
   }
   .hero{
-    min-height:auto;
-    padding:112px 18px 34px;
-    place-items:center start;
+    min-height:320px;
+    padding:94px 18px 30px;
   }
-  .hero-kicker{
-    max-width:100%;
-    font-size:.76rem;
-  }
+  .hero-kicker{font-size:.76rem}
   .hero p{font-size:1rem}
-  .hero-actions{
-    grid-template-columns:repeat(2,minmax(0,1fr));
-  }
   .hero-actions .btn{
+    flex:1 1 150px;
     min-height:44px;
     padding:8px 10px;
   }
-  .container{padding:26px 14px 72px}
-  .school-item,.feature-card,.notice-box,.link-box{padding:18px}
+  .container{margin:28px auto 72px;padding:0 14px}
+  .panel{padding:20px}
+  .info-card,.notice-box,.link-box{padding:18px}
 }
 @media(max-width:390px){
   .logo-link span{display:none}
   #user-name{max-width:24vw}
   .nav-menu a{padding:0 10px;font-size:.72rem}
-  .feature-grid,.hero-actions{grid-template-columns:1fr}
+  .quick-menu{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -401,56 +369,35 @@ footer p{margin:4px 0}
   <div class="hero-content">
     <div class="hero-kicker">Suncheon-Yeonggwang Radio Telescope Network</div>
     <h1>SYRTN</h1>
-    <p>전파망원경 관측 자료와 학교별 협업 게시판을 빠르게 확인할 수 있는 SYRTN 포털입니다.</p>
+    <p>세 학교가 함께 사용하는 전파망원경 연구 네트워크입니다.</p>
     <div class="hero-actions">
-      <a class="btn btn-primary" href="school-board.html">학교 게시판</a>
-      <a class="btn" href="talk.html">공용 게시판</a>
+      <a class="btn btn-primary" href="talk.html">커뮤니티 보기</a>
       <a class="btn" href="resource.html">자료실</a>
-      <a class="btn" href="adjust.html">권한 요청</a>
     </div>
   </div>
 </header>
 <main class="container">
-  <section>
-    <div class="section-head">
-      <h2>빠른 이동</h2>
-      <p>자주 쓰는 기능을 첫 화면에서 바로 열 수 있습니다.</p>
-    </div>
-    <div class="feature-grid">
-      <a class="feature-card" href="school-board.html">
-        <span class="tag">SCHOOL</span>
-        <h3>학교 게시판</h3>
-        <p>소속 학교 게시글을 확인합니다.</p>
-      </a>
-      <a class="feature-card" href="talk.html">
-        <span class="tag">BOARD</span>
-        <h3>공용 게시판</h3>
-        <p>전체 커뮤니티 글을 확인합니다.</p>
-      </a>
-      <a class="feature-card" href="resource.html">
-        <span class="tag">FILE</span>
-        <h3>자료실</h3>
-        <p>문서와 첨부 자료를 봅니다.</p>
-      </a>
-      <a class="feature-card" href="suggest.html">
-        <span class="tag">SUGGEST</span>
-        <h3>제안</h3>
-        <p>개선 의견을 남깁니다.</p>
-      </a>
-    </div>
+  <section class="quick-menu" aria-label="빠른 이동">
+    <a href="school-board.html">학교 게시판 <span>→</span></a>
+    <a href="talk.html">공용 게시판 <span>→</span></a>
+    <a href="resource.html">자료실 <span>→</span></a>
+    <a href="adjust.html">권한 요청 <span>→</span></a>
   </section>
-  <section class="school-strip" aria-label="참여 학교">
-    <div class="school-item">
-      <strong>영광 해룡고</strong>
-      <span>관측 장비 및 연구 활동</span>
-    </div>
-    <div class="school-item">
-      <strong>순천고</strong>
-      <span>전파 관측 데이터 분석</span>
-    </div>
-    <div class="school-item">
-      <strong>순천 복성고</strong>
-      <span>학교별 프로젝트 협업</span>
+  <section class="panel">
+    <h2 class="section-title">Project Status</h2>
+    <div class="info-grid">
+      <div class="info-card">
+        <h3>Radio Telescope Network</h3>
+        <p>영광 해룡고, 순천고, 순천 복성고가 관측 활동과 연구 자료를 연결합니다.</p>
+      </div>
+      <div class="info-card">
+        <h3>Shared Archive</h3>
+        <p>보고서, 기술 문서, 첨부파일을 한 곳에서 확인할 수 있습니다.</p>
+      </div>
+      <div class="info-card">
+        <h3>School Communities</h3>
+        <p>소속 학교와 역할에 맞는 게시판으로 협업 내용을 관리합니다.</p>
+      </div>
     </div>
   </section>
   <section class="quick-panel" aria-label="빠른 이동">
