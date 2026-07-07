@@ -149,25 +149,30 @@ a{color:inherit}
 }
 .nav-menu a:hover{color:var(--accent)}
 .hero{
-  min-height:380px;
+  min-height:520px;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  padding:112px 18px 42px;
+  padding:118px 18px 70px;
   text-align:center;
   background:
-    linear-gradient(rgba(0,0,0,.58),rgba(0,0,0,.92)),
+    linear-gradient(rgba(0,0,0,.38),rgba(0,0,0,.78)),
     url("https://images.unsplash.com/photo-1462332420958-a05d1e002413?q=80&w=1920&auto=format&fit=crop") center/cover;
 }
 .hero-content{
-  width:min(720px,100%);
+  width:min(760px,100%);
 }
-.hero-kicker{margin-bottom:12px;color:#bdf7ff;font-size:.86rem;font-weight:800}
+.hero-kicker{
+  margin-bottom:12px;
+  color:#bdf7ff;
+  font-size:.86rem;
+  font-weight:800;
+}
 .hero h1{
   margin:0;
   color:var(--accent);
-  font-size:clamp(2.5rem,8vw,4.8rem);
+  font-size:clamp(2.7rem,9vw,5.4rem);
   line-height:.96;
   letter-spacing:0;
 }
@@ -176,39 +181,12 @@ a{color:inherit}
   color:#d4dbe7;
   font-size:clamp(1rem,2.4vw,1.25rem);
 }
-.hero-actions{
-  display:flex;
-  justify-content:center;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-top:24px;
-}
 .container{
   width:100%;
   max-width:960px;
   margin:42px auto 86px;
   padding:0 20px;
 }
-.quick-menu{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:12px;
-  margin-bottom:22px;
-}
-.quick-menu a{
-  min-height:58px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  border:1px solid var(--line);
-  border-radius:6px;
-  padding:10px 13px;
-  background:rgba(255,255,255,.04);
-  color:var(--text);
-  font-weight:800;
-  text-decoration:none;
-}
-.quick-menu a:hover{border-color:var(--accent);color:var(--accent)}
 .panel{
   border:1px solid var(--line);
   border-radius:8px;
@@ -244,38 +222,28 @@ a{color:inherit}
   margin:0;
   color:var(--muted);
 }
-.quick-panel{
+.astro-section{
   display:grid;
-  grid-template-columns:1.15fr .85fr;
-  gap:14px;
-  margin-top:18px;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+  margin-top:22px;
 }
-.notice-box,.link-box{
+.astro-photo{
+  min-height:260px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:
+    linear-gradient(rgba(0,0,0,.06),rgba(0,0,0,.35)),
+    url("https://images.unsplash.com/photo-1502134249126-9f3755a50d78?q=80&w=1200&auto=format&fit=crop") center/cover;
+}
+.note-box{
   border:1px solid var(--line);
   border-radius:8px;
   padding:22px;
-  background:linear-gradient(135deg,rgba(49,215,232,.1),rgba(126,224,107,.08)),var(--surface);
+  background:var(--surface);
 }
-.notice-box h3,.link-box h3{margin:0 0 10px}
-.notice-box p,.link-box p{margin:0;color:var(--muted)}
-.quick-links{
-  display:grid;
-  gap:8px;
-  margin-top:14px;
-}
-.quick-links a{
-  min-height:42px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  border:1px solid var(--line);
-  border-radius:6px;
-  padding:8px 12px;
-  color:var(--text);
-  text-decoration:none;
-  background:rgba(255,255,255,.04);
-}
-.quick-links a:hover{border-color:var(--accent);color:var(--accent)}
+.note-box h3{margin:0 0 10px;color:var(--accent)}
+.note-box p{margin:0;color:var(--muted)}
 footer{
   border-top:1px solid var(--line);
   padding:42px 20px;
@@ -285,8 +253,7 @@ footer{
 }
 footer p{margin:4px 0}
 @media(max-width:860px){
-  .quick-menu{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .info-grid,.quick-panel{grid-template-columns:1fr}
+  .info-grid,.astro-section{grid-template-columns:1fr}
 }
 @media(max-width:700px){
   .auth-bar{
@@ -319,25 +286,20 @@ footer p{margin:4px 0}
     font-size:.76rem;
   }
   .hero{
-    min-height:320px;
-    padding:94px 18px 30px;
+    min-height:420px;
+    padding:96px 18px 52px;
   }
   .hero-kicker{font-size:.76rem}
   .hero p{font-size:1rem}
-  .hero-actions .btn{
-    flex:1 1 150px;
-    min-height:44px;
-    padding:8px 10px;
-  }
   .container{margin:28px auto 72px;padding:0 14px}
   .panel{padding:20px}
-  .info-card,.notice-box,.link-box{padding:18px}
+  .info-card,.note-box{padding:18px}
+  .astro-photo{min-height:220px}
 }
 @media(max-width:390px){
   .logo-link span{display:none}
   #user-name{max-width:24vw}
   .nav-menu a{padding:0 10px;font-size:.72rem}
-  .quick-menu{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -353,6 +315,13 @@ footer p{margin:4px 0}
     <button id="logout-btn" class="auth-btn" style="display:none">LOGOUT</button>
   </div>
 </div>
+<header class="hero">
+  <div class="hero-content">
+    <div class="hero-kicker">Suncheon-Yeonggwang Radio Telescope Network</div>
+    <h1>SYRTN</h1>
+    <p>세 학교가 함께 관측하고 기록하는 전파망원경 연구 네트워크입니다.</p>
+  </div>
+</header>
 <nav class="sub-nav-container" aria-label="주요 메뉴">
   <div class="nav-menu">
     <a href="index.html">HOME</a>
@@ -365,24 +334,7 @@ footer p{margin:4px 0}
     <a href="admin.html">ADMIN</a>
   </div>
 </nav>
-<header class="hero">
-  <div class="hero-content">
-    <div class="hero-kicker">Suncheon-Yeonggwang Radio Telescope Network</div>
-    <h1>SYRTN</h1>
-    <p>세 학교가 함께 사용하는 전파망원경 연구 네트워크입니다.</p>
-    <div class="hero-actions">
-      <a class="btn btn-primary" href="talk.html">커뮤니티 보기</a>
-      <a class="btn" href="resource.html">자료실</a>
-    </div>
-  </div>
-</header>
 <main class="container">
-  <section class="quick-menu" aria-label="빠른 이동">
-    <a href="school-board.html">학교 게시판 <span>→</span></a>
-    <a href="talk.html">공용 게시판 <span>→</span></a>
-    <a href="resource.html">자료실 <span>→</span></a>
-    <a href="adjust.html">권한 요청 <span>→</span></a>
-  </section>
   <section class="panel">
     <h2 class="section-title">Project Status</h2>
     <div class="info-grid">
@@ -400,18 +352,11 @@ footer p{margin:4px 0}
       </div>
     </div>
   </section>
-  <section class="quick-panel" aria-label="빠른 이동">
-    <div class="notice-box">
-      <h3>권한 안내</h3>
-      <p>메뉴는 로그인 상태와 역할에 따라 자동으로 정리됩니다. 필요한 권한은 권한 요청에서 신청할 수 있습니다.</p>
-    </div>
-    <div class="link-box">
-      <h3>내 계정</h3>
-      <p>로그인 정보와 권한 상태를 확인합니다.</p>
-      <div class="quick-links">
-        <a href="mypage.html">마이페이지 <span>→</span></a>
-        <a href="adjust.html">권한 요청 <span>→</span></a>
-      </div>
+  <section class="astro-section" aria-label="관측 이미지">
+    <div class="astro-photo"></div>
+    <div class="note-box">
+      <h3>Observation Archive</h3>
+      <p>SYRTN은 관측 자료, 보고서, 학교별 협업 기록을 차분하게 정리하는 공간입니다. 주요 메뉴는 상단 nav에서 선택할 수 있습니다.</p>
     </div>
   </section>
 </main>
