@@ -55,10 +55,6 @@ function findRule(page = currentPage()) {
     return PAGE_RULES.find(rule => rule.match.test(page));
 }
 
-function isIndexPage() {
-    return currentPage() === "index.html";
-}
-
 function canAccess(role, rule, searchParams = new URLSearchParams(location.search)) {
     if (!rule) return true;
     const roles = typeof rule.roles === "function" ? rule.roles(searchParams) : rule.roles;
@@ -72,20 +68,9 @@ function setLinkVisibility(selector, visible) {
 }
 
 function hardenNavigation(role) {
-    if (isIndexPage()) {
-        setLinkVisibility(".nav-menu a", true);
-        setLinkVisibility('a[href="write.html"], button[onclick*="write.html"]', true);
-        return;
-    }
+    setLinkVisibility(".nav-menu a", true);
 
-    const isLoggedIn = role !== "guest";
-    setLinkVisibility('a[href="admin.html"]', role === "admin");
-    setLinkVisibility('a[href="suggest.html"]', ROLES.suggestions.includes(role));
-    setLinkVisibility('a[href="resource.html"]', isLoggedIn);
-    setLinkVisibility('a[href="mypage.html"]', isLoggedIn);
-    setLinkVisibility('a[href="adjust.html"]', isLoggedIn);
-
-    document.querySelectorAll('a[href="write.html"], button[onclick*="write.html"]').forEach(el => {
+    document.querySelectorAll('a[href="write.html"]:not(.nav-menu a), button[onclick*="write.html"]').forEach(el => {
         el.style.display = ROLES.resourceWrite.includes(role) ? "" : "none";
     });
 }
@@ -106,17 +91,44 @@ function ruleForLink(link) {
     return { rule, searchParams: url.searchParams };
 }
 
-function installIndexNavGuards(role) {
-    window.__syrtnIndexNavRole = role;
-    if (window.__syrtnIndexNavGuardsInstalled) return;
-    window.__syrtnIndexNavGuardsInstalled = true;
+function installNavLayoutFix() {
+    if (document.getElementById("syrtn-nav-layout-fix")) return;
+    const style = document.createElement("style");
+    style.id = "syrtn-nav-layout-fix";
+    style.textContent = `
+        html, body { max-width: 100%; overflow-x: hidden; }
+        body { overflow-x: clip; }
+        .sub-nav-container {
+            max-width: 100vw !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            z-index: 1001 !important;
+            -webkit-overflow-scrolling: touch;
+        }
+        .nav-menu {
+            width: max-content !important;
+            min-width: 100% !important;
+            flex-wrap: nowrap !important;
+        }
+        .nav-menu a {
+            flex: 0 0 auto !important;
+            white-space: nowrap !important;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+function installNavGuards(role) {
+    window.__syrtnNavRole = role;
+    if (window.__syrtnNavGuardsInstalled) return;
+    window.__syrtnNavGuardsInstalled = true;
 
     document.querySelectorAll(".nav-menu a").forEach(link => {
         link.addEventListener("click", event => {
             const target = ruleForLink(link);
             if (!target) return;
 
-            const currentRole = window.__syrtnIndexNavRole || "guest";
+            const currentRole = window.__syrtnNavRole || "guest";
             if (!canAccess(currentRole, target.rule, target.searchParams)) {
                 event.preventDefault();
                 location.href = "block.html";
@@ -133,9 +145,8 @@ async function resolveRole(user) {
     return snap.data().role || "member";
 }
 
-if (isIndexPage()) {
-    installIndexNavGuards("guest");
-}
+installNavLayoutFix();
+installNavGuards("guest");
 
 onAuthStateChanged(auth, async user => {
     let role = "guest";
@@ -146,9 +157,7 @@ onAuthStateChanged(auth, async user => {
     }
 
     hardenNavigation(role);
-    if (isIndexPage()) {
-        installIndexNavGuards(role);
-    }
+    installNavGuards(role);
 
     const rule = findRule();
     if (!canAccess(role, rule)) {
