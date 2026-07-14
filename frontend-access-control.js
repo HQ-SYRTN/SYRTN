@@ -39,8 +39,8 @@ const PAGE_RULES = [
     { match: /^school-write\.html$/, roles: schoolRolesFromQuery }
 ];
 
-function schoolRolesFromQuery() {
-    const school = new URLSearchParams(location.search).get("school");
+function schoolRolesFromQuery(searchParams = new URLSearchParams(location.search)) {
+    const school = searchParams.get("school");
     if (school === "s") return ROLES.schoolS;
     if (school === "h") return ROLES.schoolH;
     if (school === "b") return ROLES.schoolB;
@@ -51,14 +51,17 @@ function currentPage() {
     return location.pathname.split("/").pop() || "index.html";
 }
 
-function findRule() {
-    const page = currentPage();
+function findRule(page = currentPage()) {
     return PAGE_RULES.find(rule => rule.match.test(page));
 }
 
-function canAccess(role, rule) {
+function isIndexPage() {
+    return currentPage() === "index.html";
+}
+
+function canAccess(role, rule, searchParams = new URLSearchParams(location.search)) {
     if (!rule) return true;
-    const roles = typeof rule.roles === "function" ? rule.roles() : rule.roles;
+    const roles = typeof rule.roles === "function" ? rule.roles(searchParams) : rule.roles;
     return roles.includes(role);
 }
 
@@ -69,6 +72,12 @@ function setLinkVisibility(selector, visible) {
 }
 
 function hardenNavigation(role) {
+    if (isIndexPage()) {
+        setLinkVisibility(".nav-menu a", true);
+        setLinkVisibility('a[href="write.html"], button[onclick*="write.html"]', true);
+        return;
+    }
+
     const isLoggedIn = role !== "guest";
     setLinkVisibility('a[href="admin.html"]', role === "admin");
     setLinkVisibility('a[href="suggest.html"]', ROLES.suggestions.includes(role));
@@ -81,12 +90,51 @@ function hardenNavigation(role) {
     });
 }
 
+function ruleForLink(link) {
+    const href = link.getAttribute("href");
+    if (!href || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) {
+        return null;
+    }
+
+    const url = new URL(href, location.href);
+    if (url.origin !== location.origin) {
+        return null;
+    }
+
+    const page = url.pathname.split("/").pop() || "index.html";
+    const rule = findRule(page);
+    return { rule, searchParams: url.searchParams };
+}
+
+function installIndexNavGuards(role) {
+    window.__syrtnIndexNavRole = role;
+    if (window.__syrtnIndexNavGuardsInstalled) return;
+    window.__syrtnIndexNavGuardsInstalled = true;
+
+    document.querySelectorAll(".nav-menu a").forEach(link => {
+        link.addEventListener("click", event => {
+            const target = ruleForLink(link);
+            if (!target) return;
+
+            const currentRole = window.__syrtnIndexNavRole || "guest";
+            if (!canAccess(currentRole, target.rule, target.searchParams)) {
+                event.preventDefault();
+                location.href = "block.html";
+            }
+        });
+    });
+}
+
 async function resolveRole(user) {
     if (!user) return "guest";
     if (user.email === ADMIN_EMAIL) return "admin";
     const snap = await getDoc(doc(db, "users", user.uid));
     if (!snap.exists()) return "member";
     return snap.data().role || "member";
+}
+
+if (isIndexPage()) {
+    installIndexNavGuards("guest");
 }
 
 onAuthStateChanged(auth, async user => {
@@ -98,6 +146,9 @@ onAuthStateChanged(auth, async user => {
     }
 
     hardenNavigation(role);
+    if (isIndexPage()) {
+        installIndexNavGuards(role);
+    }
 
     const rule = findRule();
     if (!canAccess(role, rule)) {
