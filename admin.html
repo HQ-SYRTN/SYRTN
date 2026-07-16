@@ -180,23 +180,99 @@
 </head>
 <body>
 <div class="auth-bar">
-    <a href="index.html" class="logo-link"><img src="SYRTN-logo-homepage.png" alt="SYRTN Logo" class="nav-logo"><span>SYRTN</span></a>
-    <div class="auth-user-zone"><span id="user-name" style="display:none; font-size:.9rem; color:var(--accent);"></span><button id="logout-btn" class="auth-btn" style="display:none;">LOGOUT</button></div>
+    <a href="index.html" class="logo-link">
+        <img src="SYRTN-logo-homepage.png" alt="SYRTN Logo" class="nav-logo">
+        <span>SYRTN</span>
+    </a>
+    <div class="auth-user-zone">
+        <span id="user-name" style="display:none; font-size:.9rem; color:var(--accent);"></span>
+        <button id="logout-btn" class="auth-btn" style="display:none;">LOGOUT</button>
+    </div>
 </div>
-<header class="intro-hero"><h1>Admin Panel</h1><p>부원 권한 관리 및 접수된 요청 확인</p></header>
-<nav class="sub-nav-container"><div class="nav-menu"><a href="index.html">HOME</a><a href="introduction.html">INTRODUCTION</a><a href="talk.html">TALK</a><a href="resource.html">RESOURCE</a><a href="suggest.html">SUGGESTION</a><a href="mypage.html">MY PAGE</a><a href="adjust.html">REQUEST AUTHORITY</a><a href="admin.html" class="active">ADMIN</a></div></nav>
+<header class="intro-hero">
+    <h1>Admin Panel</h1>
+    <p>부원 권한 관리 및 접수된 요청 확인</p>
+</header>
+<nav class="sub-nav-container">
+    <div class="nav-menu">
+        <a href="index.html">HOME</a>
+        <a href="introduction.html">INTRODUCTION</a>
+        <a href="talk.html">TALK</a>
+        <a href="resource.html">RESOURCE</a>
+        <a href="suggest.html">SUGGESTION</a>
+        <a href="mypage.html">MY PAGE</a>
+        <a href="adjust.html">REQUEST AUTHORITY</a>
+        <a href="admin.html" class="active">ADMIN</a>
+    </div>
+</nav>
 <main class="content-section">
     <div class="section-title">부원 권한 관리</div>
-    <p class="section-note">각 학교별 역할에 맞게 등급을 조정합니다. 관리자와 리더만 이 화면에 접근할 수 있습니다.</p>
-    <div class="admin-card"><table class="user-table"><thead><tr><th>이름</th><th>학교</th><th>이메일</th><th>현재 등급</th><th>조정</th></tr></thead><tbody id="user-list"><tr><td colspan="5" style="text-align:center; padding:50px;">데이터를 불러오는 중...</td></tr></tbody></table></div>
+    <p class="section-note">각 학교별 역할에 맞게 등급을 조정합니다. 관리자만 이 화면에 접근할 수 있습니다.</p>
+    <div class="admin-card">
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>이름</th>
+                    <th>학교</th>
+                    <th>이메일</th>
+                    <th>현재 등급</th>
+                    <th>조정</th>
+                </tr>
+            </thead>
+            <tbody id="user-list">
+                <tr>
+                    <td colspan="5" style="text-align:center; padding:50px;">데이터를 불러오는 중...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
     <div class="section-title">접수된 건의 사항</div>
-    <div class="admin-card"><table class="user-table"><thead><tr><th>날짜</th><th>분류</th><th>제목 및 내용</th><th>작성자</th><th>관리</th></tr></thead><tbody id="suggestion-list"><tr><td colspan="5" style="text-align:center; padding:50px;">데이터를 불러오는 중...</td></tr></tbody></table></div>
+    <div class="admin-card">
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>날짜</th>
+                    <th>분류</th>
+                    <th>제목 및 내용</th>
+                    <th>작성자</th>
+                    <th>관리</th>
+                </tr>
+            </thead>
+            <tbody id="suggestion-list">
+                <tr>
+                    <td colspan="5" style="text-align:center; padding:50px;">데이터를 불러오는 중...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
     <div class="section-title">접수된 등급 조정 요청</div>
-    <div class="admin-card"><table class="user-table"><thead><tr><th>요청일</th><th>이름</th><th>학교</th><th>요청 등급</th><th>사유</th><th>관리</th></tr></thead><tbody id="request-list"><tr><td colspan="6" style="text-align:center; padding:50px;">데이터를 불러오는 중...</td></tr></tbody></table></div>
+    <div class="admin-card">
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>요청일</th>
+                    <th>이름</th>
+                    <th>학교</th>
+                    <th>요청 등급</th>
+                    <th>사유</th>
+                    <th>관리</th>
+                </tr>
+            </thead>
+            <tbody id="request-list">
+                <tr>
+                    <td colspan="6" style="text-align:center; padding:50px;">데이터를 불러오는 중...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </main>
-<footer><p>&copy; 2026 SYRTN Collaboration. All Rights Reserved.</p><p>영광해룡고등학교 | 순천고등학교 | 순천복성고등학교 물리·천문·지구과학 동아리 연합</p><p>designed by SYRTN Team | 문의 : 2jw5464@gmail.com</p></footer>
+<footer>
+    <p>&copy; 2026 SYRTN Collaboration. All Rights Reserved.</p>
+    <p>영광 해룡고 | 순천고 | 순천 복성고 물리·지구과학 동아리</p>
+    <p>designed by SYRTN Team | Contact: 2jw5464@gmail.com</p>
+</footer>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
