@@ -29,6 +29,11 @@
         .content { white-space:pre-wrap; color:#ddd; margin-top:24px; }
         .links { margin-top:24px; display:flex; flex-direction:column; gap:8px; }
         .links a { color:var(--accent); word-break:break-all; }
+        .attachment-item { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border:1px solid rgba(0,229,255,.45); border-radius:8px; background:rgba(0,229,255,.08); }
+        .attachment-name { color:white; word-break:break-all; }
+        .attachment-actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+        .attachment-actions .btn-small { color:#ddd; background:rgba(255,255,255,.04); }
+        .attachment-actions .btn-small:hover { color:#000; background:var(--accent); border-color:var(--accent); }
         .actions { display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; margin-top:24px; }
         .btn-primary { border-color:var(--accent); color:var(--accent); }
         .btn-danger { color:#ff4d4d; border-color:#ff4d4d; }
@@ -125,6 +130,10 @@
             const raw = String(value || "").trim();
             const base = raw.startsWith("/api/") ? API_BASE_URL : location.href;
             const url = new URL(raw, base);
+            if (url.pathname.startsWith("/api/syrtn/uploads/")) {
+                const api = new URL(API_BASE_URL);
+                return `${api.origin}${url.pathname}${url.search}`;
+            }
             return ["http:", "https:"].includes(url.protocol) ? url.href : "";
         } catch {
             return "";
@@ -177,14 +186,35 @@
             const href = safeUrl(link.url);
             if (!href) return;
             const isFile = isFileAttachment(link, href);
-            const a = document.createElement("a");
-            a.href = isFile ? "#" : href;
-            a.target = isFile ? "_self" : "_blank";
-            a.rel = "noopener noreferrer";
-            a.textContent = `${link.name || href}${isFile ? " (열기 / 다운로드)" : ""}`;
             if (isFile) {
-                a.onclick = (event) => { event.preventDefault(); openAttachment(href, link.name || `attachment-${index + 1}`); };
+                const name = link.name || `첨부파일 ${index + 1}`;
+                const item = document.createElement("div");
+                item.className = "attachment-item";
+                const nameEl = document.createElement("span");
+                nameEl.className = "attachment-name";
+                nameEl.textContent = name;
+                const actions = document.createElement("div");
+                actions.className = "attachment-actions";
+                const previewBtn = document.createElement("button");
+                previewBtn.type = "button";
+                previewBtn.className = "btn-small";
+                previewBtn.textContent = "미리보기";
+                previewBtn.onclick = () => openAttachment(href, name, "preview");
+                const downloadBtn = document.createElement("button");
+                downloadBtn.type = "button";
+                downloadBtn.className = "btn-small";
+                downloadBtn.textContent = "다운로드";
+                downloadBtn.onclick = () => openAttachment(href, name, "download");
+                actions.append(previewBtn, downloadBtn);
+                item.append(nameEl, actions);
+                linksEl.appendChild(item);
+                return;
             }
+            const a = document.createElement("a");
+            a.href = href;
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+            a.textContent = link.name || href;
             linksEl.appendChild(a);
         });
         document.getElementById("btn-edit").classList.toggle("hidden", !canManagePost());
@@ -203,13 +233,28 @@
         }).join("");
     }
 
-    async function openAttachment(url, filename) {
+    function withDownloadParam(url) {
+        const downloadUrl = new URL(url);
+        downloadUrl.searchParams.set("download", "1");
+        return downloadUrl.href;
+    }
+
+    async function openAttachment(url, filename, mode = "preview") {
         try {
             if (!currentUser) throw new Error("로그인이 필요합니다.");
-            const res = await fetch(url, { headers: await headers() });
+            const requestUrl = mode === "download" ? withDownloadParam(url) : url;
+            const res = await fetch(requestUrl, { headers: await headers() });
             if (!res.ok) throw new Error("파일을 열 수 없습니다.");
             const blob = await res.blob();
             const objectUrl = URL.createObjectURL(blob);
+            if (mode === "download") {
+                const a = document.createElement("a");
+                a.href = objectUrl;
+                a.download = filename;
+                a.click();
+                setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+                return;
+            }
             const opened = window.open(objectUrl, "_blank", "noopener,noreferrer");
             if (!opened) {
                 const a = document.createElement("a");

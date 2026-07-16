@@ -26,6 +26,11 @@
         .links-container { display:flex; flex-direction:column; gap:10px; margin-bottom:40px; }
         .link-item { background:rgba(0,229,255,.1); border:1px solid var(--accent); padding:12px 20px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; text-decoration:none; color:white; transition:.3s; }
         .link-item:hover { background:var(--accent); color:black; }
+        .attachment-item { background:rgba(0,229,255,.08); border:1px solid rgba(0,229,255,.45); padding:12px 16px; border-radius:8px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+        .attachment-name { color:white; word-break:break-all; }
+        .attachment-actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+        .attachment-actions .btn-small { color:#ddd; background:rgba(255,255,255,.04); }
+        .attachment-actions .btn-small:hover { color:#000; background:var(--accent); border-color:var(--accent); }
         .admin-zone { position:absolute; top:45px; right:45px; display:flex; gap:10px; }
         .btn-small { padding:5px 12px; font-size:12px; border-radius:4px; cursor:pointer; border:1px solid #555; background:transparent; color:#ccc; }
         .btn-small:hover { background:white; color:black; }
@@ -275,6 +280,10 @@
             const raw = String(value || '').trim();
             const base = raw.startsWith('/api/') ? API_BASE_URL : location.href;
             const url = new URL(raw, base);
+            if (url.pathname.startsWith('/api/syrtn/uploads/')) {
+                const api = new URL(API_BASE_URL);
+                return `${api.origin}${url.pathname}${url.search}`;
+            }
             return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
         } catch {
             return '';
@@ -300,18 +309,36 @@
             const href = safeUrl(link.url);
             if (!href) return;
             const isFile = isFileAttachment(link, href);
+            if (isFile) {
+                const name = link.name || `첨부파일 ${index + 1}`;
+                const item = document.createElement('div');
+                item.className = 'attachment-item';
+                const nameEl = document.createElement('span');
+                nameEl.className = 'attachment-name';
+                nameEl.textContent = name;
+                const actions = document.createElement('div');
+                actions.className = 'attachment-actions';
+                const previewBtn = document.createElement('button');
+                previewBtn.type = 'button';
+                previewBtn.className = 'btn-small';
+                previewBtn.textContent = '미리보기';
+                previewBtn.onclick = () => openAttachment(href, name, 'preview');
+                const downloadBtn = document.createElement('button');
+                downloadBtn.type = 'button';
+                downloadBtn.className = 'btn-small';
+                downloadBtn.textContent = '다운로드';
+                downloadBtn.onclick = () => openAttachment(href, name, 'download');
+                actions.append(previewBtn, downloadBtn);
+                item.append(nameEl, actions);
+                linksDiv.appendChild(item);
+                return;
+            }
             const a = document.createElement('a');
-            a.href = isFile ? '#' : href;
-            a.target = isFile ? '_self' : '_blank';
+            a.href = href;
+            a.target = '_blank';
             a.rel = 'noopener noreferrer';
             a.className = 'link-item';
-            a.innerHTML = `<span>${escapeHtml(link.name || `첨부파일 ${index + 1}`)}</span><span style="font-size:12px; opacity:.6;">${isFile ? '열기 / 다운로드' : '새 창에서 열기'}</span>`;
-            if (isFile) {
-                a.onclick = (event) => {
-                    event.preventDefault();
-                    openAttachment(href, link.name || `attachment-${index + 1}`);
-                };
-            }
+            a.innerHTML = `<span>${escapeHtml(link.name || '첨부 링크')}</span><span style="font-size:12px; opacity:.6;">새 창에서 열기</span>`;
             linksDiv.appendChild(a);
         });
         const isOwner = currentUser && postData.uid === currentUser.uid;
@@ -357,13 +384,28 @@
         finally { btn.disabled = false; btn.innerText = 'POST'; }
     });
 
-    async function openAttachment(url, filename) {
+    function withDownloadParam(url) {
+        const downloadUrl = new URL(url);
+        downloadUrl.searchParams.set('download', '1');
+        return downloadUrl.href;
+    }
+
+    async function openAttachment(url, filename, mode = 'preview') {
         try {
             if (!currentUser) throw new Error('로그인이 필요합니다.');
-            const res = await fetch(url, { headers: await getHeaders() });
+            const requestUrl = mode === 'download' ? withDownloadParam(url) : url;
+            const res = await fetch(requestUrl, { headers: await getHeaders() });
             if (!res.ok) throw new Error('파일을 열 수 없습니다.');
             const blob = await res.blob();
             const objectUrl = URL.createObjectURL(blob);
+            if (mode === 'download') {
+                const a = document.createElement('a');
+                a.href = objectUrl;
+                a.download = filename;
+                a.click();
+                setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+                return;
+            }
             const opened = window.open(objectUrl, '_blank', 'noopener,noreferrer');
             if (!opened) {
                 const a = document.createElement('a');
