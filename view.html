@@ -270,6 +270,21 @@
         return headers;
     }
 
+    function safeUrl(value) {
+        try {
+            const raw = String(value || '').trim();
+            const base = raw.startsWith('/api/') ? API_BASE_URL : location.href;
+            const url = new URL(raw, base);
+            return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+        } catch {
+            return '';
+        }
+    }
+
+    function isFileAttachment(link, href) {
+        return link?.type === 'file' || href.includes('/api/syrtn/uploads/');
+    }
+
     async function loadPost() {
         const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${postId}`, { headers: await getHeaders() });
         if (!res.ok) { alert('자료를 찾을 수 없습니다.'); location.replace('resource.html'); return; }
@@ -281,13 +296,22 @@
         document.getElementById('viewContent').innerText = postData.content || postData.description || '';
         const linksDiv = document.getElementById('linksContainer');
         linksDiv.innerHTML = '';
-        (postData.links || []).forEach(link => {
+        (postData.links || []).forEach((link, index) => {
+            const href = safeUrl(link.url);
+            if (!href) return;
+            const isFile = isFileAttachment(link, href);
             const a = document.createElement('a');
-            a.href = link.url;
-            a.target = '_blank';
+            a.href = isFile ? '#' : href;
+            a.target = isFile ? '_self' : '_blank';
             a.rel = 'noopener noreferrer';
             a.className = 'link-item';
-            a.innerHTML = `<span>${escapeHtml(link.name || '첨부 링크')}</span><span style="font-size:12px; opacity:.6;">새 창에서 열기</span>`;
+            a.innerHTML = `<span>${escapeHtml(link.name || `첨부파일 ${index + 1}`)}</span><span style="font-size:12px; opacity:.6;">${isFile ? '열기 / 다운로드' : '새 창에서 열기'}</span>`;
+            if (isFile) {
+                a.onclick = (event) => {
+                    event.preventDefault();
+                    openAttachment(href, link.name || `attachment-${index + 1}`);
+                };
+            }
             linksDiv.appendChild(a);
         });
         const isOwner = currentUser && postData.uid === currentUser.uid;
@@ -335,8 +359,9 @@
 
     async function openAttachment(url, filename) {
         try {
+            if (!currentUser) throw new Error('로그인이 필요합니다.');
             const res = await fetch(url, { headers: await getHeaders() });
-            if (!res.ok) throw new Error('??? ? ? ????.');
+            if (!res.ok) throw new Error('파일을 열 수 없습니다.');
             const blob = await res.blob();
             const objectUrl = URL.createObjectURL(blob);
             const opened = window.open(objectUrl, '_blank', 'noopener,noreferrer');
@@ -348,7 +373,7 @@
             }
             setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
         } catch (err) {
-            alert(err.message || '??? ? ? ????.');
+            alert(err.message || '파일을 열 수 없습니다.');
         }
     }
 

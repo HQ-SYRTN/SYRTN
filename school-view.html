@@ -122,12 +122,15 @@
     const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch]));
     const safeUrl = (value) => {
         try {
-            const url = new URL(value, location.href);
+            const raw = String(value || "").trim();
+            const base = raw.startsWith("/api/") ? API_BASE_URL : location.href;
+            const url = new URL(raw, base);
             return ["http:", "https:"].includes(url.protocol) ? url.href : "";
         } catch {
             return "";
         }
     };
+    const isFileAttachment = (link, href) => link?.type === "file" || href.includes("/api/syrtn/uploads/");
 
     document.getElementById("logout-btn").onclick = async () => { if (confirm("로그아웃 하시겠습니까?")) { await signOut(auth); location.href = "index.html"; } };
     document.getElementById("btn-list").onclick = () => location.href = school.boardUrl;
@@ -173,12 +176,13 @@
         (post.links || []).forEach((link, index) => {
             const href = safeUrl(link.url);
             if (!href) return;
+            const isFile = isFileAttachment(link, href);
             const a = document.createElement("a");
-            a.href = link.type === "file" ? "#" : href;
-            a.target = link.type === "file" ? "_self" : "_blank";
+            a.href = isFile ? "#" : href;
+            a.target = isFile ? "_self" : "_blank";
             a.rel = "noopener noreferrer";
-            a.textContent = `${link.name || href}${link.type === "file" ? " (?? / ????)" : ""}`;
-            if (link.type === "file") {
+            a.textContent = `${link.name || href}${isFile ? " (열기 / 다운로드)" : ""}`;
+            if (isFile) {
                 a.onclick = (event) => { event.preventDefault(); openAttachment(href, link.name || `attachment-${index + 1}`); };
             }
             linksEl.appendChild(a);
@@ -201,8 +205,9 @@
 
     async function openAttachment(url, filename) {
         try {
+            if (!currentUser) throw new Error("로그인이 필요합니다.");
             const res = await fetch(url, { headers: await headers() });
-            if (!res.ok) throw new Error("??? ? ? ????.");
+            if (!res.ok) throw new Error("파일을 열 수 없습니다.");
             const blob = await res.blob();
             const objectUrl = URL.createObjectURL(blob);
             const opened = window.open(objectUrl, "_blank", "noopener,noreferrer");
@@ -214,7 +219,7 @@
             }
             setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
         } catch (err) {
-            alert(err.message || "??? ? ? ????.");
+            alert(err.message || "파일을 열 수 없습니다.");
         }
     }
 
