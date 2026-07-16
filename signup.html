@@ -11,11 +11,78 @@
 </style>
 </head>
 <body>
-<div class="auth-bar"><a href="index.html" class="logo-link"><img src="SYRTN-logo-homepage.png" alt="SYRTN logo" class="nav-logo"><span>SYRTN</span></a><div class="auth-user-zone"><a href="login.html" id="login-link" class="auth-btn">LOGIN</a><span id="user-name" style="display:none;color:var(--accent);font-weight:700"></span><button id="logout-btn" class="auth-btn" style="display:none">LOGOUT</button></div></div><nav class="sub-nav-container"><div class="nav-menu"><a href="index.html">HOME</a><a href="introduction.html">INTRODUCTION</a><a href="talk.html">TALK</a><a href="resource.html">RESOURCE</a><a href="suggest.html">SUGGESTION</a><a href="mypage.html">MY PAGE</a><a href="adjust.html">REQUEST AUTHORITY</a><a href="admin.html">ADMIN</a></div></nav>
-<main class="container" style="margin-top:120px"><section class="panel"><h1 class="section-title">Sign up</h1><form id="signup-form"><label>Name</label><input id="name" required><label>School</label><select id="school" required><option value="Yeonggwang Haeryong High School">Yeonggwang Haeryong High School</option><option value="Suncheon High School">Suncheon High School</option><option value="Suncheon Bokseong High School">Suncheon Bokseong High School</option></select><label>Email</label><input id="email" type="email" required><label>Password</label><input id="password" type="password" minlength="8" required><label><input id="privacy" type="checkbox" style="width:auto" required> I agree to the collection and use of personal information.</label><div class="actions"><button class="btn btn-primary" id="submit-btn">Sign up</button></div></form></section></main>
-<footer><p>&copy; 2026 SYRTN Collaboration. All Rights Reserved.</p><p>Yeonggwang Haeryong High School | Suncheon High School | Suncheon Bokseong High School science club network</p><p>designed by SYRTN Team | Contact: 2jw5464@gmail.com</p></footer>
+<div class="auth-bar">
+  <a href="index.html" class="logo-link">
+    <img src="SYRTN-logo-homepage.png" alt="SYRTN logo" class="nav-logo">
+    <span>SYRTN</span>
+  </a>
+  <div class="auth-user-zone">
+    <a href="login.html" id="login-link" class="auth-btn">LOGIN</a>
+    <span id="user-name" style="display:none;color:var(--accent);font-weight:700"></span>
+    <button id="logout-btn" class="auth-btn" style="display:none">LOGOUT</button>
+  </div>
+</div>
+  <nav class="sub-nav-container">
+    <div class="nav-menu">
+      <a href="index.html">HOME</a>
+      <a href="introduction.html">INTRODUCTION</a>
+      <a href="talk.html">TALK</a>
+      <a href="resource.html">RESOURCE</a>
+      <a href="suggest.html">SUGGESTION</a>
+      <a href="mypage.html">MY PAGE</a>
+      <a href="adjust.html">REQUEST AUTHORITY</a>
+      <a href="admin.html">ADMIN</a>
+    </div>
+  </nav>
+<main class="container" style="margin-top:120px">
+  <section class="panel">
+    <h1 class="section-title">Sign up</h1>
+    <form id="signup-form">
+      <label>Name</label>
+      <input id="name" required>
+      <label>School</label>
+      <select id="school" required>
+        <option value="Yeonggwang Haeryong High School">영광 해룡고</option>
+        <option value="Suncheon High School">순천고</option>
+        <option value="Suncheon Bokseong High School">순천 복성고</option>
+      </select>
+      <label>Email</label>
+      <input id="email" type="email" required>
+      <label>Password</label>
+      <input id="password" type="password" minlength="8" required>
+      <label>
+        <input id="privacy" type="checkbox" style="width:auto" required> I agree to the collection and use of personal information.</label>
+      <div class="actions">
+        <button class="btn btn-primary" id="submit-btn">Sign up</button>
+      </div>
+    </form>
+  </section>
+</main>
+<footer>
+  <p>&copy; 2026 SYRTN Collaboration. All Rights Reserved.</p>
+  <p>영광 해룡고 | 순천고 | 순천 복성고 물리·지구과학 동아리</p>
+  <p>designed by SYRTN Team | Contact: 2jw5464@gmail.com</p>
+</footer>
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";const firebaseConfig={apiKey:"AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU",authDomain:"syrt-2026.firebaseapp.com",projectId:"syrt-2026",storageBucket:"syrt-2026.firebasestorage.app",messagingSenderId:"848896876364",appId:"1:848896876364:web:42edc690489962f76df9e9"};const app=initializeApp(firebaseConfig);initializeAppCheck(app,{provider:new ReCaptchaV3Provider("6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq"),isTokenAutoRefreshEnabled:true});const auth=getAuth(app);const db=getFirestore(app);document.getElementById("signup-form").addEventListener("submit",async e=>{e.preventDefault();const btn=document.getElementById("submit-btn");btn.disabled=true;try{const name=document.getElementById("name").value.trim();const school=document.getElementById("school").value;const email=document.getElementById("email").value.trim();const cred=await createUserWithEmailAndPassword(auth,email,document.getElementById("password").value);await setDoc(doc(db,"users",cred.user.uid),{name,school,email,role:"member",createdAt:serverTimestamp()});await sendEmailVerification(cred.user);alert("Signup complete. Verify your email before logging in.");location.href="login.html";}catch(err){alert("Signup failed: "+err.message);}finally{btn.disabled=false;}});
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
+import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig={apiKey:"AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU",
+                      authDomain:"syrt-2026.firebaseapp.com",
+                      projectId:"syrt-2026",
+                      storageBucket:"syrt-2026.firebasestorage.app",
+                      messagingSenderId:"848896876364",
+                      appId:"1:848896876364:web:42edc690489962f76df9e9"};
+const app=initializeApp(firebaseConfig);initializeAppCheck(app,{provider:new ReCaptchaV3Provider("6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq"),isTokenAutoRefreshEnabled:true});
+const auth=getAuth(app);
+const db=getFirestore(app);document.getElementById("signup-form").addEventListener("submit",async e=>{e.preventDefault();
+const btn=document.getElementById("submit-btn");btn.disabled=true;try{const name=document.getElementById("name").value.trim();
+const school=document.getElementById("school").value;const email=document.getElementById("email").value.trim();
+const cred=await createUserWithEmailAndPassword(auth,email,document.getElementById("password").value);
+await setDoc(doc(db,"users",cred.user.uid),{name,school,email,role:"member",createdAt:serverTimestamp()});
+await sendEmailVerification(cred.user);alert("Signup complete. Verify your email before logging in.");location.href="login.html";}catch(err){alert("Signup failed: "+err.message);}finally{btn.disabled=false;}});
 </script>
 <script type="module" src="frontend-access-control.js"></script>
 </body>
