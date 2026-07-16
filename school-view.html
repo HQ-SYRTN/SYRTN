@@ -239,15 +239,47 @@
         return downloadUrl.href;
     }
 
+    function getPreviewMimeType(filename, contentType) {
+        const type = String(contentType || "").split(";")[0].trim().toLowerCase();
+        const ext = String(filename || "").split(".").pop().toLowerCase();
+        const byExt = {
+            pdf: "application/pdf",
+            png: "image/png",
+            jpg: "image/jpeg",
+            jpeg: "image/jpeg",
+            gif: "image/gif",
+            webp: "image/webp",
+            txt: "text/plain",
+            csv: "text/csv",
+            md: "text/plain",
+            json: "application/json",
+            mp3: "audio/mpeg",
+            wav: "audio/wav",
+            mp4: "video/mp4",
+            webm: "video/webm"
+        };
+        const allowedTypes = new Set(Object.values(byExt));
+        if (allowedTypes.has(type)) return type;
+        return byExt[ext] || "";
+    }
+
     async function openAttachment(url, filename, mode = "preview") {
+        let previewWindow = null;
         try {
             if (!currentUser) throw new Error("로그인이 필요합니다.");
+            if (mode === "preview") {
+                previewWindow = window.open("about:blank", "_blank");
+                if (!previewWindow) throw new Error("팝업이 차단되어 미리보기를 열 수 없습니다.");
+                previewWindow.opener = null;
+                previewWindow.document.title = "파일 미리보기";
+                previewWindow.document.body.textContent = "파일을 불러오는 중입니다...";
+            }
             const requestUrl = mode === "download" ? withDownloadParam(url) : url;
             const res = await fetch(requestUrl, { headers: await headers() });
             if (!res.ok) throw new Error("파일을 열 수 없습니다.");
             const blob = await res.blob();
-            const objectUrl = URL.createObjectURL(blob);
             if (mode === "download") {
+                const objectUrl = URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = objectUrl;
                 a.download = filename;
@@ -255,15 +287,14 @@
                 setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
                 return;
             }
-            const opened = window.open(objectUrl, "_blank", "noopener,noreferrer");
-            if (!opened) {
-                const a = document.createElement("a");
-                a.href = objectUrl;
-                a.download = filename;
-                a.click();
-            }
+            const previewType = getPreviewMimeType(filename, blob.type);
+            if (!previewType) throw new Error("이 파일 형식은 미리보기를 지원하지 않습니다. 다운로드 버튼을 사용해 주세요.");
+            const previewBlob = blob.type === previewType ? blob : new Blob([blob], { type: previewType });
+            const objectUrl = URL.createObjectURL(previewBlob);
+            previewWindow.location.href = objectUrl;
             setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
         } catch (err) {
+            if (previewWindow && !previewWindow.closed) previewWindow.close();
             alert(err.message || "파일을 열 수 없습니다.");
         }
     }
