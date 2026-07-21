@@ -1,0 +1,230 @@
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const API_BASE_URL = "https://hypocrite-depletion-until.ngrok-free.dev";
+    const ADMIN_EMAIL = "2jw5464@gmail.com";
+    const SCHOOLS = {
+        s: { collection:"s-resources", student:"s-student", leader:"s-leader", boardUrl:"school-board.html?school=s", writeUrl:"school-write.html?school=s" },
+        h: { collection:"h-resources", student:"h-student", leader:"h-leader", boardUrl:"school-board.html?school=h", writeUrl:"school-write.html?school=h" }
+    };
+    const params = new URLSearchParams(location.search);
+    const school = SCHOOLS[params.get("school")];
+    const postId = params.get("id");
+    if (!school || !postId) {
+        location.replace("talk.html");
+        throw new Error("Invalid school or post id.");
+    }
+
+    const firebaseConfig = { apiKey:"AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU", authDomain:"syrt-2026.firebaseapp.com", projectId:"syrt-2026", storageBucket:"syrt-2026.firebasestorage.app", messagingSenderId:"848896876364", appId:"1:848896876364:web:42edc690489962f76df9e9" };
+    const app = initializeApp(firebaseConfig);
+    initializeAppCheck(app, { provider:new ReCaptchaV3Provider("6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq"), isTokenAutoRefreshEnabled:true });
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let currentRole = "guest";
+    let currentUserName = "익명";
+    let post = null;
+
+    const roleAllowed = (role) => ["admin", "teacher", school.student, school.leader].includes(role);
+    const canManagePost = () => post && currentUser && (post.uid === currentUser.uid || ["admin", "teacher", school.leader].includes(currentRole));
+    const headers = async () => ({ "Authorization": `Bearer ${await currentUser.getIdToken()}`, "X-User-Role": currentRole, "ngrok-skip-browser-warning": "69420" });
+    const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch]));
+    const safeUrl = (value) => {
+        try {
+            const raw = String(value || "").trim();
+            const base = raw.startsWith("/api/") ? API_BASE_URL : location.href;
+            const url = new URL(raw, base);
+            if (url.pathname.startsWith("/api/syrtn/uploads/")) {
+                const api = new URL(API_BASE_URL);
+                return `${api.origin}${url.pathname}${url.search}`;
+            }
+            return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+        } catch {
+            return "";
+        }
+    };
+    const isFileAttachment = (link, href) => link?.type === "file" || href.includes("/api/syrtn/uploads/");
+
+    document.getElementById("logout-btn").onclick = async () => { if (confirm("로그아웃 하시겠습니까?")) { await signOut(auth); location.href = "index.html"; } };
+    document.getElementById("btn-list").onclick = () => location.href = school.boardUrl;
+    document.getElementById("btn-edit").onclick = () => location.href = `${school.writeUrl}&id=${postId}`;
+    document.getElementById("btn-delete").onclick = deletePost;
+    document.getElementById("comment-submit").onclick = createComment;
+
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) { location.replace("block.html"); return; }
+        try {
+            const snap = await getDoc(doc(db, "users", user.uid));
+            if (!snap.exists()) { location.replace("block.html"); return; }
+            const data = snap.data();
+            const role = user.email === ADMIN_EMAIL ? "admin" : (data.role || "member");
+            if (!roleAllowed(role)) { location.replace("block.html"); return; }
+            currentUser = user;
+            currentRole = role;
+            currentUserName = data.name || "익명";
+            document.getElementById("user-name").style.display = "inline";
+            document.getElementById("user-name").textContent = `${currentUserName}님`;
+            document.getElementById("logout-btn").style.display = "inline";
+            document.getElementById("login-link").style.display = "none";
+            await loadPost();
+            await loadComments();
+        } catch (err) {
+            console.error(err);
+            location.replace("block.html");
+        }
+    });
+
+    async function loadPost() {
+        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${school.collection}/${postId}`, { headers: await headers() });
+        if (!res.ok) { location.replace("block.html"); return; }
+        post = await res.json();
+        document.title = `SYRTN | ${post.title || "게시글"}`;
+        document.getElementById("post-category").textContent = post.category || "기타";
+        document.getElementById("post-author").textContent = post.author_name || "익명";
+        document.getElementById("post-date").textContent = post.created_at ? new Date(post.created_at).toLocaleString() : "-";
+        document.getElementById("post-title").textContent = post.title || "제목 없음";
+        document.getElementById("post-content").textContent = post.content || "";
+        const linksEl = document.getElementById("post-links");
+        linksEl.innerHTML = "";
+        (post.links || []).forEach((link, index) => {
+            const href = safeUrl(link.url);
+            if (!href) return;
+            const isFile = isFileAttachment(link, href);
+            if (isFile) {
+                const name = link.name || `첨부파일 ${index + 1}`;
+                const item = document.createElement("div");
+                item.className = "attachment-item";
+                const nameEl = document.createElement("span");
+                nameEl.className = "attachment-name";
+                nameEl.textContent = name;
+                const actions = document.createElement("div");
+                actions.className = "attachment-actions";
+                const previewBtn = document.createElement("button");
+                previewBtn.type = "button";
+                previewBtn.className = "btn-small";
+                previewBtn.textContent = "미리보기";
+                previewBtn.onclick = () => openAttachment(href, name, "preview");
+                const downloadBtn = document.createElement("button");
+                downloadBtn.type = "button";
+                downloadBtn.className = "btn-small";
+                downloadBtn.textContent = "다운로드";
+                downloadBtn.onclick = () => openAttachment(href, name, "download");
+                actions.append(previewBtn, downloadBtn);
+                item.append(nameEl, actions);
+                linksEl.appendChild(item);
+                return;
+            }
+            const a = document.createElement("a");
+            a.href = href;
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+            a.textContent = link.name || href;
+            linksEl.appendChild(a);
+        });
+        document.getElementById("btn-edit").classList.toggle("hidden", !canManagePost());
+        document.getElementById("btn-delete").classList.toggle("hidden", !canManagePost());
+    }
+
+    async function loadComments() {
+        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${school.collection}/${postId}/comments`, { headers: await headers() });
+        const list = document.getElementById("comment-list");
+        if (!res.ok) { list.innerHTML = ""; return; }
+        const comments = await res.json();
+        if (comments.length === 0) { list.innerHTML = '<p style="color:#777; text-align:center;">첫 댓글을 남겨보세요.</p>'; return; }
+        list.innerHTML = comments.map(c => {
+            const canDelete = c.uid === currentUser.uid || canManagePost();
+            return `<div class="comment"><div class="comment-meta"><strong>${escapeHtml(c.author_name || "익명")}</strong><span>${c.created_at ? new Date(c.created_at).toLocaleString() : ""}</span>${canDelete ? `<button class="btn-small btn-danger" onclick="deleteComment(${c.id})">삭제</button>` : ""}</div><div>${escapeHtml(c.content || "")}</div></div>`;
+        }).join("");
+    }
+
+    function withDownloadParam(url) {
+        const downloadUrl = new URL(url);
+        downloadUrl.searchParams.set("download", "1");
+        return downloadUrl.href;
+    }
+
+    function getPreviewMimeType(filename, contentType) {
+        const type = String(contentType || "").split(";")[0].trim().toLowerCase();
+        const ext = String(filename || "").split(".").pop().toLowerCase();
+        const byExt = {
+            pdf: "application/pdf",
+            png: "image/png",
+            jpg: "image/jpeg",
+            jpeg: "image/jpeg",
+            gif: "image/gif",
+            webp: "image/webp",
+            txt: "text/plain",
+            csv: "text/csv",
+            md: "text/plain",
+            json: "application/json",
+            mp3: "audio/mpeg",
+            wav: "audio/wav",
+            mp4: "video/mp4",
+            webm: "video/webm"
+        };
+        const allowedTypes = new Set(Object.values(byExt));
+        if (allowedTypes.has(type)) return type;
+        return byExt[ext] || "";
+    }
+
+    async function openAttachment(url, filename, mode = "preview") {
+        let previewWindow = null;
+        try {
+            if (!currentUser) throw new Error("로그인이 필요합니다.");
+            if (mode === "preview") {
+                previewWindow = window.open("about:blank", "_blank");
+                if (!previewWindow) throw new Error("팝업이 차단되어 미리보기를 열 수 없습니다.");
+                previewWindow.opener = null;
+                previewWindow.document.title = "파일 미리보기";
+                previewWindow.document.body.textContent = "파일을 불러오는 중입니다...";
+            }
+            const requestUrl = mode === "download" ? withDownloadParam(url) : url;
+            const res = await fetch(requestUrl, { headers: await headers() });
+            if (!res.ok) throw new Error("파일을 열 수 없습니다.");
+            const blob = await res.blob();
+            if (mode === "download") {
+                const objectUrl = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = objectUrl;
+                a.download = filename;
+                a.click();
+                setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+                return;
+            }
+            const previewType = getPreviewMimeType(filename, blob.type);
+            if (!previewType) throw new Error("이 파일 형식은 미리보기를 지원하지 않습니다. 다운로드 버튼을 사용해 주세요.");
+            const previewBlob = blob.type === previewType ? blob : new Blob([blob], { type: previewType });
+            const objectUrl = URL.createObjectURL(previewBlob);
+            previewWindow.location.href = objectUrl;
+            setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+        } catch (err) {
+            if (previewWindow && !previewWindow.closed) previewWindow.close();
+            alert(err.message || "파일을 열 수 없습니다.");
+        }
+    }
+
+    async function createComment() {
+        const input = document.getElementById("comment-input");
+        const content = input.value.trim();
+        if (!content) return;
+        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${school.collection}/${postId}/comments`, { method:"POST", headers:{ ...(await headers()), "Content-Type":"application/json" }, body:JSON.stringify({ content, authorName:currentUserName }) });
+        if (res.ok) { input.value = ""; await loadComments(); }
+        else alert("댓글 등록 권한이 없거나 오류가 발생했습니다.");
+    }
+
+    window.deleteComment = async (commentId) => {
+        if (!confirm("댓글을 삭제하시겠습니까?")) return;
+        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${school.collection}/${postId}/comments/${commentId}`, { method:"DELETE", headers: await headers() });
+        if (res.ok) await loadComments();
+        else alert("댓글 삭제 권한이 없거나 오류가 발생했습니다.");
+    };
+
+    async function deletePost() {
+        if (!confirm("게시글을 삭제하시겠습니까?")) return;
+        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${school.collection}/${postId}`, { method:"DELETE", headers: await headers() });
+        if (res.ok) location.href = school.boardUrl;
+        else alert("삭제 권한이 없거나 오류가 발생했습니다.");
+    }

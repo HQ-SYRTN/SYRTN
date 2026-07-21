@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SYRTN | 순천고 자료 작성</title>
-    <script>
-        const id = new URLSearchParams(location.search).get("id");
-        location.replace(`school-write.html?school=s${id ? `&id=${encodeURIComponent(id)}` : ""}`);
-    </script>
+    <script src="js/s-write.js"></script>
 </head>
 <body>
     <a href="school-write.html?school=s">순천고 자료 작성으로 이동</a>
