@@ -1,17 +1,8 @@
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    const API_BASE_URL = "https://hypocrite-depletion-until.ngrok-free.dev";
-    const ADMIN_EMAIL = "2jw5464@gmail.com";
-    const firebaseConfig = { apiKey:"AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU", authDomain:"syrt-2026.firebaseapp.com", projectId:"syrt-2026", storageBucket:"syrt-2026.firebasestorage.app", messagingSenderId:"848896876364", appId:"1:848896876364:web:42edc690489962f76df9e9", measurementId:"G-Q0BKR95VH2" };
-    const roleMap = { admin:"관리자", "s-student":"순천고 부원", "b-student":"복성고 부원", "h-student":"해룡고 부원", "s-leader":"순천고 리더", "b-leader":"복성고 리더", "h-leader":"해룡고 리더", teacher:"교사", member:"일반 회원" };
-    const app = initializeApp(firebaseConfig);
-    initializeAppCheck(app, { provider:new ReCaptchaV3Provider('6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq'), isTokenAutoRefreshEnabled:true });
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const userNameDisplay = document.getElementById('user-name');
+import { API_BASE_URL, ADMIN_EMAIL, auth, db } from "./common.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { collection, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+const roleMap = { admin:"관리자", "s-student":"순천고 부원", "b-student":"복성고 부원", "h-student":"해룡고 부원", "s-leader":"순천고 리더", "b-leader":"복성고 리더", "h-leader":"해룡고 리더", teacher:"교사", member:"일반 회원" };
+const userNameDisplay = document.getElementById('user-name');
     const logoutBtn = document.getElementById('logout-btn');
     let currentAdminUser = null;
     let currentAdminRole = 'guest';

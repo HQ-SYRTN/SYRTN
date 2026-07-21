@@ -1,21 +1,6 @@
-import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const ADMIN_EMAIL = "2jw5464@gmail.com";
-const firebaseConfig = {
-    apiKey: "AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU",
-    authDomain: "syrt-2026.firebaseapp.com",
-    projectId: "syrt-2026",
-    storageBucket: "syrt-2026.firebasestorage.app",
-    messagingSenderId: "848896876364",
-    appId: "1:848896876364:web:42edc690489962f76df9e9"
-};
-
-const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
+import { ADMIN_EMAIL, auth, db } from "./js/common.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 const ROLES = {
     loggedIn: ["admin", "teacher", "s-leader", "h-leader", "b-leader", "s-student", "h-student", "b-student", "member"],
     resourceWrite: ["admin", "teacher", "s-leader", "h-leader", "b-leader"],
@@ -91,33 +76,6 @@ function ruleForLink(link) {
     return { rule, searchParams: url.searchParams };
 }
 
-function installNavLayoutFix() {
-    if (document.getElementById("syrtn-nav-layout-fix")) return;
-    const style = document.createElement("style");
-    style.id = "syrtn-nav-layout-fix";
-    style.textContent = `
-        html, body { max-width: 100%; overflow-x: hidden; }
-        body { overflow-x: clip; }
-        .sub-nav-container {
-            max-width: 100vw !important;
-            overflow-x: auto !important;
-            overflow-y: hidden !important;
-            z-index: 1001 !important;
-            -webkit-overflow-scrolling: touch;
-        }
-        .nav-menu {
-            width: max-content !important;
-            min-width: 100% !important;
-            flex-wrap: nowrap !important;
-        }
-        .nav-menu a {
-            flex: 0 0 auto !important;
-            white-space: nowrap !important;
-        }
-    `;
-    document.head.appendChild(style);
-}
-
 function installNavGuards(role) {
     window.__syrtnNavRole = role;
     if (window.__syrtnNavGuardsInstalled) return;
@@ -145,7 +103,6 @@ async function resolveRole(user) {
     return snap.data().role || "member";
 }
 
-installNavLayoutFix();
 installNavGuards("guest");
 
 onAuthStateChanged(auth, async user => {

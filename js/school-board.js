@@ -1,11 +1,7 @@
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    const API_BASE_URL = "https://hypocrite-depletion-until.ngrok-free.dev";
-    const ADMIN_EMAIL = "2jw5464@gmail.com";
-    const SCHOOLS = {
+import { API_BASE_URL, ADMIN_EMAIL, auth, db } from "./common.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+const SCHOOLS = {
         s: { collection:"s-resources", title:"순천고 전용 자료실", boardTitle:"순천고 아카이브", subtitle:"순천고 전용 연구 데이터 및 결과물 아카이브", student:"s-student", leader:"s-leader", writeUrl:"school-write.html?school=s", viewUrl:"school-view.html?school=s", hero:"url('https://images.unsplash.com/photo-1614732414444-096e5f1122d5?q=80&w=2074')" },
         h: { collection:"h-resources", title:"해룡고 전용 자료실", boardTitle:"해룡고 아카이브", subtitle:"해룡고 전용 연구 데이터 및 결과물 아카이브", student:"h-student", leader:"h-leader", writeUrl:"school-write.html?school=h", viewUrl:"school-view.html?school=h", hero:"url('https://images.unsplash.com/photo-1630839437035-dac17da580d0?q=80&w=2030')" }
     };
@@ -24,14 +20,7 @@
     document.getElementById("hero-subtitle").textContent = school.subtitle;
     document.getElementById("board-title").textContent = school.boardTitle;
     document.getElementById("write-btn").onclick = () => location.href = school.writeUrl;
-
-    const firebaseConfig = { apiKey:"AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU", authDomain:"syrt-2026.firebaseapp.com", projectId:"syrt-2026", storageBucket:"syrt-2026.firebasestorage.app", messagingSenderId:"848896876364", appId:"1:848896876364:web:42edc690489962f76df9e9" };
-    const app = initializeApp(firebaseConfig);
-    initializeAppCheck(app, { provider:new ReCaptchaV3Provider("6Lfnw9ksAAAAAAoBVTPO6fqtCUMeteYlsk5OYjnq"), isTokenAutoRefreshEnabled:true });
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    let currentUser = null;
+let currentUser = null;
     let currentRole = "guest";
     let allPosts = [];
 
