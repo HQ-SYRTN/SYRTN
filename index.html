@@ -25,12 +25,13 @@
   <div class="hero-content">
     <div class="hero-kicker">Suncheon-Yeonggwang Radio Telescope Network</div>
     <h1>SYRTN</h1>
-    <p>세 학교가 함께 관측하고 기록하는 전파망원경 연구 네트워크입니다.</p>
+    <p class="hero-statement">서로 다른 세 학교의 시선이<br>하나의 우주를 향합니다.</p>
+    <a class="hero-link" href="#network">PROJECT OVERVIEW</a>
   </div>
 </header>
 <nav class="sub-nav-container" aria-label="주요 메뉴">
   <div class="nav-menu">
-    <a href="index.html">HOME</a>
+    <a href="index.html" aria-current="page">HOME</a>
     <a href="introduction.html">INTRODUCTION</a>
     <a href="talk.html">TALK</a>
     <a href="resource.html">RESOURCE</a>
@@ -40,29 +41,48 @@
     <a href="admin.html">ADMIN</a>
   </div>
 </nav>
-<main class="container">
-  <section class="panel">
-    <h2 class="section-title">Project Status</h2>
-    <div class="info-grid">
-      <div class="info-card">
-        <h3>Radio Telescope Network</h3>
-        <p>영광 해룡고, 순천고, 순천 복성고가 관측 활동과 연구 자료를 연결합니다.</p>
-      </div>
-      <div class="info-card">
-        <h3>Shared Archive</h3>
-        <p>보고서, 기술 문서, 첨부파일을 한 곳에서 확인할 수 있습니다.</p>
-      </div>
-      <div class="info-card">
-        <h3>School Communities</h3>
-        <p>소속 학교와 역할에 맞는 게시판으로 협업 내용을 관리합니다.</p>
+<main>
+  <section class="network-section" id="network">
+    <div class="section-heading">
+      <p class="section-index">01 / NETWORK</p>
+      <h2>같은 하늘을 기록하는<br>세 개의 관측 거점</h2>
+    </div>
+    <div class="network-copy">
+      <p>SYRTN은 영광 해룡고, 순천고, 순천 복성고의 물리·지구과학 동아리가 함께 만드는 전파망원경 연구 네트워크입니다.</p>
+      <div class="school-line" aria-label="참여 학교">
+        <span>영광 해룡고</span>
+        <span>순천고</span>
+        <span>순천 복성고</span>
       </div>
     </div>
   </section>
-  <section class="astro-section" aria-label="관측 이미지">
-    <div class="astro-photo"></div>
-    <div class="note-box">
-      <h3>Observation Archive</h3>
-      <p>SYRTN은 관측 자료, 보고서, 학교별 협업 기록을 차분하게 정리하는 공간입니다. 주요 메뉴는 상단 nav에서 선택할 수 있습니다.</p>
+
+  <section class="celestial-gallery" aria-label="천체 관측 이미지">
+    <figure class="nebula-figure">
+      <img src="assets/images/stellar-nursery.webp" alt="별이 태어나는 성운의 가스 기둥" width="1400" height="1050" loading="lazy">
+      <figcaption><span>DEEP SKY</span> Stellar nursery</figcaption>
+    </figure>
+    <div class="gallery-copy">
+      <p class="section-index">02 / OBSERVATION</p>
+      <h2>보이지 않던 신호를<br>함께 읽습니다.</h2>
+      <p>관측 기록과 기술 문서, 학교별 연구 과정을 한곳에 모아 다음 관측을 위한 지식으로 연결합니다.</p>
+      <a href="resource.html">관측 자료 보기 <span aria-hidden="true">&rarr;</span></a>
+    </div>
+    <figure class="moon-figure">
+      <img src="assets/images/lunar-terminator.webp" alt="분화구의 명암이 선명한 달 표면과 멀리 보이는 지구" width="900" height="1200" loading="lazy">
+      <figcaption><span>NEAR SKY</span> Lunar terminator</figcaption>
+    </figure>
+  </section>
+
+  <section class="project-links" aria-labelledby="project-links-title">
+    <div>
+      <p class="section-index">03 / COLLABORATION</p>
+      <h2 id="project-links-title">관측에서 기록까지</h2>
+    </div>
+    <div class="link-list">
+      <a href="introduction.html"><span>프로젝트 소개</span><strong>INTRODUCTION</strong></a>
+      <a href="talk.html"><span>학교별 커뮤니티</span><strong>TALK</strong></a>
+      <a href="resource.html"><span>공동 자료실</span><strong>RESOURCE</strong></a>
     </div>
   </section>
 </main>
