@@ -6,7 +6,7 @@
         .auth-user-zone { display:flex; align-items:center; gap:15px; }
         .auth-btn { background:transparent; border:1px solid var(--text-main); color:var(--text-main); padding:6px 15px; cursor:pointer; text-decoration:none; font-size:.85rem; transition:.3s; border-radius:4px; }
         .auth-btn:hover { background:white; color:black; }
-        header.intro-hero { height:42vh; display:flex; flex-direction:column; justify-content:center; align-items:center; background:linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.9)), url('https://images.unsplash.com/photo-1614313913007-2b4ae8ce32d6?q=80&w=2074') no-repeat center/cover; text-align:center; padding-top:60px; }
+        header.intro-hero { height:42vh; display:flex; flex-direction:column; justify-content:center; align-items:center; background:linear-gradient(rgba(0,0,0,.58), rgba(0,0,0,.9)), url('../assets/images/lunar-terminator.webp') no-repeat center 44%/cover; text-align:center; padding-top:60px; }
         .intro-hero h1 { font-size:2.7rem; margin:0 0 10px; color:var(--accent); }
         .intro-hero p { margin:0; font-size:1rem; opacity:.82; font-weight:300; }
         .sub-nav-container { width:100%; background:#111; border-top:1px solid var(--border); border-bottom:1px solid var(--border); position:sticky; top:60px; z-index:900; }

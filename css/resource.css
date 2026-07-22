@@ -6,7 +6,7 @@
         .auth-user-zone { display: flex; align-items: center; gap: 15px; }
         .auth-btn { background: transparent; border: 1px solid var(--text-main); color: var(--text-main); padding: 6px 15px; cursor: pointer; text-decoration: none; border-radius: 4px; font-size: 0.85rem; transition: 0.3s; }
         .auth-btn:hover { background: var(--text-main); color: black; }
-        header.board-hero { height: 45vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1462332420958-a05d1e002413?q=80&w=1920') no-repeat center/cover; text-align: center; padding-top: 60px; }
+        header.board-hero { height: 45vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(rgba(0,0,0,.52), rgba(0,0,0,.9)), url('../assets/images/stellar-nursery.webp') no-repeat center/cover; text-align: center; padding-top: 60px; }
         .board-hero h1 { font-size: 3.5rem; margin-bottom: 10px; color: var(--accent); }
         .board-hero p { font-size: 1.2rem; opacity: 0.8; font-weight: 300; }
         .sub-nav-container { width: 100%; background: #111; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 60px; z-index: 900; }

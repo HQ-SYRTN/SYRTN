@@ -2,8 +2,8 @@ import { API_BASE_URL, ADMIN_EMAIL, auth, db } from "./common.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 const SCHOOLS = {
-        s: { collection:"s-resources", title:"순천고 전용 자료실", boardTitle:"순천고 아카이브", subtitle:"순천고 전용 연구 데이터 및 결과물 아카이브", student:"s-student", leader:"s-leader", writeUrl:"school-write.html?school=s", viewUrl:"school-view.html?school=s", hero:"url('https://images.unsplash.com/photo-1614732414444-096e5f1122d5?q=80&w=2074')" },
-        h: { collection:"h-resources", title:"해룡고 전용 자료실", boardTitle:"해룡고 아카이브", subtitle:"해룡고 전용 연구 데이터 및 결과물 아카이브", student:"h-student", leader:"h-leader", writeUrl:"school-write.html?school=h", viewUrl:"school-view.html?school=h", hero:"url('https://images.unsplash.com/photo-1630839437035-dac17da580d0?q=80&w=2030')" }
+        s: { collection:"s-resources", title:"순천고 전용 자료실", boardTitle:"순천고 아카이브", subtitle:"순천고 전용 연구 데이터 및 결과물 아카이브", student:"s-student", leader:"s-leader", writeUrl:"school-write.html?school=s", viewUrl:"school-view.html?school=s", hero:"url('assets/images/saturn-observation.webp')" },
+        h: { collection:"h-resources", title:"해룡고 전용 자료실", boardTitle:"해룡고 아카이브", subtitle:"해룡고 전용 연구 데이터 및 결과물 아카이브", student:"h-student", leader:"h-leader", writeUrl:"school-write.html?school=h", viewUrl:"school-view.html?school=h", hero:"url('assets/images/spiral-galaxy.webp')" }
     };
 
     const params = new URLSearchParams(location.search);

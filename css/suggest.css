@@ -6,7 +6,7 @@
         .auth-user-zone { display:flex; align-items:center; gap:15px; }
         .auth-btn { background:transparent; border:1px solid var(--text-main); color:var(--text-main); padding:6px 15px; cursor:pointer; text-decoration:none; font-size:.85rem; transition:.3s; border-radius:4px; }
         .auth-btn:hover { background:var(--text-main); color:black; }
-        header.intro-hero { height:45vh; display:flex; flex-direction:column; justify-content:center; align-items:center; background:linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.9)), url('https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=2072') no-repeat center/cover; text-align:center; padding-top:60px; }
+        header.intro-hero { height:45vh; display:flex; flex-direction:column; justify-content:center; align-items:center; background:linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.9)), url('../assets/images/solar-observation.webp') no-repeat center/cover; text-align:center; padding-top:60px; }
         .intro-hero h1 { font-size:3.5rem; margin-bottom:10px; color:var(--accent); }
         .intro-hero p { font-size:1.2rem; opacity:.8; font-weight:300; }
         .sub-nav-container { width:100%; background:#111; border-top:1px solid rgba(255,255,255,.1); border-bottom:1px solid rgba(255,255,255,.1); position:sticky; top:60px; z-index:900; }

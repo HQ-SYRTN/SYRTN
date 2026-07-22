@@ -89,7 +89,7 @@
             align-items:center;
             justify-content:center;
             padding:60px 16px 0;
-            background:linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.9)), url('https://images.unsplash.com/photo-1462332420958-a05d1e002413?q=80&w=1920') center/cover no-repeat;
+            background:linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.9)), url('../assets/images/spiral-galaxy.webp') center/cover no-repeat;
             text-align:center;
         }
         .board-hero h1 {
