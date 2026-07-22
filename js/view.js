@@ -1,6 +1,5 @@
-import { API_BASE_URL, ADMIN_EMAIL, auth, db } from "./common.js";
+import { API_BASE_URL, auth, authHeaders, getCurrentProfile } from "./common.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 const COLLECTION = "resources";
 const postId = new URLSearchParams(window.location.search).get('id');
 let currentUser = null;
@@ -21,9 +20,8 @@ let currentUser = null;
             return;
         }
         try {
-            const userDoc = await getDoc(doc(db, 'users', user.uid));
-            const userData = userDoc.exists() ? userDoc.data() : {};
-            currentRole = user.email === ADMIN_EMAIL ? 'admin' : (userData.role || 'member');
+            const userData = await getCurrentProfile(user);
+            currentRole = userData.role || 'member';
             currentUserName = userData.name || user.displayName || '사용자';
             setAuthUi(true);
             await loadPost();
@@ -47,8 +45,7 @@ let currentUser = null;
     }
 
     async function getHeaders(contentType = false) {
-        const headers = { 'X-User-Role': currentRole, 'ngrok-skip-browser-warning': '69420' };
-        if (currentUser) headers.Authorization = `Bearer ${await currentUser.getIdToken()}`;
+        const headers = currentUser ? await authHeaders(currentUser) : { 'ngrok-skip-browser-warning': '69420' };
         if (contentType) headers['Content-Type'] = 'application/json';
         return headers;
     }

@@ -1,5 +1,54 @@
-import { auth, db } from "./common.js";
+import { apiRequest, auth, getCurrentProfile } from "./common.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-let currentUser=null;
-  document.getElementById("logout-btn").onclick=async()=>{await signOut(auth);location.href="index.html";};onAuthStateChanged(auth,async user=>{if(!user){location.href="login.html";return;}currentUser=user;document.getElementById("login-link").style.display="none";document.getElementById("logout-btn").style.display="inline";const snap=await getDoc(doc(db,"users",user.uid));const data=snap.exists()?snap.data():{};document.getElementById("user-name").style.display="inline";document.getElementById("user-name").textContent=data.name||"User";document.getElementById("request-name").value=data.name||"";});document.getElementById("request-form").addEventListener("submit",async e=>{e.preventDefault();const pending=query(collection(db,"requests"),where("uid","==",currentUser.uid),where("status","==","pending"));const existing=await getDocs(pending);if(!existing.empty){alert("A pending request already exists.");return;}await addDoc(collection(db,"requests"),{uid:currentUser.uid,email:currentUser.email,name:document.getElementById("request-name").value.trim(),school:document.getElementById("request-school").value,requestedRole:document.getElementById("request-role").value,reason:document.getElementById("request-reason").value.trim(),status:"pending",createdAt:serverTimestamp()});alert("Request submitted.");location.href="mypage.html";});
+
+let currentUser = null;
+
+document.getElementById("logout-btn").onclick = async () => {
+    await signOut(auth);
+    location.href = "index.html";
+};
+
+onAuthStateChanged(auth, async user => {
+    if (!user) {
+        location.href = "login.html";
+        return;
+    }
+    try {
+        currentUser = user;
+        const profile = await getCurrentProfile(user);
+        document.getElementById("login-link").style.display = "none";
+        document.getElementById("logout-btn").style.display = "inline";
+        document.getElementById("user-name").style.display = "inline";
+        document.getElementById("user-name").textContent = profile.name || "User";
+        document.getElementById("request-name").value = profile.name || "";
+        if (profile.school) document.getElementById("request-school").value = profile.school;
+    } catch (error) {
+        console.error(error);
+        location.replace("block.html");
+    }
+});
+
+document.getElementById("request-form").addEventListener("submit", async event => {
+    event.preventDefault();
+    if (!currentUser) return;
+    const submitButton = document.getElementById("submit-button");
+    submitButton.disabled = true;
+    try {
+        await apiRequest("/api/syrtn/authority-requests", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                name: document.getElementById("request-name").value.trim(),
+                school: document.getElementById("request-school").value,
+                requestedRole: document.getElementById("request-role").value,
+                reason: document.getElementById("request-reason").value.trim()
+            })
+        }, currentUser);
+        alert("권한 요청이 제출되었습니다.");
+        location.href = "mypage.html";
+    } catch (error) {
+        alert(error.message);
+    } finally {
+        submitButton.disabled = false;
+    }
+});

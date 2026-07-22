@@ -1,6 +1,5 @@
-import { ADMIN_EMAIL, auth, db } from "./js/common.js";
+import { auth, getCurrentProfile } from "./js/common.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 const ROLES = {
     loggedIn: ["admin", "teacher", "s-leader", "h-leader", "b-leader", "s-student", "h-student", "b-student", "member"],
     resourceWrite: ["admin", "teacher", "s-leader", "h-leader", "b-leader"],
@@ -97,10 +96,8 @@ function installNavGuards(role) {
 
 async function resolveRole(user) {
     if (!user) return "guest";
-    if (user.email === ADMIN_EMAIL) return "admin";
-    const snap = await getDoc(doc(db, "users", user.uid));
-    if (!snap.exists()) return "member";
-    return snap.data().role || "member";
+    const profile = await getCurrentProfile(user);
+    return profile.role || "member";
 }
 
 installNavGuards("guest");

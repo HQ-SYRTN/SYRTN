@@ -1,6 +1,5 @@
-import { API_BASE_URL, ADMIN_EMAIL, auth, db } from "./common.js";
+import { API_BASE_URL, auth, authHeaders, getCurrentProfile } from "./common.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 const loginLink = document.getElementById('login-link');
     const logoutBtn = document.getElementById('logout-btn');
     const userNameDisplay = document.getElementById('user-name');
@@ -15,10 +14,8 @@ const loginLink = document.getElementById('login-link');
         if (!user) { location.replace('block.html'); return; }
         currentUser = user;
         try {
-            const userDocSnap = await getDoc(doc(db, 'users', user.uid));
-            if (!userDocSnap.exists()) { location.replace('block.html'); return; }
-            currentUserData = userDocSnap.data();
-            currentRole = user.email === ADMIN_EMAIL ? 'admin' : (currentUserData.role || 'member');
+            currentUserData = await getCurrentProfile(user);
+            currentRole = currentUserData.role || 'member';
             if (!['admin', 'teacher', 's-leader', 'h-leader', 'b-leader', 's-student', 'h-student', 'b-student'].includes(currentRole)) { location.replace('block.html'); return; }
             loginLink.style.display = 'none';
             userNameDisplay.style.display = 'inline';
@@ -54,7 +51,7 @@ const loginLink = document.getElementById('login-link');
         try {
             const res = await fetch(`${API_BASE_URL}/api/syrtn/suggestions`, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${await currentUser.getIdToken()}`, 'X-User-Role': currentRole, 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '69420' },
+                headers: { ...(await authHeaders(currentUser)), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ authorName, isAnonymous: isAnon, category: document.getElementById('category').value, subject: document.getElementById('subject').value.trim(), content: document.getElementById('content').value.trim(), userEmail: currentUser.email })
             });
             if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data.error || '제출 실패'); }

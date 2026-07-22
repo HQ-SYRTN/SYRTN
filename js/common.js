@@ -1,10 +1,8 @@
 import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 export const API_BASE_URL = "https://hypocrite-depletion-until.ngrok-free.dev";
-export const ADMIN_EMAIL = "2jw5464@gmail.com";
 
 export const firebaseConfig = {
     apiKey: "AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU",
@@ -45,9 +43,62 @@ export function ensureAppCheck() {
 ensureAppCheck();
 
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+
+let profileUid = null;
+let profilePromise = null;
+
+export async function authHeaders(user = auth.currentUser, json = false) {
+    if (!user) throw new Error("로그인이 필요합니다.");
+    const headers = {
+        Authorization: `Bearer ${await user.getIdToken()}`,
+        "ngrok-skip-browser-warning": "69420"
+    };
+    if (json) headers["Content-Type"] = "application/json";
+    return headers;
+}
+
+export async function apiRequest(path, options = {}, user = auth.currentUser) {
+    const headers = new Headers(options.headers || {});
+    const authValues = await authHeaders(user);
+    Object.entries(authValues).forEach(([key, value]) => headers.set(key, value));
+    const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
+    if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || `요청에 실패했습니다. (${response.status})`);
+    }
+    return response;
+}
+
+export function clearProfileCache() {
+    profileUid = null;
+    profilePromise = null;
+}
+
+export async function getCurrentProfile(user = auth.currentUser, force = false) {
+    if (!user) return { uid: null, email: "", name: "", school: "", role: "guest" };
+    if (!force && profileUid === user.uid && profilePromise) return profilePromise;
+    profileUid = user.uid;
+    profilePromise = apiRequest("/api/syrtn/me", {}, user)
+        .then(response => response.json())
+        .catch(error => {
+            clearProfileCache();
+            throw error;
+        });
+    return profilePromise;
+}
+
+export async function updateCurrentProfile(profile, user = auth.currentUser) {
+    const response = await apiRequest("/api/syrtn/me", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(profile)
+    }, user);
+    clearProfileCache();
+    return response.json();
+}
 
 export async function logoutTo(target = "index.html") {
+    clearProfileCache();
     await signOut(auth);
     location.href = target;
 }

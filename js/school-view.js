@@ -1,6 +1,5 @@
-import { API_BASE_URL, ADMIN_EMAIL, auth, db } from "./common.js";
+import { API_BASE_URL, auth, authHeaders as getAuthHeaders, getCurrentProfile } from "./common.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 const SCHOOLS = {
         s: { collection:"s-resources", student:"s-student", leader:"s-leader", boardUrl:"school-board.html?school=s", writeUrl:"school-write.html?school=s" },
         h: { collection:"h-resources", student:"h-student", leader:"h-leader", boardUrl:"school-board.html?school=h", writeUrl:"school-write.html?school=h" }
@@ -19,7 +18,7 @@ let currentUser = null;
 
     const roleAllowed = (role) => ["admin", "teacher", school.student, school.leader].includes(role);
     const canManagePost = () => post && currentUser && (post.uid === currentUser.uid || ["admin", "teacher", school.leader].includes(currentRole));
-    const headers = async () => ({ "Authorization": `Bearer ${await currentUser.getIdToken()}`, "X-User-Role": currentRole, "ngrok-skip-browser-warning": "69420" });
+    const headers = async () => getAuthHeaders(currentUser);
     const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch]));
     const safeUrl = (value) => {
         try {
@@ -46,10 +45,8 @@ let currentUser = null;
     onAuthStateChanged(auth, async (user) => {
         if (!user) { location.replace("block.html"); return; }
         try {
-            const snap = await getDoc(doc(db, "users", user.uid));
-            if (!snap.exists()) { location.replace("block.html"); return; }
-            const data = snap.data();
-            const role = user.email === ADMIN_EMAIL ? "admin" : (data.role || "member");
+            const data = await getCurrentProfile(user);
+            const role = data.role || "member";
             if (!roleAllowed(role)) { location.replace("block.html"); return; }
             currentUser = user;
             currentRole = role;

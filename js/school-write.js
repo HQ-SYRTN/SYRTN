@@ -1,6 +1,5 @@
-import { API_BASE_URL, ADMIN_EMAIL, auth, db } from "./common.js";
+import { API_BASE_URL, auth, authHeaders as getAuthHeaders, getCurrentProfile } from "./common.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 const SCHOOLS = {
         s: { collection:"s-resources", name:"순천고", student:"s-student", leader:"s-leader", boardUrl:"school-board.html?school=s", viewUrl:"school-view.html?school=s" },
         h: { collection:"h-resources", name:"해룡고", student:"h-student", leader:"h-leader", boardUrl:"school-board.html?school=h", viewUrl:"school-view.html?school=h" }
@@ -26,7 +25,7 @@ let currentUser = null;
 
     const roleAllowed = (role) => ["admin", "teacher", school.student, school.leader].includes(role);
     const canEditPost = () => editPost && currentUser && (editPost.uid === currentUser.uid || ["admin", "teacher", school.leader].includes(currentRole));
-    const authHeaders = async () => ({ "Authorization": `Bearer ${await currentUser.getIdToken()}`, "X-User-Role": currentRole, "ngrok-skip-browser-warning": "69420" });
+    const authHeaders = async () => getAuthHeaders(currentUser);
     const isHttpUrl = (value) => {
         try {
             const url = new URL(value);
@@ -41,10 +40,8 @@ let currentUser = null;
     onAuthStateChanged(auth, async (user) => {
         if (!user) { location.replace("block.html"); return; }
         try {
-            const snap = await getDoc(doc(db, "users", user.uid));
-            if (!snap.exists()) { location.replace("block.html"); return; }
-            const data = snap.data();
-            const role = user.email === ADMIN_EMAIL ? "admin" : (data.role || "member");
+            const data = await getCurrentProfile(user);
+            const role = data.role || "member";
             if (!roleAllowed(role)) { location.replace("block.html"); return; }
             currentUser = user;
             currentRole = role;

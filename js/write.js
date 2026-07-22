@@ -1,6 +1,5 @@
-import { API_BASE_URL, ADMIN_EMAIL, auth, db } from "./common.js";
+import { API_BASE_URL, auth, authHeaders, getCurrentProfile } from "./common.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 const COLLECTION = "resources";
 const WRITABLE_ROLES = ['s-leader', 'b-leader', 'h-leader', 'teacher', 'admin'];
 const editPostId = new URLSearchParams(window.location.search).get('id');
@@ -15,10 +14,8 @@ const editPostId = new URLSearchParams(window.location.search).get('id');
     onAuthStateChanged(auth, async (user) => {
         if (!user) { alert('로그인이 필요합니다.'); location.replace('login.html'); return; }
         try {
-            const userDocSnap = await getDoc(doc(db, 'users', user.uid));
-            if (!userDocSnap.exists()) { alert('사용자 정보를 찾을 수 없습니다.'); location.replace('index.html'); return; }
-            const userData = userDocSnap.data();
-            currentRole = user.email === ADMIN_EMAIL ? 'admin' : (userData.role || 'member');
+            const userData = await getCurrentProfile(user);
+            currentRole = userData.role || 'member';
             if (!WRITABLE_ROLES.includes(currentRole)) { alert('작성 권한이 없습니다. 각 학교별 리더 이상만 가능합니다.'); location.replace('resource.html'); return; }
             currentUser = user;
             currentUserName = userData.name || user.displayName || '사용자';
@@ -34,7 +31,7 @@ const editPostId = new URLSearchParams(window.location.search).get('id');
     });
 
     async function getHeaders(contentType = false) {
-        const headers = { 'Authorization': `Bearer ${await currentUser.getIdToken()}`, 'X-User-Role': currentRole, 'ngrok-skip-browser-warning': '69420' };
+        const headers = await authHeaders(currentUser);
         if (contentType) headers['Content-Type'] = 'application/json';
         return headers;
     }
@@ -45,7 +42,7 @@ const editPostId = new URLSearchParams(window.location.search).get('id');
         const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${editPostId}`, { headers: await getHeaders() });
         if (!res.ok) { alert('자료를 찾을 수 없습니다.'); location.replace('resource.html'); return; }
         const data = await res.json();
-        const canEdit = data.uid === currentUser.uid || WRITABLE_ROLES.includes(currentRole) || currentUser.email === ADMIN_EMAIL;
+        const canEdit = data.uid === currentUser.uid || WRITABLE_ROLES.includes(currentRole);
         if (!canEdit) { alert('수정 권한이 없습니다.'); location.replace('resource.html'); return; }
         document.getElementById('postTitle').value = data.title || '';
         document.getElementById('postContent').value = data.content || data.description || '';

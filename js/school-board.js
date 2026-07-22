@@ -1,6 +1,5 @@
-import { API_BASE_URL, ADMIN_EMAIL, auth, db } from "./common.js";
+import { API_BASE_URL, auth, authHeaders as getAuthHeaders, getCurrentProfile } from "./common.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 const SCHOOLS = {
         s: { collection:"s-resources", title:"순천고 전용 자료실", boardTitle:"순천고 아카이브", subtitle:"순천고 전용 연구 데이터 및 결과물 아카이브", student:"s-student", leader:"s-leader", writeUrl:"school-write.html?school=s", viewUrl:"school-view.html?school=s", hero:"url('assets/images/saturn-observation.webp')" },
         h: { collection:"h-resources", title:"해룡고 전용 자료실", boardTitle:"해룡고 아카이브", subtitle:"해룡고 전용 연구 데이터 및 결과물 아카이브", student:"h-student", leader:"h-leader", writeUrl:"school-write.html?school=h", viewUrl:"school-view.html?school=h", hero:"url('assets/images/spiral-galaxy.webp')" }
@@ -38,10 +37,8 @@ let currentUser = null;
     onAuthStateChanged(auth, async (user) => {
         if (!user) { location.replace("block.html"); return; }
         try {
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (!userDoc.exists()) { location.replace("block.html"); return; }
-            const userData = userDoc.data();
-            const role = user.email === ADMIN_EMAIL ? "admin" : (userData.role || "member");
+            const userData = await getCurrentProfile(user);
+            const role = userData.role || "member";
             if (!roleAllowed(role)) { location.replace("block.html"); return; }
             currentUser = user;
             currentRole = role;
@@ -58,7 +55,7 @@ let currentUser = null;
     });
 
     async function authHeaders() {
-        return { "Authorization": `Bearer ${await currentUser.getIdToken()}`, "X-User-Role": currentRole, "ngrok-skip-browser-warning": "69420" };
+        return getAuthHeaders(currentUser);
     }
 
     async function loadPosts() {

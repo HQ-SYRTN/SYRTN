@@ -1,6 +1,5 @@
-import { API_BASE_URL, ADMIN_EMAIL, auth, db } from "./common.js";
+import { API_BASE_URL, auth, authHeaders, getCurrentProfile } from "./common.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 const COLLECTION = "resources";
 const WRITABLE_ROLES = ['teacher', 's-leader', 'h-leader', 'b-leader', 'admin'];
 let currentUser = null;
@@ -22,19 +21,11 @@ let currentUser = null;
         }
 
         try {
-            const userDoc = await getDoc(doc(db, "users", user.uid));
             currentUser = user;
-
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                currentRole = user.email === ADMIN_EMAIL ? 'admin' : (userData.role || 'member');
-                document.getElementById('user-name').style.display = 'inline';
-                document.getElementById('user-name').innerText = `${userData.name || '사용자'}님`;
-            } else {
-                currentRole = 'member';
-                document.getElementById('user-name').style.display = 'inline';
-                document.getElementById('user-name').innerText = '사용자님';
-            }
+            const userData = await getCurrentProfile(user);
+            currentRole = userData.role || 'member';
+            document.getElementById('user-name').style.display = 'inline';
+            document.getElementById('user-name').innerText = `${userData.name || '사용자'}님`;
 
             document.getElementById('logout-btn').style.display = 'inline';
             document.getElementById('login-link').style.display = 'none';
@@ -51,10 +42,7 @@ let currentUser = null;
     });
     async function loadPosts() {
         try {
-            const headers = { "ngrok-skip-browser-warning": "69420", "X-User-Role": currentRole };
-            if (currentUser) headers["Authorization"] = `Bearer ${await currentUser.getIdToken()}`;
-
-            const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}`, { headers });
+            const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}`, { headers: await authHeaders(currentUser) });
             if (!res.ok) {
                 document.getElementById('resource-list').innerHTML = '<div style="padding:100px; text-align:center; color:#ff4d4d;">서버 연결에 실패했습니다.</div>';
                 return;
@@ -106,14 +94,9 @@ let currentUser = null;
         e.stopPropagation();
         if (!confirm("이 자료를 삭제하시겠습니까?")) return;
         try {
-            const token = await currentUser.getIdToken();
             const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${postId}`, {
                 method: 'DELETE',
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "X-User-Role": currentRole,
-                    "ngrok-skip-browser-warning": "69420"
-                }
+                headers: await authHeaders(currentUser)
             });
             if (res.ok) {
                 alert("삭제되었습니다.");

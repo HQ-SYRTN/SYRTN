@@ -1,6 +1,5 @@
-import { auth, db } from "./common.js";
+import { auth, getCurrentProfile } from "./common.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 let userDataCache=null;
 
 const loginLink=document.getElementById("login-link");
@@ -21,8 +20,7 @@ onAuthStateChanged(auth,async user=>{
         return;
     }
 
-    const snap=await getDoc(doc(db,"users",user.uid));
-    userDataCache=snap.exists()?snap.data():{role:"member"};
+    userDataCache=await getCurrentProfile(user);
     loginLink.style.display="none";
     logoutBtn.style.display="inline-flex";
     userName.style.display="inline";
