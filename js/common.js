@@ -2,7 +2,9 @@ import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebase
 import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-export const API_BASE_URL = "https://hypocrite-depletion-until.ngrok-free.dev";
+export const API_BASE_URL = String(
+    globalThis.SYRTN_API_BASE_URL || "https://hypocrite-depletion-until.ngrok-free.dev"
+).replace(/\/+$/, "");
 
 export const firebaseConfig = {
     apiKey: "AIzaSyB-0z16OPjp1wY0-U_EHKY9kbRCVba4DkU",
@@ -101,4 +103,56 @@ export async function logoutTo(target = "index.html") {
     clearProfileCache();
     await signOut(auth);
     location.href = target;
+}
+
+function getApiStatusBanner() {
+    let banner = document.getElementById("api-status-banner");
+    if (banner) return banner;
+    banner = document.createElement("div");
+    banner.id = "api-status-banner";
+    banner.className = "api-status-banner";
+    banner.setAttribute("role", "status");
+    banner.setAttribute("aria-live", "polite");
+    banner.hidden = true;
+
+    const message = document.createElement("span");
+    message.textContent = "서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.";
+    const retry = document.createElement("button");
+    retry.type = "button";
+    retry.textContent = "다시 확인";
+    retry.addEventListener("click", checkApiAvailability);
+    banner.append(message, retry);
+    document.body.prepend(banner);
+    return banner;
+}
+
+export async function checkApiAvailability() {
+    const banner = getApiStatusBanner();
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/syrtn/health`, {
+            headers: { "ngrok-skip-browser-warning": "69420" },
+            signal: controller.signal
+        });
+        if (!response.ok) throw new Error(`Health check failed (${response.status})`);
+        banner.hidden = true;
+        return true;
+    } catch {
+        banner.hidden = false;
+        return false;
+    } finally {
+        clearTimeout(timeout);
+    }
+}
+
+function startApiStatusMonitor() {
+    checkApiAvailability();
+    window.addEventListener("online", checkApiAvailability);
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", startApiStatusMonitor, { once: true });
+} else {
+    startApiStatusMonitor();
 }

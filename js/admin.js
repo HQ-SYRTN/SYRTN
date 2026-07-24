@@ -132,7 +132,7 @@ async function handleRequest(uid, action) {
 async function deleteSuggestion(id) {
     if (!confirm("이 건의 사항을 해결 완료 처리하고 삭제하시겠습니까?")) return;
     try {
-        await apiRequest(`/api/syrtn/suggestions/${id}`, { method: "DELETE" }, currentAdminUser);
+        await apiRequest(`/api/syrtn/suggestions/${encodeURIComponent(String(id))}`, { method: "DELETE" }, currentAdminUser);
         alert("삭제되었습니다.");
         await loadSuggestions();
     } catch (error) {

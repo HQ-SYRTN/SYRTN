@@ -15,7 +15,7 @@
     <a href="index.html" class="logo-link"><img src="SYRTN-logo-homepage.png" alt="Logo" class="nav-logo"><span>SYRTN</span></a>
     <div class="auth-user-zone"><a href="login.html" id="login-link" class="auth-btn">LOGIN</a><span id="user-name" style="display:none;"></span><button id="logout-btn" class="auth-btn" style="display:none;">LOGOUT</button></div>
 </div>
-<nav class="sub-nav-container"><div class="nav-menu"><a href="index.html">HOME</a><a href="introduction.html">INTRODUCTION</a><a href="talk.html" class="active">TALK</a><a href="resource.html">RESOURCE</a><a href="suggest.html">SUGGESTION</a><a href="mypage.html">MY PAGE</a><a href="adjust.html">REQUEST AUTHORITY</a><a href="admin.html">ADMIN</a></div></nav>
+<nav class="sub-nav-container" aria-label="주요 메뉴"><div class="nav-menu"><a href="index.html">HOME</a><a href="introduction.html">INTRODUCTION</a><a href="talk.html" class="active">TALK</a><a href="resource.html">RESOURCE</a><a href="suggest.html">SUGGESTION</a><a href="mypage.html">MY PAGE</a><a href="adjust.html">REQUEST AUTHORITY</a><a href="admin.html">ADMIN</a></div></nav>
 
 <main class="container">
     <section class="editor">
@@ -26,10 +26,10 @@
         <input id="post-title" type="text" placeholder="제목을 입력하세요.">
         <label for="post-content">내용</label>
         <textarea id="post-content" placeholder="자료에 대한 설명을 입력하세요."></textarea>
-        <label>첨부 링크</label>
+        <p class="field-label">첨부 링크</p>
         <div id="link-container"></div>
         <button class="btn" id="add-link" type="button">링크 추가</button>
-        <label>첨부파일</label>
+        <label for="file-input">첨부파일</label>
         <input type="file" id="file-input" multiple>
         <p style="margin:8px 0 0; color:#888; font-size:13px;">파일 크기 제한 없이 업로드할 수 있습니다. 위험한 실행 파일 형식은 차단됩니다.</p>
         <div class="actions"><button class="btn" id="cancel-btn">취소</button><button class="btn btn-primary" id="submit-btn">등록</button></div>

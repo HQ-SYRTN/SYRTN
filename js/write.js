@@ -39,7 +39,7 @@ const editPostId = new URLSearchParams(window.location.search).get('id');
     async function loadEditData() {
         document.getElementById('formTitle').innerText = '자료 수정하기';
         document.getElementById('submitBtn').innerText = '수정 완료';
-        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${editPostId}`, { headers: await getHeaders() });
+        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${encodeURIComponent(editPostId)}`, { headers: await getHeaders() });
         if (!res.ok) { alert('자료를 찾을 수 없습니다.'); location.replace('resource.html'); return; }
         const data = await res.json();
         const canEdit = data.uid === currentUser.uid || WRITABLE_ROLES.includes(currentRole);
@@ -71,7 +71,7 @@ const editPostId = new URLSearchParams(window.location.search).get('id');
         try {
             const uploadedFiles = await uploadSelectedFiles();
             links.push(...uploadedFiles);
-            const url = editPostId ? `${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${editPostId}` : `${API_BASE_URL}/api/syrtn/board/${COLLECTION}`;
+            const url = editPostId ? `${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${encodeURIComponent(editPostId)}` : `${API_BASE_URL}/api/syrtn/board/${COLLECTION}`;
             const res = await fetch(url, { method: editPostId ? 'PUT' : 'POST', headers: await getHeaders(true), body: JSON.stringify({ title, content, category, links, authorName: currentUserName }) });
             if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data.error || '저장 실패'); }
             alert(editPostId ? '수정되었습니다.' : '등록되었습니다.');
@@ -106,9 +106,28 @@ const editPostId = new URLSearchParams(window.location.search).get('id');
     function addLinkField(url = '', name = '') {
         const div = document.createElement('div');
         div.className = 'link-item';
-        div.innerHTML = `<input type="text" class="postFileUrl" value="${escapeAttr(url)}" placeholder="링크 주소 (https://...)" style="flex:2; margin-bottom:0;"><input type="text" class="postFileName" value="${escapeAttr(name)}" placeholder="이름" style="flex:1; margin-bottom:0;"><button type="button" class="btn-remove-link" style="width:40px; background:#ff4d4d; color:white; border:none; border-radius:5px; cursor:pointer;">-</button>`;
+        const urlInput = document.createElement('input');
+        urlInput.type = 'url';
+        urlInput.className = 'postFileUrl';
+        urlInput.value = url;
+        urlInput.placeholder = '링크 주소 (https://...)';
+        urlInput.setAttribute('aria-label', '공유 링크 주소');
+        urlInput.style.cssText = 'flex:2; margin-bottom:0;';
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.className = 'postFileName';
+        nameInput.value = name;
+        nameInput.placeholder = '이름';
+        nameInput.setAttribute('aria-label', '공유 링크 이름');
+        nameInput.style.cssText = 'flex:1; margin-bottom:0;';
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.className = 'btn-remove-link';
+        removeButton.textContent = '-';
+        removeButton.setAttribute('aria-label', '공유 링크 삭제');
+        removeButton.style.cssText = 'width:40px; background:#ff4d4d; color:white; border:none; border-radius:5px; cursor:pointer;';
+        div.append(urlInput, nameInput, removeButton);
         document.getElementById('linkContainer').appendChild(div);
-        div.querySelector('.btn-remove-link').onclick = () => div.remove();
+        removeButton.onclick = () => div.remove();
     }
-    function escapeAttr(value) { return String(value || '').replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;'); }
     document.getElementById('submitBtn').addEventListener('click', submitPost);

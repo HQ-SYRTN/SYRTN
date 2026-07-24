@@ -29,7 +29,7 @@
     <p>Archive of research materials and observation data</p>
 </header>
 
-<nav class="sub-nav-container">
+<nav class="sub-nav-container" aria-label="주요 메뉴">
     <div class="nav-menu">
         <a href="index.html">HOME</a>
         <a href="introduction.html">INTRODUCTION</a>
@@ -48,14 +48,14 @@
         <button class="btn-write" id="write-btn" style="display:none;" onclick="location.href='write.html'">ADD RESOURCE</button>
     </div>
     <div class="search-filter-section">
-        <select id="filter-category" class="filter-select">
+        <select id="filter-category" class="filter-select" aria-label="자료 분류">
             <option value="all">전체 카테고리</option>
             <option value="천체 관측 데이터">천체 관측 데이터</option>
             <option value="기술 문서 / 매뉴얼">기술 문서 / 매뉴얼</option>
             <option value="발표 및 보고서">발표 및 보고서</option>
             <option value="소프트웨어 및 코드">소프트웨어 및 코드</option>
         </select>
-        <input type="text" id="search-keyword" class="search-input" placeholder="제목 또는 작성자 검색...">
+        <input type="search" id="search-keyword" class="search-input" aria-label="자료 검색" placeholder="제목 또는 작성자 검색...">
     </div>
     <div id="resource-list" class="resource-container">
         <div style="padding:100px; text-align:center; color:#555;">등록된 자료가 없거나 검색 결과가 없습니다.</div>
@@ -72,8 +72,6 @@
 <script type="module" src="frontend-access-control.js"></script>
 </body>
 </html>
-
-
 
 
 

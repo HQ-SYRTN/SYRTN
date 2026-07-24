@@ -74,27 +74,69 @@ let currentUser = null;
             ['admin', 'teacher', 's-leader', 'h-leader', 'b-leader'].includes(currentRole)
         );
 
-        listDiv.innerHTML = filtered.map(p => `
-            <div class="resource-item" onclick="location.href='view.html?id=${p.id}'">
-                ${canDelete(p) ? `<button class="btn-delete-left" onclick="deletePost(event, ${p.id})">삭제</button>` : ''}
-                <div class="item-content">
-                    <span class="tag" style="margin-bottom:8px; display:inline-block;">${p.category || '기타'}</span>
-                    <span class="item-title">${p.title || '제목 없음'}</span>
-                    <div class="item-meta">
-                        <span>${p.author_name || '익명'}</span>
-                        <span style="opacity:0.4;">|</span>
-                        <span>${p.created_at ? new Date(p.created_at).toLocaleDateString() : '-'}</span>
-                    </div>
-                </div>
-            </div>
-        `).join('');
+        listDiv.replaceChildren();
+        filtered.forEach(post => {
+            const item = document.createElement('article');
+            item.className = 'resource-item';
+            item.tabIndex = 0;
+            item.setAttribute('role', 'link');
+
+            const openPost = () => {
+                location.href = `view.html?id=${encodeURIComponent(String(post.id))}`;
+            };
+            item.addEventListener('click', openPost);
+            item.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    openPost();
+                }
+            });
+
+            if (canDelete(post)) {
+                const deleteButton = document.createElement('button');
+                deleteButton.type = 'button';
+                deleteButton.className = 'btn-delete-left';
+                deleteButton.textContent = '삭제';
+                deleteButton.addEventListener('click', event => {
+                    event.stopPropagation();
+                    deletePost(post.id);
+                });
+                item.appendChild(deleteButton);
+            }
+
+            const content = document.createElement('div');
+            content.className = 'item-content';
+
+            const tag = document.createElement('span');
+            tag.className = 'tag';
+            tag.style.cssText = 'margin-bottom:8px; display:inline-block;';
+            tag.textContent = post.category || '기타';
+
+            const title = document.createElement('span');
+            title.className = 'item-title';
+            title.textContent = post.title || '제목 없음';
+
+            const meta = document.createElement('div');
+            meta.className = 'item-meta';
+            const author = document.createElement('span');
+            author.textContent = post.author_name || '익명';
+            const separator = document.createElement('span');
+            separator.style.opacity = '0.4';
+            separator.textContent = '|';
+            const date = document.createElement('span');
+            date.textContent = post.created_at ? new Date(post.created_at).toLocaleDateString() : '-';
+            meta.append(author, separator, date);
+
+            content.append(tag, title, meta);
+            item.appendChild(content);
+            listDiv.appendChild(item);
+        });
     }
 
-    window.deletePost = async (e, postId) => {
-        e.stopPropagation();
+    async function deletePost(postId) {
         if (!confirm("이 자료를 삭제하시겠습니까?")) return;
         try {
-            const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${postId}`, {
+            const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${encodeURIComponent(String(postId))}`, {
                 method: 'DELETE',
                 headers: await authHeaders(currentUser)
             });
@@ -108,7 +150,7 @@ let currentUser = null;
         } catch (err) {
             alert("서버 연결에 실패했습니다.");
         }
-    };
+    }
 
     document.getElementById('search-keyword').oninput = renderPosts;
     document.getElementById('filter-category').onchange = renderPosts;

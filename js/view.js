@@ -2,6 +2,7 @@ import { API_BASE_URL, auth, authHeaders, getCurrentProfile } from "./common.js"
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 const COLLECTION = "resources";
 const postId = new URLSearchParams(window.location.search).get('id');
+const encodedPostId = postId ? encodeURIComponent(postId) : '';
 let currentUser = null;
     let currentRole = 'guest';
     let currentUserName = '익명';
@@ -70,7 +71,7 @@ let currentUser = null;
     }
 
     async function loadPost() {
-        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${postId}`, { headers: await getHeaders() });
+        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${encodedPostId}`, { headers: await getHeaders() });
         if (!res.ok) { alert('자료를 찾을 수 없습니다.'); location.replace('resource.html'); return; }
         postData = await res.json();
         document.getElementById('viewTitle').innerText = postData.title || '제목 없음';
@@ -123,7 +124,7 @@ let currentUser = null;
     }
 
     async function loadComments() {
-        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${postId}/comments`, { headers: await getHeaders() });
+        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${encodedPostId}/comments`, { headers: await getHeaders() });
         if (!res.ok) return;
         const comments = await res.json();
         const list = document.getElementById('commentList');
@@ -136,9 +137,29 @@ let currentUser = null;
             const item = document.createElement('div');
             item.className = 'comment-item';
             if (isCommentOwner) item.style.border = '1px solid var(--accent)';
-            item.innerHTML = `<div class="comment-meta"><span class="comment-author">${escapeHtml(c.author_name || c.author || '익명')}</span><span>${formatDate(c.created_at || c.createdAt)}</span></div><div>${escapeHtml(c.content || '')}</div><div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;">${canDelete ? `<button class="btn-small" style="color:#ff4d4d; border-color:#ff4d4d;" data-comment-id="${c.id}">삭제</button>` : ''}</div>`;
-            const deleteBtn = item.querySelector('[data-comment-id]');
-            if (deleteBtn) deleteBtn.onclick = () => deleteComment(c.id);
+            const meta = document.createElement('div');
+            meta.className = 'comment-meta';
+            const author = document.createElement('span');
+            author.className = 'comment-author';
+            author.textContent = c.author_name || c.author || '익명';
+            const date = document.createElement('span');
+            date.textContent = formatDate(c.created_at || c.createdAt);
+            meta.append(author, date);
+
+            const content = document.createElement('div');
+            content.textContent = c.content || '';
+            const actions = document.createElement('div');
+            actions.style.cssText = 'display:flex; justify-content:flex-end; gap:8px; margin-top:10px;';
+            if (canDelete) {
+                const deleteButton = document.createElement('button');
+                deleteButton.type = 'button';
+                deleteButton.className = 'btn-small';
+                deleteButton.style.cssText = 'color:#ff4d4d; border-color:#ff4d4d;';
+                deleteButton.textContent = '삭제';
+                deleteButton.addEventListener('click', () => deleteComment(c.id));
+                actions.appendChild(deleteButton);
+            }
+            item.append(meta, content, actions);
             list.appendChild(item);
         });
     }
@@ -151,7 +172,7 @@ let currentUser = null;
         btn.disabled = true;
         btn.innerText = 'SENDING...';
         try {
-            const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${postId}/comments`, { method:'POST', headers: await getHeaders(true), body: JSON.stringify({ content, authorName: currentUserName }) });
+            const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${encodedPostId}/comments`, { method:'POST', headers: await getHeaders(true), body: JSON.stringify({ content, authorName: currentUserName }) });
             if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data.error || '댓글 작성 실패'); }
             input.value = '';
             await loadComments();
@@ -227,14 +248,14 @@ let currentUser = null;
 
     async function deleteComment(commentId) {
         if (!confirm('댓글을 삭제하시겠습니까?')) return;
-        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${postId}/comments/${commentId}`, { method:'DELETE', headers: await getHeaders() });
+        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${encodedPostId}/comments/${encodeURIComponent(String(commentId))}`, { method:'DELETE', headers: await getHeaders() });
         if (res.ok) await loadComments(); else alert('댓글 삭제에 실패했습니다.');
     }
 
-    document.getElementById('btnEditPost').onclick = () => { location.href = `write.html?id=${postId}`; };
+    document.getElementById('btnEditPost').onclick = () => { location.href = `write.html?id=${encodedPostId}`; };
     document.getElementById('btnDeletePost').onclick = async () => {
         if (!confirm('자료를 삭제하시겠습니까? 관련 댓글도 함께 삭제됩니다.')) return;
-        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${postId}`, { method:'DELETE', headers: await getHeaders() });
+        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${COLLECTION}/${encodedPostId}`, { method:'DELETE', headers: await getHeaders() });
         if (res.ok) location.href = 'resource.html'; else alert('삭제 권한이 없거나 오류가 발생했습니다.');
     };
 

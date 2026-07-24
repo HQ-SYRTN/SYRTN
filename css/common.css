@@ -27,6 +27,44 @@ body {
     overflow-x: clip;
 }
 
+.api-status-banner {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 3000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: #7d1f2a;
+    color: #fff;
+    font-size: .88rem;
+    text-align: center;
+}
+
+.api-status-banner[hidden] {
+    display: none;
+}
+
+.api-status-banner button {
+    padding: 5px 10px;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+}
+
 .auth-bar {
     position: fixed;
     top: 0;
@@ -251,6 +289,18 @@ footer {
     .sub-nav-container {
         top: 56px;
         height: 48px;
+        scrollbar-width: thin;
+        scrollbar-color: var(--accent) #111;
+    }
+
+    .sub-nav-container::-webkit-scrollbar {
+        display: block;
+        height: 4px;
+    }
+
+    .sub-nav-container::-webkit-scrollbar-thumb {
+        background: var(--accent);
+        border-radius: 999px;
     }
 
     .nav-menu {

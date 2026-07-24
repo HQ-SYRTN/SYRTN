@@ -11,6 +11,7 @@ const SCHOOLS = {
         location.replace("talk.html");
         throw new Error("Invalid school or post id.");
     }
+    const encodedPostId = encodeURIComponent(postId);
 let currentUser = null;
     let currentRole = "guest";
     let currentUserName = "익명";
@@ -38,7 +39,7 @@ let currentUser = null;
 
     document.getElementById("logout-btn").onclick = async () => { if (confirm("로그아웃 하시겠습니까?")) { await signOut(auth); location.href = "index.html"; } };
     document.getElementById("btn-list").onclick = () => location.href = school.boardUrl;
-    document.getElementById("btn-edit").onclick = () => location.href = `${school.writeUrl}&id=${postId}`;
+    document.getElementById("btn-edit").onclick = () => location.href = `${school.writeUrl}&id=${encodedPostId}`;
     document.getElementById("btn-delete").onclick = deletePost;
     document.getElementById("comment-submit").onclick = createComment;
 
@@ -64,7 +65,7 @@ let currentUser = null;
     });
 
     async function loadPost() {
-        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${school.collection}/${postId}`, { headers: await headers() });
+        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${school.collection}/${encodedPostId}`, { headers: await headers() });
         if (!res.ok) { location.replace("block.html"); return; }
         post = await res.json();
         document.title = `SYRTN | ${post.title || "게시글"}`;
@@ -115,15 +116,38 @@ let currentUser = null;
     }
 
     async function loadComments() {
-        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${school.collection}/${postId}/comments`, { headers: await headers() });
+        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${school.collection}/${encodedPostId}/comments`, { headers: await headers() });
         const list = document.getElementById("comment-list");
         if (!res.ok) { list.innerHTML = ""; return; }
         const comments = await res.json();
         if (comments.length === 0) { list.innerHTML = '<p style="color:#777; text-align:center;">첫 댓글을 남겨보세요.</p>'; return; }
-        list.innerHTML = comments.map(c => {
-            const canDelete = c.uid === currentUser.uid || canManagePost();
-            return `<div class="comment"><div class="comment-meta"><strong>${escapeHtml(c.author_name || "익명")}</strong><span>${c.created_at ? new Date(c.created_at).toLocaleString() : ""}</span>${canDelete ? `<button class="btn-small btn-danger" onclick="deleteComment(${c.id})">삭제</button>` : ""}</div><div>${escapeHtml(c.content || "")}</div></div>`;
-        }).join("");
+        list.replaceChildren();
+        comments.forEach(comment => {
+            const item = document.createElement("div");
+            item.className = "comment";
+            const meta = document.createElement("div");
+            meta.className = "comment-meta";
+            const author = document.createElement("strong");
+            author.textContent = comment.author_name || "익명";
+            const date = document.createElement("span");
+            date.textContent = comment.created_at ? new Date(comment.created_at).toLocaleString() : "";
+            meta.append(author, date);
+
+            const canDelete = comment.uid === currentUser.uid || canManagePost();
+            if (canDelete) {
+                const deleteButton = document.createElement("button");
+                deleteButton.type = "button";
+                deleteButton.className = "btn-small btn-danger";
+                deleteButton.textContent = "삭제";
+                deleteButton.addEventListener("click", () => deleteComment(comment.id));
+                meta.appendChild(deleteButton);
+            }
+
+            const content = document.createElement("div");
+            content.textContent = comment.content || "";
+            item.append(meta, content);
+            list.appendChild(item);
+        });
     }
 
     function withDownloadParam(url) {
@@ -196,21 +220,21 @@ let currentUser = null;
         const input = document.getElementById("comment-input");
         const content = input.value.trim();
         if (!content) return;
-        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${school.collection}/${postId}/comments`, { method:"POST", headers:{ ...(await headers()), "Content-Type":"application/json" }, body:JSON.stringify({ content, authorName:currentUserName }) });
+        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${school.collection}/${encodedPostId}/comments`, { method:"POST", headers:{ ...(await headers()), "Content-Type":"application/json" }, body:JSON.stringify({ content, authorName:currentUserName }) });
         if (res.ok) { input.value = ""; await loadComments(); }
         else alert("댓글 등록 권한이 없거나 오류가 발생했습니다.");
     }
 
-    window.deleteComment = async (commentId) => {
+    async function deleteComment(commentId) {
         if (!confirm("댓글을 삭제하시겠습니까?")) return;
-        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${school.collection}/${postId}/comments/${commentId}`, { method:"DELETE", headers: await headers() });
+        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${school.collection}/${encodedPostId}/comments/${encodeURIComponent(String(commentId))}`, { method:"DELETE", headers: await headers() });
         if (res.ok) await loadComments();
         else alert("댓글 삭제 권한이 없거나 오류가 발생했습니다.");
-    };
+    }
 
     async function deletePost() {
         if (!confirm("게시글을 삭제하시겠습니까?")) return;
-        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${school.collection}/${postId}`, { method:"DELETE", headers: await headers() });
+        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${school.collection}/${encodedPostId}`, { method:"DELETE", headers: await headers() });
         if (res.ok) location.href = school.boardUrl;
         else alert("삭제 권한이 없거나 오류가 발생했습니다.");
     }

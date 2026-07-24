@@ -24,7 +24,7 @@
   <h1>Request Authority</h1>
   <p>Request access for your school and role</p>
 </header>
-  <nav class="sub-nav-container">
+  <nav class="sub-nav-container" aria-label="주요 메뉴">
     <div class="nav-menu">
       <a href="index.html">HOME</a>
       <a href="introduction.html">INTRODUCTION</a>
@@ -40,15 +40,15 @@
   <section class="panel">
     <h1 class="section-title">Request authority</h1>
     <form id="request-form">
-      <label>Name</label>
+      <label for="request-name">Name</label>
       <input id="request-name" required>
-      <label>School</label>
+      <label for="request-school">School</label>
       <select id="request-school" required>
         <option value="Yeonggwang Haeryong High School">영광 해룡고</option>
         <option value="Suncheon High School">순천고</option>
         <option value="Suncheon Bokseong High School">순천 복성고</option>
       </select>
-      <label>Requested role</label>
+      <label for="request-role">Requested role</label>
       <select id="request-role" required>
         <option value="member">일반 회원</option>
         <option value="s-student">순천고 학생</option>
@@ -59,7 +59,7 @@
         <option value="h-leader">해룡고 동아리 부장</option>
         <option value="teacher">교사</option>
       </select>
-      <label>Reason</label>
+      <label for="request-reason">Reason</label>
       <textarea id="request-reason" required></textarea>
       <div class="actions">
         <button class="btn btn-primary" id="submit-button">Submit request</button>

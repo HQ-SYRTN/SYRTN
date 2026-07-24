@@ -78,24 +78,65 @@ let currentUser = null;
             listDiv.innerHTML = '<div class="empty-msg">등록된 자료가 없습니다.</div>';
             return;
         }
-        listDiv.innerHTML = filtered.map(p => `
-            <div class="resource-item" onclick="location.href='${school.viewUrl}&id=${p.id}'">
-                ${canManage(p) ? `<button class="btn-delete-left" onclick="deletePost(event, ${p.id})">삭제</button>` : ""}
-                <div class="item-content">
-                    <span class="item-title">${escapeHtml(p.title || "제목 없음")}</span>
-                    <div class="item-meta"><span class="tag">${escapeHtml(p.category || "기타")}</span><span>${escapeHtml(p.author_name || "익명")}</span><span>|</span><span>${p.created_at ? new Date(p.created_at).toLocaleDateString() : "-"}</span></div>
-                </div>
-            </div>
-        `).join("");
+        listDiv.replaceChildren();
+        filtered.forEach(post => {
+            const item = document.createElement("article");
+            item.className = "resource-item";
+            item.tabIndex = 0;
+            item.setAttribute("role", "link");
+
+            const openPost = () => {
+                location.href = `${school.viewUrl}&id=${encodeURIComponent(String(post.id))}`;
+            };
+            item.addEventListener("click", openPost);
+            item.addEventListener("keydown", event => {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    openPost();
+                }
+            });
+
+            if (canManage(post)) {
+                const deleteButton = document.createElement("button");
+                deleteButton.type = "button";
+                deleteButton.className = "btn-delete-left";
+                deleteButton.textContent = "삭제";
+                deleteButton.addEventListener("click", event => {
+                    event.stopPropagation();
+                    deletePost(post.id);
+                });
+                item.appendChild(deleteButton);
+            }
+
+            const content = document.createElement("div");
+            content.className = "item-content";
+            const title = document.createElement("span");
+            title.className = "item-title";
+            title.textContent = post.title || "제목 없음";
+            const meta = document.createElement("div");
+            meta.className = "item-meta";
+            const tag = document.createElement("span");
+            tag.className = "tag";
+            tag.textContent = post.category || "기타";
+            const author = document.createElement("span");
+            author.textContent = post.author_name || "익명";
+            const separator = document.createElement("span");
+            separator.textContent = "|";
+            const date = document.createElement("span");
+            date.textContent = post.created_at ? new Date(post.created_at).toLocaleDateString() : "-";
+            meta.append(tag, author, separator, date);
+            content.append(title, meta);
+            item.appendChild(content);
+            listDiv.appendChild(item);
+        });
     }
 
-    window.deletePost = async (event, postId) => {
-        event.stopPropagation();
+    async function deletePost(postId) {
         if (!confirm("이 자료를 삭제하시겠습니까?")) return;
-        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${school.collection}/${postId}`, { method:"DELETE", headers: await authHeaders() });
+        const res = await fetch(`${API_BASE_URL}/api/syrtn/board/${school.collection}/${encodeURIComponent(String(postId))}`, { method:"DELETE", headers: await authHeaders() });
         if (res.ok) await loadPosts();
         else alert("삭제 권한이 없거나 오류가 발생했습니다.");
-    };
+    }
 
     document.getElementById("search-keyword").oninput = renderPosts;
     document.getElementById("filter-category").onchange = renderPosts;
